@@ -1,0 +1,2 @@
+# JagodaWindowsSetup
+Neka skripta
