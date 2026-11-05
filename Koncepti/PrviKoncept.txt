@@ -1,0 +1,61 @@
+
+Datoteka / folder
+
+Funkcija
+
+Wallpapers
+
+Preuzimanje i postavljanje pozadina
+
+Themes
+
+Nativne Windows boje i teme
+
+Installers
+
+Instalacija Chromea, VLC-a, Python-a itd.
+
+SystemTools
+
+Informacije o računalu i održavanje
+
+Logs
+
+Evidencija svih instalacija i grešaka
+
+PinkSetup.ps1
+
+Glavni izbornik
+
+Config.ps1
+
+Zajedničke postavke
+
+Kako će izgledati glavni izbornik?
+
+text
+========================================
+         PINK WINDOWS SETUP
+========================================
+
+[1] WALLPAPER MANAGER
+[2] WINDOWS THEMES
+[3] INSTALL PROGRAMS
+[4] SYSTEM TOOLS
+[5] PC INFORMATION
+[6] INSTALLATION LOGS
+
+[0] EXIT
+
+Choose option:
+
+
+CreatePinkProject.ps1 – samo stvara foldere i datoteke.
+
+PinkSetup.ps1 – pokreće glavni izbornik.
+
+Wallpaper.ps1 – mijenja pozadinu.
+
+PinkTheme.ps1 – mijenja Windows boje.
+
+Programs.ps1 – instalira aplikacije.

@@ -1,0 +1,6 @@
+Wallpapers maknuti iz Installlera jer sada iamimo Dva lokalno u DATA/Photos ( i to dodati kao funkciju za odbir data je funkicja WALLPAPERS [Neki broj])
+
+Get-SystemSpecs.ps1 dodati odjeljako i folder koji provijerava na kakvom smo sustavu je li windows 
+
+dodati i isto kao i novu funkicju wallpapers tak oi promjern uTEME da ne postoji sam oPINK nego i Blue yellow, green
+popravitti da u Installers stvarno installira programe s linkova i onda ih raspakira i run 
