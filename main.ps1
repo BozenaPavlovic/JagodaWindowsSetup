@@ -28,7 +28,7 @@ try {
             "10" {
                 Write-Host "Detected Windows 10 - launching Windows10 installer..." -ForegroundColor Green
                 Read-Host "Press ENTER to continue"
-                $target = Join-Path $root "Windows10\install.ps1"
+                $target = Join-Path $root "GUI\MainMenu.ps1"
                 if (!(Test-Path $target)) { throw "Missing $target" }
                 try { & $target } catch { Write-Log "Win10 install failed: $($_.Exception.Message)"; throw }
             }

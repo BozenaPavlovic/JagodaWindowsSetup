@@ -69,7 +69,7 @@ try {
     Write-Host "ALL CHECKS PASSED!" -ForegroundColor Green
 
     # Start application
-    & "$Root\PinkSetup.ps1"
+    & "$Root\..\GUI\MainMenu.ps1"
 
 }
 catch {
