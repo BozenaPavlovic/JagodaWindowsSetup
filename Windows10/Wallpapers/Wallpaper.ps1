@@ -1,4 +1,4 @@
-﻿# WALLPAPER MODULE
+# WALLPAPER MODULE
 
 function WALLPAPERS {
     param([int]$Number = 1)

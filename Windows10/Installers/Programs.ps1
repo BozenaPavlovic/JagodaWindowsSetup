@@ -1,6 +1,6 @@
 
 # ==========================================
-# PINK WINDOWS - PROGRAM INSTALLER
+# STRAWBERRY WINDOWS - PROGRAM INSTALLER
 # VERSION 4.0
 # ==========================================
 
@@ -392,7 +392,7 @@ function Install-Programs {
         Clear-Host
 
         Write-Host "========================================" -ForegroundColor Magenta
-        Write-Host " PINK WINDOWS PROGRAM INSTALLER" -ForegroundColor Magenta
+        Write-Host " STRAWBERRY WINDOWS PROGRAM INSTALLER" -ForegroundColor Magenta
         Write-Host "========================================" -ForegroundColor Magenta
 
         Write-Host ""
@@ -443,4 +443,4 @@ function Install-Programs {
     }
 }
 
-Write-Host "[OK] Pink Windows installer module loaded." -ForegroundColor Green
+Write-Host "[OK] STRAWBERRY WINDOWS installer module loaded." -ForegroundColor Green

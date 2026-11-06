@@ -2,7 +2,7 @@
 . "$PSScriptRoot\..\Config.ps1"
 
 # ==========================================
-# PINK WINDOWS - STRAWBERRY THEME ENGINE
+# STRAWBERRY WINDOWS - STRAWBERRY THEME ENGINE
 # Windows 10
 # ==========================================
 

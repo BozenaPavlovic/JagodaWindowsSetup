@@ -1,6 +1,6 @@
 
 # ==========================================
-# PINK WINDOWS - PORTABLE CONFIGURATION
+# STRAWBERRY WINDOWS - PORTABLE CONFIGURATION
 # VERSION 3.1
 # ==========================================
 
@@ -15,7 +15,7 @@ $Global:PinkWork = Join-Path $env:TEMP "PinkWindowsSetup"
 # CONFIGURATION
 $Global:PinkConfig = @{
     Version = "3.1"
-    Name = "Pink Windows Strawberry Edition"
+    Name = "STRAWBERRY WINDOWS Strawberry Edition"
 
     Root = $Global:PinkRoot
 
@@ -57,7 +57,7 @@ $Global:PinkEnvironment = @{
 }
 
 Write-Host ""
-Write-Host "PINK WINDOWS CONFIGURATION LOADED!" -ForegroundColor Magenta
+Write-Host "STRAWBERRY WINDOWS CONFIGURATION LOADED!" -ForegroundColor Magenta
 Write-Host "Project: $($Global:PinkConfig.Root)" -ForegroundColor Green
 Write-Host "Downloads: $($Global:PinkConfig.DownloadFolder)" -ForegroundColor Cyan
 Write-Host "Logs: $($Global:PinkConfig.LogFolder)" -ForegroundColor Cyan

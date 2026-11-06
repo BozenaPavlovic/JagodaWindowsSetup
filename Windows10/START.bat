@@ -1,11 +1,11 @@
 
 @echo off
-title Pink Windows Strawberry Setup
+title STRAWBERRY WINDOWS Strawberry Setup
 
 cd /d "%~dp0"
 
 echo ========================================
-echo    PINK WINDOWS PORTABLE INSTALLER
+echo    STRAWBERRY WINDOWS PORTABLE INSTALLER
 echo ========================================
 echo.
 
@@ -21,6 +21,6 @@ powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -NoExit -File "%~dp0ST
 
 if errorlevel 1 (
     echo.
-    echo Pink Windows exited with an error.
+    echo STRAWBERRY WINDOWS exited with an error.
     pause
 )

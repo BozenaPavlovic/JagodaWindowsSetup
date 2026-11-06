@@ -1,6 +1,6 @@
-﻿
+
 # ==========================================
-# PINK WINDOWS - MAIN MENU DEBUG VERSION
+# STRAWBERRY WINDOWS - MAIN MENU DEBUG VERSION
 # ==========================================
 
 $ErrorActionPreference = "Stop"
@@ -20,7 +20,7 @@ try {
 
     $Root = $PSScriptRoot
 
-    Write-Host "Loading Pink Windows modules..." -ForegroundColor Magenta
+    Write-Host "Loading STRAWBERRY WINDOWS modules..." -ForegroundColor Magenta
 
     # Check files
     $Modules = @(
@@ -53,7 +53,7 @@ try {
 
         $spec = Get-OSSpecs
         Write-Host "====================================" -ForegroundColor Magenta
-        Write-Host "   PINK WINDOWS - STRAWBERRY       " -ForegroundColor Magenta
+        Write-Host "   STRAWBERRY WINDOWS       " -ForegroundColor Magenta
         Write-Host "====================================" -ForegroundColor Magenta
         Write-Host "Detected OS: $($spec.OSName)" -ForegroundColor Cyan
         Write-Host "Version: $($spec.Version)" -ForegroundColor Cyan
@@ -141,6 +141,6 @@ catch {
 finally {
 
     Write-Host ""
-    Read-Host "Press ENTER to close Pink Windows"
+    Read-Host "Press ENTER to close STRAWBERRY WINDOWS"
 
 }

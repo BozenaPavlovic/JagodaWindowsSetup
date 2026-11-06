@@ -1,6 +1,6 @@
 
 # ==========================================
-# PINK WINDOWS - PORTABLE STARTER
+# STRAWBERRY WINDOWS - PORTABLE STARTER
 # ==========================================
 
 $ErrorActionPreference = "Stop"
@@ -10,7 +10,7 @@ try {
     $Root = $PSScriptRoot
 
     Write-Host ""
-    Write-Host "PINK WINDOWS PORTABLE STARTER" -ForegroundColor Magenta
+    Write-Host "STRAWBERRY WINDOWS PORTABLE STARTER" -ForegroundColor Magenta
     Write-Host "Project: $Root" -ForegroundColor Cyan
 
     # Windows check

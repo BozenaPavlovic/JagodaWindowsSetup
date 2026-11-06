@@ -11,7 +11,7 @@ $profiles = @{
 
 function Show-ProfileForm {
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "PINK WINDOWS - STRAWBERRY GUI"
+    $form.Text = "STRAWBERRY WINDOWS - STRAWBERRY GUI"
     $form.Size = New-Object System.Drawing.Size(320,260)
     $y = 20
     foreach ($name in $profiles.Keys) {
