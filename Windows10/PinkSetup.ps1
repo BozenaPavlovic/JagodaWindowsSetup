@@ -102,8 +102,7 @@ try {
                 }
 
                 "4" {
-                    WALLPAPERS 1
-                    Install-PinkTheme
+                    & "$PSScriptRoot\..\GUI\ProgramInstaller.ps1"
                 }
 
                 "0" {
