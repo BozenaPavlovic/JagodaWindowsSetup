@@ -1,0 +1,30 @@
+PowerShell 7+ portable verziju
+(možeš je staviti na USB i pokrenuti direktno)
+
+bilo bi dobro podijeli skriput da radi prema OS na kojem je
+Win7,  Win10, Win11, Linux i macOS
+
+PowerShell 7+ portable verziju
+(možeš je staviti na USB i pokrenuti direktno)
+
+USB-Setup/
+│
+├── main.ps1
+│
+├── Windows10/
+│   ├── install.ps1
+│   ├── theme/
+│   └── apps/
+│
+├── Windows11/
+│   ├── install.ps1
+│   ├── theme/
+│   └── apps/
+│
+├── Linux/
+│   ├── install.ps1
+│   └── apps/
+│
+└── MacOS/
+    ├── install.ps1
+    └── apps/

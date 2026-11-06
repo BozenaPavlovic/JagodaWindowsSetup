@@ -5,6 +5,17 @@
 
 $ErrorActionPreference = "Stop"
 
+function Get-OSSpecs {
+    $reg = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+    [PSCustomObject]@{
+        OSName  = "Windows 10"
+        Version = $reg.DisplayVersion
+        Build   = $reg.CurrentBuild
+        Edition = $reg.EditionID
+        Arch    = if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" }
+    }
+}
+
 try {
 
     $Root = $PSScriptRoot
@@ -40,8 +51,15 @@ try {
 
         Clear-Host
 
+        $spec = Get-OSSpecs
         Write-Host "====================================" -ForegroundColor Magenta
         Write-Host "   PINK WINDOWS - STRAWBERRY       " -ForegroundColor Magenta
+        Write-Host "====================================" -ForegroundColor Magenta
+        Write-Host "Detected OS: $($spec.OSName)" -ForegroundColor Cyan
+        Write-Host "Version: $($spec.Version)" -ForegroundColor Cyan
+        Write-Host "Build: $($spec.Build)" -ForegroundColor Cyan
+        Write-Host "Edition: $($spec.Edition)" -ForegroundColor Cyan
+        Write-Host "Architecture: $($spec.Arch)" -ForegroundColor Cyan
         Write-Host "====================================" -ForegroundColor Magenta
 
         Write-Host ""

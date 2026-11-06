@@ -15,6 +15,7 @@ if (!(Test-Path $ConfigPath)) {
 
 . $ConfigPath
 
+$Global:OSVersion = "Windows10"
 $DownloadFolder = $Global:PinkConfig.DownloadFolder
 $LogFolder = $Global:PinkConfig.LogFolder
 
@@ -39,6 +40,7 @@ $Apps = @(
         SilentArguments="/qn /norestart"
         MinBytes=30000000
         Publisher="Google LLC"
+         WingetID="Google.Chrome"
     },
     @{
         Number="4"
@@ -51,6 +53,7 @@ $Apps = @(
         SilentArguments="/S"
         MinBytes=10000000
         Publisher="VideoLAN"
+         WingetID="VideoLAN.VLC"
     },
     @{
         Number="5"
@@ -63,6 +66,7 @@ $Apps = @(
         SilentArguments="/qn /norestart"
         MinBytes=100000000
         Publisher="The Document Foundation"
+         WingetID="TheDocumentFoundation.LibreOffice"
     },
     @{
         Number="6"
@@ -75,6 +79,7 @@ $Apps = @(
         SilentArguments="/S"
         MinBytes=500000
         Publisher="Igor Pavlov"
+         WingetID="7zip.7zip"
     },
     @{
         Number="7"
@@ -87,6 +92,7 @@ $Apps = @(
         SilentArguments="/quiet InstallAllUsers=0 PrependPath=1 Include_test=0"
         MinBytes=10000000
         Publisher="Python Software Foundation"
+         WingetID="Python.Python.3.14"
     }
 )
 
@@ -186,6 +192,34 @@ function Get-ProgramInstaller {
 
 
 # ==========================================
+# WINGET SUPPORT
+# ==========================================
+
+function Test-Winget {
+    try {
+        winget --version | Out-Null
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+function Install-WithWinget {
+    param($App)
+
+    Write-Host "Winget detected - using winget installer." -ForegroundColor Green
+    Write-Host "Installing $($App.Name) using winget..." -ForegroundColor Cyan
+
+    winget install --id $App.WingetID --silent --accept-package-agreements --accept-source-agreements --force
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Winget installation failed with exit code $LASTEXITCODE"
+    }
+
+    Write-Host "Winget installation successful!" -ForegroundColor Green
+}
+
+# ==========================================
 # INSTALL APPLICATION
 # ==========================================
 
@@ -201,7 +235,12 @@ function Install-OneApp {
 
         $Existing = Find-InstalledApp $App.Match
 
-        if ($Existing) {
+        if ($Existing -and $Global:AutoMode) {
+            Write-Host "$($App.Name) already installed - verified, skipping." -ForegroundColor Green
+            return
+        }
+
+        if ($Existing -and -not $Global:AutoMode) {
 
             Write-Host "ALREADY INSTALLED!" -ForegroundColor Yellow
             Write-Host "Version: $($Existing.DisplayVersion)"
@@ -213,14 +252,33 @@ function Install-OneApp {
             }
         }
 
-        Write-Host ""
-        Write-Host "[1] Interactive installation"
-        Write-Host "[2] Automatic installation"
+        if ($Global:OSVersion -ne "Windows11") {
+            if (Test-Winget) {
+                try {
+                    Install-WithWinget $App
+                    return
+                } catch {
+                    Write-Host "Winget failed, falling back to classic installer." -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host "Winget not available - using classic installer." -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "Detected Windows 11 - winget mode disabled." -ForegroundColor Yellow
+        }
 
-        $Mode = Read-Host "Choose installation mode"
+        if ($Global:AutoMode) {
+            $Mode = "2"
+        } else {
+            Write-Host ""
+            Write-Host "[1] Interactive installation"
+            Write-Host "[2] Automatic installation"
 
-        if ($Mode -notin @("1","2")) {
-            throw "Invalid installation mode."
+            $Mode = Read-Host "Choose installation mode"
+
+            if ($Mode -notin @("1","2")) {
+                throw "Invalid installation mode."
+            }
         }
 
         $Installer = Get-ProgramInstaller $App
@@ -301,7 +359,9 @@ function Install-OneApp {
             "$(Get-Date) FAILED: $($App.Name) - $($_.Exception.Message)"
     }
 
-    Read-Host "`nPress ENTER to continue"
+    if (-not $Global:AutoMode) {
+        Read-Host "`nPress ENTER to continue"
+    }
 }
 
 # ==========================================
@@ -359,9 +419,10 @@ function Install-Programs {
         }
 
         if ($Choice -eq "1") {
+            $Global:AutoMode = $true
             $Selected = $Apps
-        }
-        else {
+        } else {
+            $Global:AutoMode = $false
             $Selected = @($Apps | Where-Object {
                 $_.Number -eq $Choice
             })
