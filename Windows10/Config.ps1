@@ -47,6 +47,15 @@ foreach ($Folder in $Folders) {
         -ErrorAction Stop | Out-Null
 }
 
+# NEW: Unified config used by Core/Model.ps1
+$Global:WindowsConfig = @{
+    OS = "Windows10"
+    Theme = "Pink"
+    EnableDarkMode = $true
+    InstallWinget = $true
+    EnableWidgets = $false
+}
+
 # ENVIRONMENT INFORMATION
 $Global:PinkEnvironment = @{
     ComputerName = $env:COMPUTERNAME

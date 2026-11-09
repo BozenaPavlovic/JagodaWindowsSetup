@@ -2,66 +2,52 @@
 
 Skripta za automatsku instalaciju i postavljanje Windows okruženja (Strawberry Windows Setup).
 
-## Struktura projekta
+## Arhitektura
 
-```text
-JagodaWindowsSetup/
-├── main.ps1
-├── README.md
-├── Core/
-│   ├── Controller.ps1
-│   ├── Installer.ps1
-│   └── Model.ps1
-├── GUI/
-│   ├── About.ps1
-│   ├── AppsExplorer.ps1
-│   ├── AppsInstaller.ps1
-│   ├── LogViewer.ps1
-│   ├── MainMenu.ps1
-│   ├── OSInfo.ps1
-│   ├── ProfileInstaller.ps1
-│   ├── ProgramInstaller.ps1
-│   ├── Settings.ps1
-│   ├── SystemTools.ps1
-│   ├── ThemeManager.ps1
-│   └── WallpaperManager.ps1
-├── Koncepti/
-│   ├── DrugiKoncept.txt
-│   ├── PrviKoncept.txt
-│   └── TrećiKoncept.txt
-├── Linux/
-│   └── install.ps1
-├── Logs/
-│   ├── Google_Chrome.log
-│   └── InstallationHistory.log
-├── MacOS/
-│   └── install.ps1
-├── Windows10/
-│   ├── Config.ps1
-│   ├── install.ps1
-│   ├── PinkSetup.ps1
-│   ├── START.bat
-│   ├── START.ps1
-│   ├── Config/
-│   │   └── settings.json
-│   ├── DATA/
-│   │   ├── Photos/
-│   │   │   ├── Pink-Strawberry.jpg
-│   │   │   └── Yellow-Flowers-Blue-Sky.jpg
-│   │   └── SystemSpecs/
-│   ├── Functions/
-│   ├── Installers/
-│   │   └── Programs.ps1
-│   ├── Logs/
-│   ├── Modules/
-│   │   └── Logging.psm1
-│   ├── SystemTools/
-│   │   ├── Get-SystemSpecs.ps1
-│   │   └── PCInfo.ps1
-│   ├── Themes/
-│   │   └── PinkTheme.ps1
-│   └── Wallpapers/
-│       └── Wallpaper.ps1
-└── Windows11/
-    └── install.ps1
 ```
+main.ps1
+    │
+    ├── Core/Model.ps1        - Get-WindowsVersion, Get-OSConfig
+    ├── Core/Controller.ps1   - Show-MainMenu, Run-Installation, Get-SelectedApps
+    │
+    ├── Windows10/
+    │   ├── Config.ps1        - $WindowsConfig (OS=Windows10, Theme=Pink, EnableWidgets=$false)
+    │   ├── install.ps1       - Elevation + PinkSetup.ps1
+    │   ├── PinkSetup.ps1     - Get-OSSpecs + menu
+    │   ├── Themes/PinkTheme.ps1 - Set-Dword, ConvertTo-WindowsColor, New-AccentPalette,
+    │   │                       Set-WindowsAccentTheme, Install-PinkTheme, Install-BlueTheme,
+    │   │                       Install-YellowTheme, Install-GreenTheme
+    │   ├── Installers/Programs.ps1 - Find-InstalledApp, Get-ProgramInstaller, Test-Winget,
+    │   │                       Install-WithWinget, Install-OneApp, Install-YouTubeShortcut,
+    │   │                       Install-Programs
+    │   ├── SystemTools/Get-SystemSpecs.ps1 - Get-SystemSpecs, Test-IsWindows
+    │   ├── Wallpapers/Wallpaper.ps1 - WALLPAPERS
+    │   └── Modules/Logging.psm1 - Write-Log
+    │
+    └── Windows11/
+        ├── Config.ps1        - $WindowsConfig (OS=Windows11, Theme=Pink, EnableWidgets=$true)
+        └── install.ps1       - Elevation + Core/Controller orchestration
+```
+
+## Funkcije po fajlovima
+
+| Fajl | Funkcije |
+|------|----------|
+| `main.ps1` | `Write-Log` |
+| `Core/Model.ps1` | `Get-WindowsVersion`, `Get-OSConfig` |
+| `Core/Controller.ps1` | `Get-SelectedApps`, `Show-MainMenu`, `Run-Installation` |
+| `Windows10/Config.ps1` | (config varijable) |
+| `Windows10/PinkSetup.ps1` | `Get-OSSpecs` |
+| `Windows10/Themes/PinkTheme.ps1` | `Set-Dword`, `ConvertTo-WindowsColor`, `New-AccentPalette`, `Set-WindowsAccentTheme`, `Install-PinkTheme`, `Install-BlueTheme`, `Install-YellowTheme`, `Install-GreenTheme` |
+| `Windows10/Installers/Programs.ps1` | `Find-InstalledApp`, `Get-ProgramInstaller`, `Test-Winget`, `Install-WithWinget`, `Install-OneApp`, `Install-YouTubeShortcut`, `Install-Programs` |
+| `Windows10/SystemTools/Get-SystemSpecs.ps1` | `Get-SystemSpecs`, `Test-IsWindows` |
+| `Windows10/Wallpapers/Wallpaper.ps1` | `WALLPAPERS` |
+| `Windows10/Modules/Logging.psm1` | `Write-Log` |
+| `Windows11/Config.ps1` | (config varijable) |
+| `Windows11/install.ps1` | (orchestrator) |
+
+## Zajedničko vs specifično
+
+- **Zajedničke funkcije** (Core): instalacija Chrome/Firefox/7-Zip, logiranje, wallpaper, system info
+- **Specifično po OS-u**: Config.ps1 postavke (npr. `EnableWidgets`), theme prilagodbe, menu struktura
+- **Detekcija OS-a**: `Get-WindowsVersion` koristi `BuildNumber >= 22000` za Windows 11

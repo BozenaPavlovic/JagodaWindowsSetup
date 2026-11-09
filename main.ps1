@@ -10,58 +10,29 @@ function Write-Log {
 }
 
 try {
-    if ($IsWindows) {
-        try {
-            $reg = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
-            $ver = $reg.DisplayVersion
-            if (-not $ver) { $ver = $reg.ReleaseId }
-        } catch {
-            Write-Log "Registry read failed: $($_.Exception.Message)"
-            throw
-        }
+    . "$root\Core\Model.ps1"
+    . "$root\Core\Controller.ps1"
 
-        $WindowsVersion = "Unknown"
-        if ($ver -like "10*") { $WindowsVersion = "10" }
-        elseif ($ver -like "11*") { $WindowsVersion = "11" }
+    $os = Get-WindowsVersion
+    Write-Host "Detected OS: $os" -ForegroundColor Green
+    Write-Log "Detected OS: $os"
 
-        switch ($WindowsVersion) {
-            "10" {
-                Write-Host "Detected Windows 10 - launching Windows10 installer..." -ForegroundColor Green
-                Read-Host "Press ENTER to continue"
-                $target = Join-Path $root "GUI\MainMenu.ps1"
-                if (!(Test-Path $target)) { throw "Missing $target" }
-                try { & $target } catch { Write-Log "Win10 install failed: $($_.Exception.Message)"; throw }
-            }
-            "11" {
-                Write-Host "Detected Windows 11 - launching Windows11 installer..." -ForegroundColor Green
-                Read-Host "Press ENTER to continue"
-                $target = Join-Path $root "Windows11\install.ps1"
-                if (!(Test-Path $target)) { throw "Missing $target" }
-                try { & $target } catch { Write-Log "Win11 install failed: $($_.Exception.Message)"; throw }
-            }
-            default {
-                Write-Host "Unsupported Windows version: $ver"
-                Write-Log "Unsupported Windows version: $ver"
-                exit 1
-            }
+    switch ($os) {
+        "Windows10" {
+            Write-Host "Launching Windows10 installer..." -ForegroundColor Green
+            $target = Join-Path $root "Windows10\install.ps1"
         }
-    } elseif ($IsLinux) {
-        Write-Host "Detected Linux - launching Linux installer..." -ForegroundColor Green
-        Read-Host "Press ENTER to continue"
-        $target = Join-Path $root "Linux\install.ps1"
-        if (!(Test-Path $target)) { throw "Missing $target" }
-        try { & $target } catch { Write-Log "Linux install failed: $($_.Exception.Message)"; throw }
-    } elseif ($IsMacOS) {
-        Write-Host "Detected macOS - launching MacOS installer..." -ForegroundColor Green
-        Read-Host "Press ENTER to continue"
-        $target = Join-Path $root "MacOS\install.ps1"
-        if (!(Test-Path $target)) { throw "Missing $target" }
-        try { & $target } catch { Write-Log "MacOS install failed: $($_.Exception.Message)"; throw }
-    } else {
-        Write-Host "Unrecognized OS."
-        Write-Log "Unrecognized OS."
-        exit 1
+        "Windows11" {
+            Write-Host "Launching Windows11 installer..." -ForegroundColor Green
+            $target = Join-Path $root "Windows11\install.ps1"
+        }
+        default {
+            throw "Unsupported OS: $os"
+        }
     }
+
+    if (!(Test-Path $target)) { throw "Missing $target" }
+    & $target
 }
 catch {
     Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
