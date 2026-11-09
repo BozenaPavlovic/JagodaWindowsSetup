@@ -1,0 +1,28 @@
+
+Datoteka
+
+Odgovornost
+
+MainMenu.ps1
+
+Pokretanje i povezivanje
+
+MainMenuModel.ps1
+
+Sistemski podaci
+
+MainMenuView.ps1
+
+Glavni Form i povezivanje View komponenti
+
+MainMenuPanel.ps1
+
+Glavni izbornik i gumbi
+
+SystemInformationPanel.ps1
+
+Prikaz sistemskih informacija
+
+MainMenuController.ps1
+
+Klikovi i otvaranje prozora
