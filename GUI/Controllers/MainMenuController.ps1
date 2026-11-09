@@ -1,13 +1,27 @@
+
 <#
 .SYNOPSIS
     Main Menu Controller.
 
 .DESCRIPTION
-    Handles menu button events, application navigation and exit.
+    Handles menu navigation and opens scripts from OtherWindows.
 #>
 
 # ==========================================
-# INITIALIZE MAIN MENU CONTROLLER
+# WINDOW FILE MAPPING
+# ==========================================
+
+$script:WindowFiles = @{
+    "Profile Installer" = "ProfileInstaller.ps1"
+    "Apps Installer"    = "AppsInstaller.ps1"
+    "Theme Manager"     = "ThemeManager.ps1"
+    "Wallpaper Manager" = "WallpaperManager.ps1"
+    "Log Viewer"        = "LogViewer.ps1"
+    "About"             = "About.ps1"
+}
+
+# ==========================================
+# INITIALIZE CONTROLLER
 # ==========================================
 
 function Initialize-MainMenuController {
@@ -20,15 +34,48 @@ function Initialize-MainMenuController {
 
         $btn.Add_Click({
 
-            $selectedItem = [string]$this.Tag
+            param($sender, $eventArgs)
 
-            # Convert button name to filename.
-            $fileName = $selectedItem -replace '\s+', ''
+            $selectedItem = [string]$sender.Tag
 
-            # Build OtherWindows path.
-            $windowPath = Join-Path `
+            # GET FILE NAME
+            $fileName = $script:WindowFiles[$selectedItem]
+
+            if ([string]::IsNullOrWhiteSpace($fileName)) {
+
+                [System.Windows.Forms.MessageBox]::Show(
+                    "No window is registered for: $selectedItem",
+                    "Strawberry Windows"
+                ) | Out-Null
+
+                return
+            }
+
+            # ==========================================
+            # BUILD WINDOW PATH
+            # ==========================================
+
+            $otherWindowsFolder = Join-Path `
                 $script:ProjectRoot `
-                "OtherWindows\$fileName.ps1"
+                "OtherWindows"
+
+            $windowPath = Join-Path `
+                $otherWindowsFolder `
+                $fileName
+
+            # ==========================================
+            # CHECK FOLDER
+            # ==========================================
+
+            if (-not (Test-Path -LiteralPath $otherWindowsFolder -PathType Container)) {
+
+                [System.Windows.Forms.MessageBox]::Show(
+                    "OtherWindows folder not found:`n$otherWindowsFolder",
+                    "Strawberry Windows"
+                ) | Out-Null
+
+                return
+            }
 
             # ==========================================
             # CHECK FILE
@@ -38,9 +85,7 @@ function Initialize-MainMenuController {
 
                 [System.Windows.Forms.MessageBox]::Show(
                     "Window script not found:`n$windowPath",
-                    "Strawberry Windows",
-                    [System.Windows.Forms.MessageBoxButtons]::OK,
-                    [System.Windows.Forms.MessageBoxIcon]::Warning
+                    "Strawberry Windows"
                 ) | Out-Null
 
                 return
@@ -52,13 +97,15 @@ function Initialize-MainMenuController {
 
             try {
 
+                Write-Host "Opening window: $windowPath" -ForegroundColor Cyan
+
                 & $windowPath
 
             }
             catch {
 
                 [System.Windows.Forms.MessageBox]::Show(
-                    "Unable to open $selectedItem.`n`n$($_.Exception.Message)",
+                    "Failed to open $selectedItem.`n`n$($_.Exception.Message)",
                     "Strawberry Windows",
                     [System.Windows.Forms.MessageBoxButtons]::OK,
                     [System.Windows.Forms.MessageBoxIcon]::Error
@@ -68,11 +115,12 @@ function Initialize-MainMenuController {
     }
 
     # ==========================================
-    # EXIT BUTTON EVENT
+    # EXIT BUTTON
     # ==========================================
 
     $script:ExitButton.Add_Click({
 
         $script:Form.Close()
+
     })
 }
