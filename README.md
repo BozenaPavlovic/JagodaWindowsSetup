@@ -8,9 +8,13 @@ Skripta za automatsku instalaciju i postavljanje Windows okruženja (Strawberry 
 main.ps1                - OS router + Write-Log
 │
 ├── Core/
-│   ├── Model.ps1       - Get-WindowsVersion, Get-OSConfig
-│   ├── Controller.ps1  - Show-MainMenu, Show-OSSpecs, Run-Installation, Get-SelectedApps
-│   └── Installer.ps1   - Install-OneApp
+│   ├── Model.ps1               - Get-WindowsVersion, Get-OSConfig
+│   ├── Controller.ps1          - Show-MainMenu, Show-OSSpecs, Run-Installation, Get-SelectedApps
+│   ├── Installer.ps1           - Install-OneApp
+│   ├── ProgramDatabase.ps1     - $Global:Apps (Chrome, VLC, LibreOffice, 7-Zip, Python 3.14)
+│   └── InstallerHelpers.ps1    - Initialize-InstallerBackend, Find-InstalledApp, Test-Winget,
+│                                 Install-WithWinget, Get-ProgramInstaller, Write-InstallerLog,
+│                                 Install-YouTubeShortcut
 │
 ├── Windows10/
 │   ├── Config.ps1              - $WindowsConfig (OS=Windows10, Theme=Pink)
@@ -66,6 +70,8 @@ main.ps1                - OS router + Write-Log
 | `Core/Model.ps1` | `Get-WindowsVersion`, `Get-OSConfig` |
 | `Core/Controller.ps1` | `Get-SelectedApps`, `Show-MainMenu`, `Show-OSSpecs`, `Run-Installation` |
 | `Core/Installer.ps1` | `Install-OneApp` |
+| `Core/ProgramDatabase.ps1` | `$Global:Apps` |
+| `Core/InstallerHelpers.ps1` | `Initialize-InstallerBackend`, `Find-InstalledApp`, `Test-Winget`, `Install-WithWinget`, `Get-ProgramInstaller`, `Write-InstallerLog`, `Install-YouTubeShortcut` |
 | `Windows10/Config.ps1` | (config varijable) |
 | `Windows10/PinkSetup.ps1` | `Get-OSSpecs` |
 | `Windows10/Themes/PinkTheme.ps1` | `Set-Dword`, `ConvertTo-WindowsColor`, `New-AccentPalette`, `Set-WindowsAccentTheme`, `Install-PinkTheme`, `Install-BlueTheme`, `Install-YellowTheme`, `Install-GreenTheme` |
