@@ -6,8 +6,11 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 
 $root = Join-Path $PSScriptRoot ".."
+$win10Path = Join-Path $root "Windows10"
+
 . "$root\Core\Model.ps1"
 . "$root\Core\Controller.ps1"
 . "$PSScriptRoot\Config.ps1"
+. "$win10Path\SystemTools\Get-SystemSpecs.ps1"
 
 Run-Installation

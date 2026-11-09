@@ -1,4 +1,4 @@
-Add-Type -AssemblyName System.Windows.Forms
+<# Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 $os = Get-CimInstance Win32_OperatingSystem
@@ -16,4 +16,4 @@ $label.Text = $text
 $label.Location = New-Object System.Drawing.Point(20,20)
 $label.Size = New-Object System.Drawing.Size(380,200)
 $form.Controls.Add($label)
-[void]$form.ShowDialog()
+[void]$form.ShowDialog() #>

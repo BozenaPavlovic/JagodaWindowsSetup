@@ -66,7 +66,8 @@ try {
         Write-Host "[1] Choose Wallpaper"
         Write-Host "[2] Choose Theme"
         Write-Host "[3] Install Programs"
-        Write-Host "[4] Complete Installation"
+        Write-Host "[4] OS Specifications"
+        Write-Host "[5] Complete Installation"
         Write-Host "[0] Exit"
         Write-Host ""
 
@@ -102,6 +103,25 @@ try {
                 }
 
                 "4" {
+                    Clear-Host
+                    Write-Host "====================================" -ForegroundColor Magenta
+                    Write-Host "   OS SPECIFICATIONS" -ForegroundColor Magenta
+                    Write-Host "====================================" -ForegroundColor Magenta
+                    $spec = Get-OSSpecs
+                    Write-Host "OS Name:     $($spec.OSName)" -ForegroundColor Cyan
+                    Write-Host "Version:     $($spec.Version)" -ForegroundColor Cyan
+                    Write-Host "Build:       $($spec.Build)" -ForegroundColor Cyan
+                    Write-Host "Edition:     $($spec.Edition)" -ForegroundColor Cyan
+                    Write-Host "Architecture: $($spec.Arch)" -ForegroundColor Cyan
+                    Write-Host "Computer:    $env:COMPUTERNAME" -ForegroundColor Cyan
+                    Write-Host "User:        $env:USERNAME" -ForegroundColor Cyan
+                    Write-Host "PowerShell:  $($PSVersionTable.PSVersion.ToString())" -ForegroundColor Cyan
+                    Write-Host "====================================" -ForegroundColor Magenta
+                    Write-Host ""
+                    Read-Host "Press ENTER to return to menu"
+                }
+
+                "5" {
                     & "$PSScriptRoot\..\GUI\ProgramInstaller.ps1"
                 }
 

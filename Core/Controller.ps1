@@ -22,7 +22,7 @@ function Show-MainMenu {
         Write-Host "[1] Install Programs"
         Write-Host "[2] Apply Theme"
         Write-Host "[3] Set Wallpaper"
-        Write-Host "[4] System Info"
+        Write-Host "[4] OS Specifications"
         Write-Host "[0] Exit"
         Write-Host ""
 
@@ -32,7 +32,7 @@ function Show-MainMenu {
             "1" { Install-Programs }
             "2" { Install-PinkTheme }
             "3" { WALLPAPERS 1 }
-            "4" { Get-SystemSpecs }
+            "4" { Show-OSSpecs }
             "0" { return }
             default { Write-Host "Invalid option!" -ForegroundColor Red }
         }
@@ -42,6 +42,24 @@ function Show-MainMenu {
             Read-Host "Press ENTER to return to menu"
         }
     }
+}
+
+function Show-OSSpecs {
+    $spec = Get-SystemSpecs
+    Clear-Host
+    Write-Host "====================================" -ForegroundColor Magenta
+    Write-Host "   OS SPECIFICATIONS" -ForegroundColor Magenta
+    Write-Host "====================================" -ForegroundColor Magenta
+    Write-Host "OS:            $($spec.OS)" -ForegroundColor Cyan
+    Write-Host "Platform:      $($spec.Platform)" -ForegroundColor Cyan
+    Write-Host "IsWindows:     $($spec.IsWindows)" -ForegroundColor Cyan
+    Write-Host "Computer:      $($spec.ComputerName)" -ForegroundColor Cyan
+    Write-Host "User:          $($spec.UserName)" -ForegroundColor Cyan
+    Write-Host "64Bit:         $($spec.Is64Bit)" -ForegroundColor Cyan
+    Write-Host "PowerShell:    $($spec.PowerShell)" -ForegroundColor Cyan
+    Write-Host "====================================" -ForegroundColor Magenta
+    Write-Host ""
+    Read-Host "Press ENTER to return to menu"
 }
 
 function Run-Installation {
