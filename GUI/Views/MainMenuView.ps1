@@ -15,14 +15,14 @@ $script:Form = New-Object System.Windows.Forms.Form
 
 $script:Form.Text = "STRAWBERRY WINDOWS"
 
-$script:Form.Size = New-Object System.Drawing.Size(450, 750)
+$script:Form.Size = New-Object System.Drawing.Size(450, 860)
 
 $script:Form.StartPosition = `
     [System.Windows.Forms.FormStartPosition]::CenterScreen
 
 $script:Form.BackColor = [System.Drawing.Color]::WhiteSmoke
 
-$script:Form.MinimumSize = New-Object System.Drawing.Size(400, 650)
+$script:Form.MinimumSize = New-Object System.Drawing.Size(400, 780)
 
 $script:Form.FormBorderStyle = `
     [System.Windows.Forms.FormBorderStyle]::Sizable

@@ -11,6 +11,7 @@ $script:SystemInformationPanel = New-Object System.Windows.Forms.Panel
 
 $script:SystemInformationPanel.Dock = [System.Windows.Forms.DockStyle]::Bottom
 $script:SystemInformationPanel.Height = 350
+$script:SystemInformationPanel.AutoScroll = $true
 
 $script:SystemInformationPanel.BackColor = [System.Drawing.Color]::LavenderBlush
 
@@ -54,12 +55,8 @@ $script:LabelInfo.ForeColor = [System.Drawing.Color]::DarkSlateGray
 
 $script:LabelInfo.Location = New-Object System.Drawing.Point(10, 32)
 
-$script:LabelInfo.Size = New-Object System.Drawing.Size(
-    410,
-    300
-)
-
-$script:LabelInfo.AutoSize = $false
+$script:LabelInfo.AutoSize = $true
+$script:LabelInfo.MaximumSize = New-Object System.Drawing.Size(410, 0)
 
 $script:LabelInfo.UseCompatibleTextRendering = $true
 
@@ -79,13 +76,10 @@ $script:SystemInformationPanel.Controls.Add($script:LabelInfo)
 
 $script:SystemInformationPanel.Add_Resize({
 
-    $script:LabelInfo.Width = [math]::Max(
+    $maxWidth = [math]::Max(
         100,
-        $script:SystemInformationPanel.ClientSize.Width - 20
+        $script:SystemInformationPanel.ClientSize.Width - 30
     )
 
-    $script:LabelInfo.Height = [math]::Max(
-        50,
-        $script:SystemInformationPanel.ClientSize.Height - 42
-    )
+    $script:LabelInfo.MaximumSize = New-Object System.Drawing.Size($maxWidth, 0)
 })
