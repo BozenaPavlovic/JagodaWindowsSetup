@@ -103,8 +103,8 @@ else {
     "STRAWBERRY WINDOWS - APPS INSTALLER"
 }
 
-$form.Size = New-Object System.Drawing.Size(500, 600)
-$form.MinimumSize = New-Object System.Drawing.Size(400, 350)
+$form.Size = New-Object System.Drawing.Size(700, 680)
+$form.MinimumSize = New-Object System.Drawing.Size(520, 420)
 $form.StartPosition = "CenterScreen"
 $form.BackColor = [System.Drawing.Color]::WhiteSmoke
 
@@ -137,7 +137,7 @@ $form.Controls.Add($title)
 $appPanel = New-Object System.Windows.Forms.Panel
 
 $appPanel.Location = New-Object System.Drawing.Point(20, 50)
-$appPanel.Size = New-Object System.Drawing.Size(445, 400)
+$appPanel.Size = New-Object System.Drawing.Size(645, 480)
 $appPanel.Anchor = (
     [System.Windows.Forms.AnchorStyles]::Top -bor
     [System.Windows.Forms.AnchorStyles]::Bottom -bor
@@ -152,34 +152,58 @@ $appPanel.BackColor = [System.Drawing.Color]::White
 $form.Controls.Add($appPanel)
 
 # ==========================================
-# APPLICATION CHECKBOXES
+# APPLICATION CHECKBOXES (GROUPED BY CATEGORY)
 # ==========================================
 
 $checks = @()
 
+$groupedApps = $appsToDisplay | Group-Object -Property {
+    if ($_.Category) { $_.Category } else { "Other" }
+} | Sort-Object Name
+
 $y = 10
 
-foreach ($app in $appsToDisplay) {
+foreach ($group in $groupedApps) {
 
-    $cb = New-Object System.Windows.Forms.CheckBox
+    $header = New-Object System.Windows.Forms.Label
+    $header.Text = $group.Name
+    $header.Font = New-Object System.Drawing.Font(
+        "Segoe UI", 10, [System.Drawing.FontStyle]::Bold
+    )
+    $header.Location = New-Object System.Drawing.Point(10, $y)
+    $header.Size = New-Object System.Drawing.Size(600, 22)
+    $header.ForeColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
 
-    $cb.Text = "$($app.Number) - $($app.Name)"
+    $appPanel.Controls.Add($header)
+    $y += 26
 
-    $cb.Tag = $app
+    foreach ($app in ($group.Group | Sort-Object Name)) {
 
-    $cb.Checked = $true
+        $cb = New-Object System.Windows.Forms.CheckBox
 
-    $cb.Location = New-Object System.Drawing.Point(12, $y)
+        $displayText = $app.Name
+        if ($app.Version) {
+            $displayText += " $($app.Version)"
+        }
+        if ($app.Description) {
+            $displayText += "  -  $($app.Description)"
+        }
 
-    $cb.Size = New-Object System.Drawing.Size(400, 25)
+        $cb.Text = $displayText
+        $cb.Tag = $app
+        $cb.Checked = $true
+        $cb.Location = New-Object System.Drawing.Point(28, $y)
+        $cb.Size = New-Object System.Drawing.Size(590, 24)
+        $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+        $cb.AutoEllipsis = $true
 
-    $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+        $appPanel.Controls.Add($cb)
+        $checks += $cb
 
-    $appPanel.Controls.Add($cb)
+        $y += 26
+    }
 
-    $checks += $cb
-
-    $y += 30
+    $y += 8
 }
 
 # ==========================================
@@ -189,7 +213,7 @@ foreach ($app in $appsToDisplay) {
 $selectAll = New-Object System.Windows.Forms.Button
 
 $selectAll.Text = "Select All"
-$selectAll.Location = New-Object System.Drawing.Point(20, 465)
+$selectAll.Location = New-Object System.Drawing.Point(20, 545)
 $selectAll.Size = New-Object System.Drawing.Size(115, 35)
 $selectAll.Anchor = "Bottom, Left"
 
@@ -210,7 +234,7 @@ $form.Controls.Add($selectAll)
 $deselectAll = New-Object System.Windows.Forms.Button
 
 $deselectAll.Text = "Deselect All"
-$deselectAll.Location = New-Object System.Drawing.Point(145, 465)
+$deselectAll.Location = New-Object System.Drawing.Point(145, 545)
 $deselectAll.Size = New-Object System.Drawing.Size(115, 35)
 $deselectAll.Anchor = "Bottom, Left"
 
@@ -231,7 +255,7 @@ $form.Controls.Add($deselectAll)
 $install = New-Object System.Windows.Forms.Button
 
 $install.Text = "Install Selected"
-$install.Location = New-Object System.Drawing.Point(275, 465)
+$install.Location = New-Object System.Drawing.Point(495, 545)
 $install.Size = New-Object System.Drawing.Size(170, 35)
 $install.Anchor = "Bottom, Right"
 
@@ -328,7 +352,7 @@ $back = New-Object System.Windows.Forms.Button
 
 $back.Text = if ($ProfileName) { "Back" } else { "Close" }
 
-$back.Location = New-Object System.Drawing.Point(20, 510)
+$back.Location = New-Object System.Drawing.Point(20, 590)
 $back.Size = New-Object System.Drawing.Size(115, 35)
 $back.Anchor = "Bottom, Left"
 
