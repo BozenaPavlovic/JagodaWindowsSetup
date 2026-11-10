@@ -9,6 +9,11 @@ function Show-MainMenu {
     $root = $PSScriptRoot
     $config = Get-OSConfig
 
+    $themeManager = Join-Path $root "ThemeManager.ps1"
+    if (-not (Get-Command Invoke-Theme -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath $themeManager)) {
+        . $themeManager
+    }
+
     while ($true) {
         Clear-Host
         Write-Host "====================================" -ForegroundColor Magenta
@@ -30,7 +35,7 @@ function Show-MainMenu {
 
         switch ($choice) {
             "1" { Install-Programs }
-            "2" { Install-PinkTheme }
+            "2" { Invoke-Theme -ThemeId "Pink" }
             "3" { WALLPAPERS 1 }
             "4" { Show-OSSpecs }
             "0" { return }

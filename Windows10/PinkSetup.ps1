@@ -23,10 +23,11 @@ try {
     Write-Host "Loading STRAWBERRY WINDOWS modules..." -ForegroundColor Magenta
 
     # Check files
+    $ThemeManagerPath = Join-Path $Root "..\Core\ThemeManager.ps1"
     $Modules = @(
         "$Root\Config.ps1",
         "$Root\Wallpapers\Wallpaper.ps1",
-        "$Root\Themes\PinkTheme.ps1",
+        $ThemeManagerPath,
         "$Root\Installers\Programs.ps1"
     )
 
@@ -42,7 +43,8 @@ try {
     # Load modules
     . "$Root\Config.ps1"
     . "$Root\Wallpapers\Wallpaper.ps1"
-    . "$Root\Themes\PinkTheme.ps1"
+    . $ThemeManagerPath
+    Initialize-ThemeBackend | Out-Null
     . "$Root\Installers\Programs.ps1"
 
     Write-Host "All modules loaded!" -ForegroundColor Green
@@ -91,10 +93,10 @@ try {
                     Write-Host "[4] Green"
                     $T = Read-Host "Choose theme"
                     switch ($T) {
-                        "1" { Install-PinkTheme }
-                        "2" { Install-BlueTheme }
-                        "3" { Install-YellowTheme }
-                        "4" { Install-GreenTheme }
+                        "1" { Invoke-Theme -ThemeId "Pink" }
+                        "2" { Invoke-Theme -ThemeId "Blue" }
+                        "3" { Invoke-Theme -ThemeId "Yellow" }
+                        "4" { Invoke-Theme -ThemeId "Green" }
                     }
                 }
 
