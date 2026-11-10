@@ -1,9 +1,19 @@
 # WALLPAPER MODULE
 
+# ==========================================
+# LOAD SHARED PATHS
+# ==========================================
+
+$pathsModule = Join-Path $PSScriptRoot "..\..\Core\Paths.ps1"
+if (Test-Path -LiteralPath $pathsModule) {
+    . $pathsModule
+}
+
+$PhotosFolder = $Global:PhotosFolder
+
 function WALLPAPERS {
     param([int]$Number = 1)
 
-    $PhotosFolder = Join-Path $PSScriptRoot "..\DATA\Photos"
     $Photos = @(
         (Join-Path $PhotosFolder "Pink-Strawberry.jpg")
         (Join-Path $PhotosFolder "Yellow-Flowers-Blue-Sky.jpg")

@@ -10,13 +10,19 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # ==========================================
+# LOAD SHARED PATHS
+# ==========================================
+
+$pathsModule = Join-Path $PSScriptRoot "..\..\Core\Paths.ps1"
+if (Test-Path -LiteralPath $pathsModule) {
+    . $pathsModule
+}
+
+# ==========================================
 # LOAD WALLPAPER BACKEND
 # ==========================================
 
-$script:ProjectRoot = Split-Path $PSScriptRoot -Parent
-$script:ProjectRoot = Split-Path $script:ProjectRoot -Parent
-
-$wallpaperModule = Join-Path $script:ProjectRoot "Windows10\Wallpapers\Wallpaper.ps1"
+$wallpaperModule = Join-Path $Global:ProjectRoot "Windows10\Wallpapers\Wallpaper.ps1"
 if (Test-Path -LiteralPath $wallpaperModule) {
     . $wallpaperModule
 }
@@ -25,7 +31,7 @@ if (Test-Path -LiteralPath $wallpaperModule) {
 # GET WALLPAPER FILES
 # ==========================================
 
-$photosDir = Join-Path $script:ProjectRoot "DATA\Photos"
+$photosDir = $Global:PhotosFolder
 $files = Get-ChildItem $photosDir -Filter *.jpg -ErrorAction SilentlyContinue
 
 if (-not $files -or $files.Count -eq 0) {

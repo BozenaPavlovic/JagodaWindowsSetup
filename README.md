@@ -15,8 +15,9 @@ JagodaWindowsSetup/
 │   ├── Installer.ps1           - Install-OneApp (router to OS-specific installer)
 │   ├── ProgramDatabase.ps1     - $Global:Apps (Chrome, VLC, LibreOffice, 7-Zip, Python 3.14)
 │   ├── InstallerHelpers.ps1    - Initialize-InstallerBackend, Find-InstalledApp, Test-Winget,
-│                                 Install-WithWinget, Get-ProgramInstaller, Write-InstallerLog,
-│                                 Install-YouTubeShortcut
+│   │                             Install-WithWinget, Get-ProgramInstaller, Write-InstallerLog,
+│   │                             Install-YouTubeShortcut
+│   └── Paths.ps1               - Get-ProjectRoot, $Global:ProjectRoot/DataFolder/PhotosFolder/LogsFolder
 │   ├── Logging.ps1             - Write-AppLog (centralized logging: Activity/Installation/Error logs)
 │   ├── ThemeEngine.ps1         - Set-ThemeDword, ConvertTo-WindowsColor, New-AccentPalette,
 │                                 Invoke-ThemeRefresh, Set-WindowsAccentTheme
