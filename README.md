@@ -5,49 +5,75 @@ Skripta za automatsku instalaciju i postavljanje Windows okruženja (Strawberry 
 ## Arhitektura
 
 ```
-main.ps1                - OS router + Write-Log
+JagodaWindowsSetup/
+│
+├── main.ps1                    - OS router + Write-Log
 │
 ├── Core/
 │   ├── Model.ps1               - Get-WindowsVersion, Get-OSConfig
 │   ├── Controller.ps1          - Show-MainMenu, Show-OSSpecs, Run-Installation, Get-SelectedApps
 │   ├── Installer.ps1           - Install-OneApp
 │   ├── ProgramDatabase.ps1     - $Global:Apps (Chrome, VLC, LibreOffice, 7-Zip, Python 3.14)
-│   └── InstallerHelpers.ps1    - Initialize-InstallerBackend, Find-InstalledApp, Test-Winget,
+│   ├── InstallerHelpers.ps1    - Initialize-InstallerBackend, Find-InstalledApp, Test-Winget,
 │                                 Install-WithWinget, Get-ProgramInstaller, Write-InstallerLog,
 │                                 Install-YouTubeShortcut
+│   ├── Logging.ps1             - Write-Log (shared logging)
+│   ├── ThemeEngine.ps1         - Theme engine core functions
+│   └── ThemeManager.ps1        - Theme management
 │
 ├── Windows10/
 │   ├── Config.ps1              - $WindowsConfig (OS=Windows10, Theme=Pink)
 │   ├── install.ps1             - Elevation + Core/Controller orchestration
 │   ├── PinkSetup.ps1           - Get-OSSpecs + CLI menu
 │   ├── START.ps1 / START.bat   - Portable starter (launches GUI\MainMenu.ps1)
-│   ├── Config/settings.json
-│   ├── Themes/PinkTheme.ps1    - Set-Dword, ConvertTo-WindowsColor, New-AccentPalette,
-│   │                             Set-WindowsAccentTheme, Install-PinkTheme,
-│   │                             Install-BlueTheme, Install-YellowTheme, Install-GreenTheme
-│   ├── Installers/Programs.ps1 - Find-InstalledApp, Get-ProgramInstaller, Test-Winget,
-│   │                             Install-WithWinget, Install-OneApp, Install-YouTubeShortcut,
-│   │                             Install-Programs
-│   ├── SystemTools/Get-SystemSpecs.ps1 - Get-SystemSpecs, Test-IsWindows
-│   ├── SystemTools/PCInfo.ps1
-│   ├── Wallpapers/Wallpaper.ps1 - WALLPAPERS
-│   └── Modules/Logging.psm1    - Write-Log
+│   ├── Config/
+│   │   └── settings.json
+│   ├── Installers/
+│   │   └── Programs.ps1        - Install-Programs, Find-InstalledApp, Get-ProgramInstaller,
+│   │                             Test-Winget, Install-WithWinget, Install-OneApp,
+│   │                             Install-YouTubeShortcut
+│   ├── Modules/
+│   │   └── Logging.psm1        - Write-Log (Windows10 specific)
+│   ├── SystemTools/
+│   │   ├── Get-SystemSpecs.ps1 - Get-SystemSpecs, Test-IsWindows
+│   │   └── PCInfo.ps1
+│   ├── Themes/
+│   │   ├── PinkTheme.ps1       - Set-Dword, ConvertTo-WindowsColor, New-AccentPalette,
+│   │   │                         Set-WindowsAccentTheme, Install-PinkTheme,
+│   │   │                         Install-BlueTheme, Install-YellowTheme, Install-GreenTheme
+│   │   ├── BlueTheme.ps1
+│   │   ├── GreenTheme.ps1
+│   │   └── YellowTheme.ps1
+│   └── Wallpapers/
+│       └── Wallpaper.ps1       - WALLPAPERS
 │
 ├── Windows11/
-│   ├── Config.ps1   - $WindowsConfig (OS=Windows11, Theme=Pink, EnableWidgets=$true)
-│   └── install.ps1  - Elevation + Core/Controller orchestration
+│   ├── Config.ps1              - $WindowsConfig (OS=Windows11, Theme=Pink, EnableWidgets=$true)
+│   ├── install.ps1             - Elevation + Core/Controller orchestration
+│   └── Themes/
+│       ├── PinkTheme.ps1
+│       ├── BlueTheme.ps1
+│       ├── GreenTheme.ps1
+│       └── YellowTheme.ps1
 │
-├── Linux/install.ps1
-├── MacOS/install.ps1
+├── Linux/
+│   └── install.ps1
+│
+├── MacOS/
+│   └── install.ps1
 │
 ├── GUI/
-│   ├── MainMenu.ps1             - Entry point (WinForms app)
-│   ├── Models/MainMenuModel.ps1 - Get-SystemInformation
-│   ├── Helpers/SystemInformationFormatter.ps1 - Format-SystemInformation
-│   ├── Views/MainMenuView.ps1               - Form + panel layout
-│   ├── Views/MainMenuPanel.ps1              - Menu buttons panel
-│   ├── Views/SystemInformationPanel.ps1     - System info panel
-│   ├── Controllers/MainMenuController.ps1   - Initialize-MainMenuController
+│   ├── MainMenu.ps1                    - Entry point (WinForms app)
+│   ├── Models/
+│   │   └── MainMenuModel.ps1           - Get-SystemInformation
+│   ├── Helpers/
+│   │   └── SystemInformationFormatter.ps1 - Format-SystemInformation
+│   ├── Views/
+│   │   ├── MainMenuView.ps1            - Form + panel layout
+│   │   ├── MainMenuPanel.ps1           - Menu buttons panel
+│   │   └── SystemInformationPanel.ps1  - System info panel
+│   ├── Controllers/
+│   │   └── MainMenuController.ps1      - Initialize-MainMenuController
 │   └── OtherWindows/
 │       ├── About.ps1
 │       ├── AppsInstaller.ps1
@@ -57,9 +83,23 @@ main.ps1                - OS router + Write-Log
 │       ├── LogViewer.ps1
 │       └── LoadInstallerBackend.ps1
 │
-├── DATA/Photos/*.jpg
-├── Logs/*.log
-└── Koncepti/*.txt
+├── DATA/
+│   └── Photos/
+│       ├── Pink-Strawberry.jpg
+│       └── Yellow-Flowers-Blue-Sky.jpg
+│
+├── Logs/
+│   ├── Activity.log
+│   ├── Errors.log
+│   ├── Google_Chrome.log
+│   ├── Installation.log
+│   └── InstallationHistory.log
+│
+└── Koncepti/
+    ├── PrviKoncept.txt
+    ├── DrugiKoncept.txt
+    ├── TrećiKoncept.txt
+    └── ČetvrtiKoncept.txt
 ```
 
 ## Funkcije po fajlovima
@@ -72,6 +112,9 @@ main.ps1                - OS router + Write-Log
 | `Core/Installer.ps1` | `Install-OneApp` |
 | `Core/ProgramDatabase.ps1` | `$Global:Apps` |
 | `Core/InstallerHelpers.ps1` | `Initialize-InstallerBackend`, `Find-InstalledApp`, `Test-Winget`, `Install-WithWinget`, `Get-ProgramInstaller`, `Write-InstallerLog`, `Install-YouTubeShortcut` |
+| `Core/Logging.ps1` | `Write-Log` |
+| `Core/ThemeEngine.ps1` | Theme engine functions |
+| `Core/ThemeManager.ps1` | Theme management |
 | `Windows10/Config.ps1` | (config varijable) |
 | `Windows10/PinkSetup.ps1` | `Get-OSSpecs` |
 | `Windows10/Themes/PinkTheme.ps1` | `Set-Dword`, `ConvertTo-WindowsColor`, `New-AccentPalette`, `Set-WindowsAccentTheme`, `Install-PinkTheme`, `Install-BlueTheme`, `Install-YellowTheme`, `Install-GreenTheme` |
