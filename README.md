@@ -1,60 +1,102 @@
 # JagodaWindowsSetup
 
-Skripta za automatsku instalaciju i postavljanje Windows okruženja (Strawberry Windows Setup).
+PowerShell skripta/projekt za automatsku instalaciju programa i postavljanje Windows okruženja (Strawberry / Jagoda Windows Setup).
 
-## Arhitektura
+Najbitnije:
+- **Struktura foldera** je ispod prikazana prema stvarnom stanju repozitorija.
+- **Funkcije i ključne komponente** su navedene po fajlovima/modulima.
 
-```
+## Ulazne tačke
+
+| Fajl | Namjena |
+|------|---------|
+| `main.ps1` | Glavni router: detektuje OS (`Get-WindowsVersion`), loguje u `Logs\main.log`, pokreće `Windows10\install.ps1` ili `Windows11\install.ps1`. |
+| `Windows10\install.ps1` | Provjera administratorskih prava, učitavanje Core/Config/SystemTools modula, pokretanje `Run-Installation`. |
+| `Windows11\install.ps1` | Isto kao Win10 varijanta (koristi Win11 config). |
+| `Windows10\START.ps1` / `Windows10\START.bat` | Portable pokretač za GUI (`GUI\MainMenu.ps1`). |
+| `Windows10\PinkSetup.ps1` | CLI meni za Windows 10 (wallpaper, tema, programi, specifikacije, kompletna instalacija). |
+| `GUI\MainMenu.ps1` | WinForms GUI ulazna tačka (MVC: Model/View/Controller). |
+
+## Struktura foldera
+
+```text
 JagodaWindowsSetup/
-│
-├── main.ps1                    - OS router + Write-Log
+├── main.ps1
+├── README.md
 │
 ├── Core/
-│   ├── Model.ps1               - Get-WindowsVersion, Get-OSConfig
-│   ├── Controller.ps1          - Show-MainMenu, Show-OSSpecs, Run-Installation, Get-SelectedApps
-│   ├── Installer.ps1           - Install-OneApp (router to OS-specific installer)
-│   ├── ProgramDatabase.ps1     - $Global:Apps (Chrome, VLC, LibreOffice, 7-Zip, Python 3.14)
-│   ├── InstallerHelpers.ps1    - Initialize-InstallerBackend, Find-InstalledApp, Test-Winget,
-│   │                             Install-WithWinget, Get-ProgramInstaller, Write-InstallerLog,
-│   │                             Install-YouTubeShortcut
-│   └── Paths.ps1               - Get-ProjectRoot, $Global:ProjectRoot/DataFolder/PhotosFolder/LogsFolder
-│   ├── Logging.ps1             - Write-AppLog (centralized logging: Activity/Installation/Error logs)
-│   ├── ThemeEngine.ps1         - Set-ThemeDword, ConvertTo-WindowsColor, New-AccentPalette,
-│                                 Invoke-ThemeRefresh, Set-WindowsAccentTheme
-│   └── ThemeManager.ps1        - Get-ThemeCatalog, Get-TargetThemeOS, Initialize-ThemeBackend,
-│                                 Get-ThemeDefinition, Invoke-Theme, Install-Pink/Blue/Yellow/GreenTheme
+│   ├── Controller.ps1
+│   ├── Installer.ps1
+│   ├── InstallerHelpers.ps1
+│   ├── Logging.ps1
+│   ├── Model.ps1
+│   ├── Paths.ps1
+│   ├── ProgramDatabase.ps1          # compatibility wrapper -> DATABASE\ProgramDatabase.ps1
+│   ├── ThemeEngine.ps1
+│   └── ThemeManager.ps1
+│
+├── DATABASE/
+│   ├── ProgramDatabase.ps1          # učitava sve definicije iz DATABASE\Installers
+│   └── Installers/
+│       ├── Compression.ps1
+│       ├── Development.ps1
+│       ├── Media.ps1
+│       ├── Messaging.ps1
+│       ├── Office.ps1
+│       ├── Utilities.ps1
+│       └── WebBrowsers.ps1
+│
+├── GUI/
+│   ├── MainMenu.ps1
+│   ├── Controllers/
+│   │   └── MainMenuController.ps1
+│   ├── Helpers/
+│   │   └── SystemInformationFormatter.ps1
+│   ├── Models/
+│   │   └── MainMenuModel.ps1
+│   ├── Views/
+│   │   ├── MainMenuPanel.ps1
+│   │   ├── MainMenuView.ps1
+│   │   └── SystemInformationPanel.ps1
+│   └── OtherWindows/
+│       ├── About.ps1
+│       ├── AppsInstaller.ps1
+│       ├── LoadInstallerBackend.ps1
+│       ├── LogViewer.ps1
+│       ├── ProfileInstaller.ps1
+│       ├── ThemeManager.ps1
+│       └── WallpaperManager.ps1
 │
 ├── Windows10/
-│   ├── Config.ps1              - $Global:PinkConfig, $Global:WindowsConfig (OS=Windows10, Theme=Pink, EnableWidgets=$false)
-│   ├── install.ps1             - Elevation check + Core/Controller orchestration
-│   ├── PinkSetup.ps1           - Get-OSSpecs + CLI menu (5 options: wallpaper, theme, programs, specs, complete)
-│   ├── START.ps1 / START.bat   - Portable starter (launches GUI\MainMenu.ps1)
+│   ├── Config.ps1
+│   ├── install.ps1
+│   ├── PinkSetup.ps1
+│   ├── START.bat
+│   ├── START.ps1
 │   ├── Config/
 │   │   └── settings.json
 │   ├── Installers/
-│   │   └── Programs.ps1        - Install-Programs, Find-InstalledApp, Get-ProgramInstaller,
-│   │                             Test-Winget, Install-WithWinget, Install-OneApp,
-│   │                             Install-YouTubeShortcut
+│   │   └── Programs.ps1
 │   ├── Modules/
-│   │   └── Logging.psm1        - Write-Log (Windows10 specific)
+│   │   └── Logging.psm1
 │   ├── SystemTools/
-│   │   ├── Get-SystemSpecs.ps1 - Get-SystemSpecs, Test-IsWindows
+│   │   ├── Get-SystemSpecs.ps1
 │   │   └── PCInfo.ps1
 │   ├── Themes/
-│   │   ├── PinkTheme.ps1       - Invoke-PinkTheme, Install-PinkTheme (delegates to Core engine)
 │   │   ├── BlueTheme.ps1
 │   │   ├── GreenTheme.ps1
+│   │   ├── PinkTheme.ps1
 │   │   └── YellowTheme.ps1
 │   └── Wallpapers/
-│       └── Wallpaper.ps1       - WALLPAPERS (sets desktop wallpaper via SystemParametersInfo)
+│       └── Wallpaper.ps1
 │
 ├── Windows11/
-│   ├── Config.ps1              - $Global:PinkConfig, $Global:WindowsConfig (OS=Windows11, Theme=Pink, EnableWidgets=$true, EnableDarkMode=$true)
-│   ├── install.ps1             - Elevation check + Core/Controller orchestration
+│   ├── Config.ps1
+│   ├── install.ps1
 │   └── Themes/
-│       ├── PinkTheme.ps1       - Invoke-PinkTheme, Install-PinkTheme (delegates to Core engine)
 │       ├── BlueTheme.ps1
 │       ├── GreenTheme.ps1
+│       ├── PinkTheme.ps1
 │       └── YellowTheme.ps1
 │
 ├── Linux/
@@ -62,27 +104,6 @@ JagodaWindowsSetup/
 │
 ├── MacOS/
 │   └── install.ps1
-│
-├── GUI/
-│   ├── MainMenu.ps1                    - Entry point (WinForms app, loads Model/View/Controller)
-│   ├── Models/
-│   │   └── MainMenuModel.ps1           - Get-SystemInformation (OS, CPU, GPU, RAM, Disk, Uptime, Admin status)
-│   ├── Helpers/
-│   │   └── SystemInformationFormatter.ps1 - Format-SystemInformation (formats PSCustomObject to string)
-│   ├── Views/
-│   │   ├── MainMenuView.ps1            - Creates Form + adds MainMenuPanel + SystemInformationPanel
-│   │   ├── MainMenuPanel.ps1           - Menu buttons (Profile Installer, Apps Installer, Theme Manager, Wallpaper Manager, Log Viewer, About, Exit)
-│   │   └── SystemInformationPanel.ps1  - System info display panel (docked bottom, 350px height)
-│   ├── Controllers/
-│   │   └── MainMenuController.ps1      - Initialize-MainMenuController (button click handlers, window routing)
-│   └── OtherWindows/
-│       ├── About.ps1                   - Simple About dialog
-│       ├── AppsInstaller.ps1           - GUI app selector with checkboxes, profile filtering, Install-OneApp integration
-│       ├── ProfileInstaller.ps1        - Profile selection (Profil A/B/C) -> launches AppsInstaller with profile
-│       ├── ThemeManager.ps1            - Theme picker GUI (dynamic from Get-ThemeCatalog, Apply button uses Invoke-Theme)
-│       ├── WallpaperManager.ps1        - Lists JPG files from Photos folder
-│       ├── LogViewer.ps1               - Displays InstallationHistory.log in TextBox
-│       └── LoadInstallerBackend.ps1    - Loads Logging, ProgramDatabase, InstallerHelpers, Windows10 installer, ThemeManager; sets $Global:AutoMode=$true
 │
 ├── DATA/
 │   └── Photos/
@@ -103,71 +124,86 @@ JagodaWindowsSetup/
     └── ČetvrtiKoncept.txt
 ```
 
-## Funkcije po fajlovima
+## Core moduli i funkcije
 
-| Fajl | Funkcije |
-|------|----------|
-| `main.ps1` | `Write-Log` |
-| `Core/Model.ps1` | `Get-WindowsVersion` (detects Win10/Win11 via BuildNumber >= 22000), `Get-OSConfig` (loads OS-specific Config.ps1, returns `$Global:WindowsConfig`) |
-| `Core/Controller.ps1` | `Get-SelectedApps` (filters `$Global:Apps` by IDs), `Show-MainMenu` (CLI menu: Install Programs, Apply Theme, Set Wallpaper, OS Specs, Exit), `Show-OSSpecs` (displays system specs via `Get-SystemSpecs`), `Run-Installation` (entry point: `Show-MainMenu`) |
-| `Core/Installer.ps1` | `Install-OneApp` (router: calls Windows10 or Windows11 installer based on OS) |
-| `Core/ProgramDatabase.ps1` | `$Global:Apps` (array of hashtables: Number, Name, Match, File, URL, Type, InteractiveArguments, SilentArguments, MinBytes, Publisher, WingetID) |
-| `Core/InstallerHelpers.ps1` | `Initialize-InstallerBackend` (detects OS, loads Config, sets $Global:InstallerConfig with DownloadFolder/LogFolder), `Find-InstalledApp` (searches registry Uninstall keys), `Test-Winget` (checks winget.exe), `Install-WithWinget` (installs via winget --id), `Get-ProgramInstaller` (downloads installer to DownloadFolder, verifies MinBytes), `Write-InstallerLog` (appends to InstallationHistory.log), `Install-YouTubeShortcut` (creates YouTube.url on Desktop) |
-| `Core/Logging.ps1` | `Write-AppLog` (centralized logging: Message, Level [INFO/SUCCESS/WARNING/ERROR], LogType [ACTIVITY/INSTALLATION/ERROR]; writes to Activity.log/Installation.log/Errors.log) |
-| `Core/ThemeEngine.ps1` | `Set-ThemeDword` (registry helper), `ConvertTo-WindowsColor` (#RRGGBB -> ABGR int), `New-AccentPalette` (generates 8-color palette from base color), `Invoke-ThemeRefresh` (SendMessageTimeout WM_SETTINGCHANGE + explorer restart), `Set-WindowsAccentTheme` (applies theme to Personalize/DWM/Accent registry keys, calls Invoke-ThemeRefresh) |
-| `Core/ThemeManager.ps1` | `Get-ThemeCatalog` (returns Pink/Blue/Yellow/Green theme definitions), `Get-TargetThemeOS` (detects OS via Get-WindowsVersion or CIM), `Initialize-ThemeBackend` (loads ThemeEngine.ps1, sets OS), `Get-ThemeDefinition` (looks up theme by ID), `Invoke-Theme` (dispatches to OS-specific Invoke-<Theme>Theme or falls back to Set-WindowsAccentTheme), `Install-Pink/Blue/Yellow/GreenTheme` (backward-compatible aliases) |
-| `Windows10/Config.ps1` | `$Global:PinkConfig` (Root, WallpaperFolder, DownloadFolder, CacheFolder, LogFolder, WallpaperURL), `$Global:WindowsConfig` (OS=Windows10, Theme=Pink, EnableDarkMode=$true, InstallWinget=$true, EnableWidgets=$false), `$Global:PinkEnvironment` (ComputerName, UserName, WindowsVersion, PowerShellVersion, Is64Bit) |
-| `Windows10/install.ps1` | Elevation check (restarts as Admin), loads Core/Model.ps1, Core/Controller.ps1, Config.ps1, Windows10/SystemTools/Get-SystemSpecs.ps1, calls `Run-Installation` |
-| `Windows10/PinkSetup.ps1` | `Get-OSSpecs` (reads HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion), CLI menu loop (1=Wallpaper, 2=Theme, 3=Programs, 4=Specs, 5=Complete Installation via GUI\ProgramInstaller.ps1, 0=Exit) |
-| `Windows10/START.ps1` / `START.bat` | Portable launcher for GUI\MainMenu.ps1 |
-| `Windows10/Installers/Programs.ps1` | `Find-InstalledApp` (registry search), `Get-ProgramInstaller` (download with progress), `Test-Winget`, `Install-WithWinget`, `Install-OneApp` (handles MSI/EXE, interactive/auto mode, verification loop), `Install-YouTubeShortcut`, `Install-Programs` (menu: 1=All, 2=Chrome, 3=YouTube, 4=VLC, 5=LibreOffice, 6=7-Zip, 7=Python) |
-| `Windows10/SystemTools/Get-SystemSpecs.ps1` | `Get-SystemSpecs` (returns hashtable: OS, Platform, IsWindows, ComputerName, UserName, Is64Bit, PowerShell; optional JSON output), `Test-IsWindows` |
-| `Windows10/SystemTools/PCInfo.ps1` | (empty/helper) |
-| `Windows10/Themes/PinkTheme.ps1` | `Invoke-PinkTheme` (loads Core ThemeManager if needed, calls Set-WindowsAccentTheme with Pink/#FF69B4), `Install-PinkTheme` (alias) |
-| `Windows10/Themes/BlueTheme.ps1` | `Invoke-BlueTheme`, `Install-BlueTheme` |
-| `Windows10/Themes/GreenTheme.ps1` | `Invoke-GreenTheme`, `Install-GreenTheme` |
-| `Windows10/Themes/YellowTheme.ps1` | `Invoke-YellowTheme`, `Install-YellowTheme` |
-| `Windows10/Wallpapers/Wallpaper.ps1` | `WALLPAPERS` (param $Number=1/2, sets wallpaper via SystemParametersInfo SPI_SETDESKWALLPAPER) |
-| `Windows10/Modules/Logging.psm1` | `Write-Log` (simple file logging) |
-| `Windows11/Config.ps1` | `$Global:PinkConfig`, `$Global:WindowsConfig` (OS=Windows11, Theme=Pink, EnableDarkMode=$true, InstallWinget=$true, EnableWidgets=$true), `$Global:PinkEnvironment` |
-| `Windows11/install.ps1` | Elevation check, loads Core/Model.ps1, Core/Controller.ps1, Config.ps1, Windows10/SystemTools/Get-SystemSpecs.ps1, calls `Run-Installation` |
-| `Windows11/Themes/PinkTheme.ps1` | `Invoke-PinkTheme`, `Install-PinkTheme` (delegates to Core ThemeEngine) |
-| `Windows11/Themes/BlueTheme.ps1` | `Invoke-BlueTheme`, `Install-BlueTheme` |
-| `Windows11/Themes/GreenTheme.ps1` | `Invoke-GreenTheme`, `Install-GreenTheme` |
-| `Windows11/Themes/YellowTheme.ps1` | `Invoke-YellowTheme`, `Install-YellowTheme` |
-| `GUI/MainMenu.ps1` | Entry point: loads Model/View/Controller, `Get-SystemInformation`, `Format-SystemInformation`, `Initialize-MainMenuController`, `Form.ShowDialog()` |
-| `GUI/Models/MainMenuModel.ps1` | `Get-SystemInformation` (returns PSCustomObject: OS, Version, Build, ComputerName, Model, Username, CPU, GPU, RAM, DiskFree, DiskSize, Architecture, PowerShellVersion, Uptime, Administrator) |
-| `GUI/Helpers/SystemInformationFormatter.ps1` | `Format-SystemInformation` (formats PSCustomObject to multi-line string for display) |
-| `GUI/Views/MainMenuView.ps1` | Creates `$script:Form`, loads MainMenuPanel.ps1 + SystemInformationPanel.ps1, adds to Form.Controls |
-| `GUI/Views/MainMenuPanel.ps1` | Creates `$script:MainMenuPanel` (Dock=Fill), title label, 6 menu buttons (Profile Installer, Apps Installer, Theme Manager, Wallpaper Manager, Log Viewer, About), Exit button, responsive resize handler |
-| `GUI/Views/SystemInformationPanel.ps1` | Creates `$script:SystemInformationPanel` (Dock=Bottom, Height=350), title label, info label (Consolas 8pt), responsive resize handler |
-| `GUI/Controllers/MainMenuController.ps1` | `Initialize-MainMenuController` (maps button Tags to OtherWindows scripts, click handler opens window via `& $windowPath`, Exit button closes Form) |
-| `GUI/OtherWindows/About.ps1` | Simple WinForms dialog with info text |
-| `GUI/OtherWindows/AppsInstaller.ps1` | Param `$ProfileName`, loads LoadInstallerBackend.ps1, defines profiles (A=2,4,6,7 / B=2,4 / C=6,7), creates Form with CheckBoxes for apps, Select All/Deselect All, Install Selected (calls `Install-OneApp` per app with `$Global:AutoMode=$true`), Back/Close button |
-| `GUI/OtherWindows/ProfileInstaller.ps1` | `Show-ProfileForm` (profile selection dialog), loop: shows profile form -> launches AppsInstaller.ps1 with -ProfileName -> breaks on non-"Back" result |
-| `GUI/OtherWindows/ThemeManager.ps1` | Loads LoadInstallerBackend.ps1 + Core ThemeManager fallback, gets themes via `Get-ThemeCatalog`, creates Form with colored buttons per theme, Apply button calls `Invoke-Theme -ThemeId`, Close button |
-| `GUI/OtherWindows/WallpaperManager.ps1` | Lists JPG files from Photos folder in ListBox |
-| `GUI/OtherWindows/LogViewer.ps1` | Reads Logs\InstallationHistory.log, displays in read-only multiline TextBox |
-| `GUI/OtherWindows/LoadInstallerBackend.ps1` | Validates required files, loads Core/Logging.ps1, Core/ProgramDatabase.ps1, Core/InstallerHelpers.ps1, Windows10/Installers/Programs.ps1, Core/ThemeManager.ps1, calls `Initialize-ThemeBackend`, sets `$Global:AutoMode=$true` |
+| Fajl | Funkcije / varijable | Opis |
+|------|-----------------------|------|
+| `main.ps1` | `Write-Log` | OS router, pokretanje odgovarajućeg OS installera, logovanje u `Logs\main.log`. |
+| `Core\Model.ps1` | `Get-WindowsVersion`, `Get-OSConfig` | Detekcija Windows 10/11 (`BuildNumber >= 22000`) i učitavanje OS `Config.ps1`. |
+| `Core\Controller.ps1` | `Get-SelectedApps`, `Show-MainMenu`, `Show-OSSpecs`, `Run-Installation` | CLI kontroler/meni (instalacija programa, tema, wallpaper, specifikacije). |
+| `Core\Installer.ps1` | `Install-OneApp` | Router instalacije ka OS-specifičnom installeru. |
+| `Core\InstallerHelpers.ps1` | `Initialize-InstallerBackend`, `Find-InstalledApp`, `Test-Winget`, `Install-WithWinget`, `Get-ProgramInstaller`, `Write-InstallerLog`, `Install-YouTubeShortcut` | Pomoćne funkcije za instalaciju, provjeru postojećih app-a, winget, download i logovanje instalacija. |
+| `Core\Logging.ps1` | `Write-AppLog` | Centralizovano logovanje (`Activity.log`, `Installation.log`, `Errors.log`). |
+| `Core\Paths.ps1` | `Get-ProjectRoot`, `$Global:ProjectRoot`, `$Global:DataFolder`, `$Global:PhotosFolder`, `$Global:LogsFolder` | Pouzdano pronalaženje root-a projekta i standardnih putanja. |
+| `Core\ProgramDatabase.ps1` | (wrapper) | Učitava `DATABASE\ProgramDatabase.ps1`. |
+| `Core\ThemeEngine.ps1` | `Set-ThemeDword`, `ConvertTo-WindowsColor`, `New-AccentPalette`, `Invoke-ThemeRefresh`, `Set-WindowsAccentTheme` | Niskonivonska primjena Windows accent/theme podešavanja (registry + refresh). |
+| `Core\ThemeManager.ps1` | `Get-ThemeCatalog`, `Get-TargetThemeOS`, `Initialize-ThemeBackend`, `Get-ThemeDefinition`, `Invoke-Theme`, `Install-PinkTheme`, `Install-BlueTheme`, `Install-YellowTheme`, `Install-GreenTheme` | Katalog tema i dispatch primjene teme (OS-specifično ili fallback na Core engine). |
 
-## Menu opcije
+## Baza programa (`DATABASE`)
 
-**PinkSetup.ps1 (Windows 10 CLI):**
+- `DATABASE\ProgramDatabase.ps1`: učitava sve `.ps1` definicije iz `DATABASE\Installers\` i puni `$Global:Apps`.
+- `Core\ProgramDatabase.ps1`: kompatibilnost/wrapper koji poziva `DATABASE\ProgramDatabase.ps1`.
+- Kategorije instalera u `DATABASE\Installers\`:
+  - `Compression.ps1`
+  - `Development.ps1`
+  - `Media.ps1`
+  - `Messaging.ps1`
+  - `Office.ps1`
+  - `Utilities.ps1`
+  - `WebBrowsers.ps1`
+
+## GUI (WinForms, MVC stil)
+
+| Fajl | Funkcije / uloga |
+|------|------------------|
+| `GUI\MainMenu.ps1` | Ulazna tačka GUI-ja: učitava model/view/controller, priprema i prikazuje formu. |
+| `GUI\Models\MainMenuModel.ps1` | `Get-SystemInformation` (OS, verzija, build, CPU, GPU, RAM, disk, uptime, admin status itd.). |
+| `GUI\Helpers\SystemInformationFormatter.ps1` | `Format-SystemInformation` (formatira podatke za prikaz). |
+| `GUI\Views\MainMenuView.ps1` | Kreira glavnu formu i dodaje panele. |
+| `GUI\Views\MainMenuPanel.ps1` | Glavni meni dugmad: Profile Installer, Apps Installer, Theme Manager, Wallpaper Manager, Log Viewer, About, Exit. |
+| `GUI\Views\SystemInformationPanel.ps1` | Panel za prikaz sistemskih informacija. |
+| `GUI\Controllers\MainMenuController.ps1` | `Initialize-MainMenuController` (mapiranje klikova na skripte u `GUI\OtherWindows`, zatvaranje aplikacije). |
+| `GUI\OtherWindows\LoadInstallerBackend.ps1` | Učitava Core logging/database/helpers, Win10 installer i ThemeManager; inicijalizuje backend (`$Global:AutoMode = $true`). |
+| `GUI\OtherWindows\AppsInstaller.ps1` | GUI izbor i instalacija aplikacija (checkbox lista, Select/Deselect All, profili, poziv `Install-OneApp`). |
+| `GUI\OtherWindows\ProfileInstaller.ps1` | `Show-ProfileForm`; izbor profila (A/B/C) i pokretanje `AppsInstaller.ps1` sa profilom. |
+| `GUI\OtherWindows\ThemeManager.ps1` | Dinamički prikaz tema iz `Get-ThemeCatalog` i primjena preko `Invoke-Theme`. |
+| `GUI\OtherWindows\WallpaperManager.ps1` | Prikaz/listanje JPG wallpaper-a iz `DATA\Photos`. |
+| `GUI\OtherWindows\LogViewer.ps1` | `Load-Log`; prikaz `Logs\InstallationHistory.log`. |
+| `GUI\OtherWindows\About.ps1` | About dijalog. |
+
+## Windows 10 / Windows 11 moduli
+
+| Fajl | Funkcije / varijable | Opis |
+|------|-----------------------|------|
+| `Windows10\Config.ps1` | `$Global:PinkRoot`, `$Global:PinkWork`, `$Global:PinkConfig`, `$Global:WindowsConfig`, `$Global:PinkEnvironment` | Konfiguracija za Win10 (tema, putanje, okruženje; `EnableWidgets=$false`). |
+| `Windows10\PinkSetup.ps1` | `Get-OSSpecs` + CLI meni | Interaktivni CLI tok za wallpaper/temu/programe/specifikacije/kompletnu instalaciju. |
+| `Windows10\Installers\Programs.ps1` | `Find-InstalledApp`, `Get-ProgramInstaller`, `Test-Winget`, `Install-WithWinget`, `Install-OneApp`, `Install-YouTubeShortcut`, `Install-Programs` (+ `$Global:OSVersion`, `$Global:AutoMode`) | Win10 instalaciona logika (MSI/EXE, winget, verifikacija, meni/profili). |
+| `Windows10\SystemTools\Get-SystemSpecs.ps1` | `Get-SystemSpecs`, `Test-IsWindows` | Prikupljanje i prikaz sistemskih specifikacija. |
+| `Windows10\SystemTools\PCInfo.ps1` | (pomoćni/rezervni fajl) | Dodatne sistemske informacije (trenutno minimalno/placeholder). |
+| `Windows10\Themes\*.ps1` | `Invoke-BlueTheme`, `Install-BlueTheme`, `Invoke-GreenTheme`, `Install-GreenTheme`, `Invoke-PinkTheme`, `Install-PinkTheme`, `Invoke-YellowTheme`, `Install-YellowTheme` | OS-specifični theme wrapperi (delegacija ka Core theme backend-u). |
+| `Windows10\Wallpapers\Wallpaper.ps1` | `WALLPAPERS` | Postavljanje wallpaper-a preko `SystemParametersInfo`. |
+| `Windows10\Modules\Logging.psm1` | `Write-Log` | Jednostavniji logging modul za Win10 skripte. |
+| `Windows11\Config.ps1` | `$Global:PinkRoot`, `$Global:PinkWork`, `$Global:PinkConfig`, `$Global:WindowsConfig`, `$Global:PinkEnvironment` | Konfiguracija za Win11 (`EnableWidgets=$true`, `EnableDarkMode=$true` itd.). |
+| `Windows11\Themes\*.ps1` | `Invoke-*Theme`, `Install-*Theme` (Blue/Green/Pink/Yellow) | Win11 theme wrapperi (delegacija ka Core theme backend-u). |
+
+## Meniji i tokovi
+
+### CLI (Windows 10 - `Windows10\PinkSetup.ps1`)
 - `[1]` Choose Wallpaper
 - `[2]` Choose Theme
 - `[3]` Install Programs
 - `[4]` OS Specifications
-- `[5]` Complete Installation (launches GUI\ProgramInstaller.ps1)
+- `[5]` Complete Installation
 - `[0]` Exit
 
-**Core/Controller.ps1 (Windows 11 CLI via main.ps1):**
+### CLI (Core controller - `Core\Controller.ps1`)
 - `[1]` Install Programs
 - `[2]` Apply Theme
 - `[3]` Set Wallpaper
 - `[4]` OS Specifications
 - `[0]` Exit
 
-**GUI MainMenu (WinForms):**
+### GUI glavni meni
 - Profile Installer
 - Apps Installer
 - Theme Manager
@@ -176,20 +212,19 @@ JagodaWindowsSetup/
 - About
 - Exit
 
-**AppsInstaller (GUI):**
-- Profile-filtered or all apps with checkboxes
-- Select All / Deselect All
-- Install Selected (runs in AutoMode)
+### GUI profili (`GUI\OtherWindows\ProfileInstaller.ps1` / `AppsInstaller.ps1`)
+- **Profil A**: 2, 4, 6, 7 (Chrome, VLC, 7-Zip, Python)
+- **Profil B**: 2, 4 (Chrome, VLC)
+- **Profil C**: 6, 7 (7-Zip, Python)
 
-**ProfileInstaller (GUI):**
-- Profil A (Chrome, VLC, 7-Zip, Python)
-- Profil B (Chrome, VLC)
-- Profil C (7-Zip, Python)
+## Podaci i logovi
 
-## Zajedničko vs specifično
+- `DATA\Photos\`: wallpaper slike (`.jpg`) koje koristi GUI/skripte.
+- `Logs\`: runtime log fajlovi (`main.log` iz `main.ps1`, te `Activity.log`, `Errors.log`, `Installation.log`, `InstallationHistory.log`, pojedinačni app logovi).
+- `Koncepti\`: tekstualni koncepti/dizajn ideje (nije runtime kod).
 
-- **Zajedničke funkcije** (Core): instalacija Chrome/Firefox/7-Zip, logiranje, wallpaper, system info, theme engine
-- **Specifično po OS-u**: Config.ps1 postavke (npr. `EnableWidgets`=$true za Win11, $false za Win10), theme prilagodbe, menu struktura
-- **Detekcija OS-a**: `Get-WindowsVersion` koristi `BuildNumber >= 22000` za Windows 11
-- **Shared theme engine**: Core/ThemeEngine.ps1 + Core/ThemeManager.ps1 used by both Win10 and Win11 theme scripts
-- **GUI backend**: LoadInstallerBackend.ps1 loads shared Core modules + Windows10 installer engine for GUI use
+## Napomene
+
+- Projekat sadrži i zajedničke (Core/DATABASE/GUI) i OS-specifične (`Windows10`, `Windows11`) komponente.
+- `Linux/install.ps1` i `MacOS/install.ps1` su prisutni kao zasebni ulazi/folderi u strukturi repozitorija.
+- README je fokusiran na tačnu strukturu foldera i pregled funkcionalnosti/funkcija u kodu.
