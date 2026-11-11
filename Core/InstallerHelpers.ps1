@@ -285,20 +285,28 @@ function Invoke-InstallCooldown {
 
     $message = "Installation cooldown for ${name}: ${seconds}s"
 
-    if ($seconds -gt 0) {
-        if (Get-Command Write-AppLog -ErrorAction SilentlyContinue) {
+    if (Get-Command Write-AppLog -ErrorAction SilentlyContinue) {
+        if ($seconds -gt 0) {
             Write-AppLog -Message $message -LogType INSTALLATION
         }
         else {
-            Write-Host $message -ForegroundColor DarkGray
-        }
-
-        Start-Sleep -Seconds $seconds
-    }
-    else {
-        if (Get-Command Write-AppLog -ErrorAction SilentlyContinue) {
             Write-AppLog -Message "$message (skipped)" -LogType INSTALLATION
         }
+    }
+
+    if ($seconds -gt 0) {
+        Write-Host ""
+        Write-Host "Cooldown after ${name}: ${seconds}s" -ForegroundColor DarkGray
+        for ($remaining = $seconds; $remaining -ge 0; $remaining--) {
+            Write-Host ("`rCooldown: {0}s remaining... " -f $remaining) -NoNewline -ForegroundColor DarkGray
+            if ($remaining -gt 0) {
+                Start-Sleep -Seconds 1
+            }
+        }
+        Write-Host "`rCooldown complete.            " -ForegroundColor DarkGray
+    }
+    else {
+        Write-Host "Cooldown for ${name}: skipped (0s)" -ForegroundColor DarkGray
     }
 }
 

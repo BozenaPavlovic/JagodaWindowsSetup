@@ -298,11 +298,20 @@ $install.Add_Click({
 
     $installErrors = @()
 
+    $totalApps = @($selectedApps).Count
+    $currentApp = 0
+
     foreach ($app in $selectedApps) {
+
+        $currentApp++
 
         try {
 
-            Install-OneApp $app -ErrorAction Stop
+            if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
+                Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+            }
+
+            Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
 
         }
         catch {

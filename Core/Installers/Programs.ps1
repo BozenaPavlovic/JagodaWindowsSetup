@@ -189,9 +189,16 @@ function Install-WithWinget {
 
 function Install-OneApp {
 
-    param($App)
+    param(
+        $App,
+        [int]$Index = 0,
+        [int]$Total = 0
+    )
 
     Write-Host "`n========================================" -ForegroundColor Magenta
+    if ($Index -gt 0 -and $Total -gt 0) {
+        Write-Host " INSTALL PROGRESS: $Index/$Total" -ForegroundColor Cyan
+    }
     Write-Host " $($App.Name)" -ForegroundColor Magenta
     Write-Host "========================================" -ForegroundColor Magenta
 
@@ -404,8 +411,12 @@ function Install-Programs {
             continue
         }
 
+        $totalApps = @($Selected).Count
+        $currentApp = 0
         foreach ($App in $Selected) {
-            Install-OneApp $App
+            $currentApp++
+            Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+            Install-OneApp -App $App -Index $currentApp -Total $totalApps
         }
 
         Write-Host "`nINSTALLATION SESSION FINISHED!" -ForegroundColor Magenta
