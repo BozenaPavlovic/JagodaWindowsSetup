@@ -23,13 +23,10 @@ try {
         throw "PowerShell 5.1 or newer is required."
     }
 
-    # Required modules
+    # Required files
     $RequiredFiles = @(
         "Config.ps1",
-        "PinkSetup.ps1",
-        "Wallpapers\Wallpaper.ps1",
-        "Themes\PinkTheme.ps1",
-        "Installers\Programs.ps1"
+        "..\GUI\MainMenu.ps1"
     )
 
     foreach ($File in $RequiredFiles) {

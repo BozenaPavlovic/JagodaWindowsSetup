@@ -18,7 +18,7 @@ $ProjectRoot = Split-Path $ProjectRoot -Parent
 $LoggingPath = Join-Path $ProjectRoot "Core\Logging.ps1"
 $DatabasePath = Join-Path $ProjectRoot "Core\ProgramDatabase.ps1"
 $InstallerHelpersPath = Join-Path $ProjectRoot "Core\InstallerHelpers.ps1"
-$Windows10InstallerPath = Join-Path $ProjectRoot "Windows10\Installers\Programs.ps1"
+$InstallerEnginePath = Join-Path $ProjectRoot "Core\Installers\Programs.ps1"
 $ThemeManagerPath = Join-Path $ProjectRoot "Core\ThemeManager.ps1"
 
 # ==========================================
@@ -29,7 +29,7 @@ $RequiredFiles = @(
     $LoggingPath
     $DatabasePath
     $InstallerHelpersPath
-    $Windows10InstallerPath
+    $InstallerEnginePath
     $ThemeManagerPath
 )
 
@@ -86,8 +86,8 @@ catch {
 # ==========================================
 
 try {
-    . $Windows10InstallerPath
-    Write-AppLog -Message "Windows 10 installer engine loaded."
+    . $InstallerEnginePath
+    Write-AppLog -Message "Installer engine loaded."
 }
 catch {
     Write-AppLog -Message "Failed to load installer engine: $($_.Exception.Message)"

@@ -230,6 +230,79 @@ function Write-InstallerLog {
 }
 
 # ==========================================
+# INSTALLATION COOLDOWN
+# ==========================================
+
+function Get-InstallCooldownSeconds {
+
+    $configPath = Join-Path $PSScriptRoot "InstallerConfig.ps1"
+    if (-not $Global:InstallerSettings -and (Test-Path -LiteralPath $configPath)) {
+        . $configPath
+    }
+
+    $value = $null
+
+    if ($Global:InstallerSettings -and $Global:InstallerSettings.ContainsKey("InstallCooldownSeconds")) {
+        $value = $Global:InstallerSettings.InstallCooldownSeconds
+    }
+    elseif ($Global:WindowsConfig -and $Global:WindowsConfig.ContainsKey("InstallCooldownSeconds")) {
+        $value = $Global:WindowsConfig.InstallCooldownSeconds
+    }
+    elseif ($Global:PinkConfig -and $Global:PinkConfig.ContainsKey("InstallCooldownSeconds")) {
+        $value = $Global:PinkConfig.InstallCooldownSeconds
+    }
+
+    if ($null -eq $value -or "$value" -eq "") {
+        return 5
+    }
+
+    try {
+        $seconds = [int]$value
+    }
+    catch {
+        return 5
+    }
+
+    if ($seconds -lt 0) {
+        return 5
+    }
+
+    return $seconds
+}
+
+function Invoke-InstallCooldown {
+
+    param(
+        [string]$AppName
+    )
+
+    $seconds = Get-InstallCooldownSeconds
+
+    $name = $AppName
+    if ([string]::IsNullOrWhiteSpace($name)) {
+        $name = "Unknown application"
+    }
+
+    $message = "Installation cooldown for ${name}: ${seconds}s"
+
+    if ($seconds -gt 0) {
+        if (Get-Command Write-AppLog -ErrorAction SilentlyContinue) {
+            Write-AppLog -Message $message -LogType INSTALLATION
+        }
+        else {
+            Write-Host $message -ForegroundColor DarkGray
+        }
+
+        Start-Sleep -Seconds $seconds
+    }
+    else {
+        if (Get-Command Write-AppLog -ErrorAction SilentlyContinue) {
+            Write-AppLog -Message "$message (skipped)" -LogType INSTALLATION
+        }
+    }
+}
+
+# ==========================================
 # YOUTUBE SHORTCUT
 # ==========================================
 
