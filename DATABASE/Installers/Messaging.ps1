@@ -93,7 +93,9 @@
         Version = ""
         Match = "WhatsApp"
         File = "WhatsAppSetup.exe"
-        URL = "https://web.whatsapp.com/desktop/windows/release/x64/WhatsAppSetup.exe"
+        # WhatsApp Desktop is distributed via Microsoft Store / Winget only;
+        # the legacy direct .exe URL (web.whatsapp.com) now returns HTTP 400.
+        URL = $null
         Type = "EXE"
         InteractiveArguments = ""
         SilentArguments = "--silent"

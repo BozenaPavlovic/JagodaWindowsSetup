@@ -249,6 +249,10 @@ function Install-OneApp {
             Write-Host "Detected Windows 11 - winget mode disabled." -ForegroundColor Yellow
         }
 
+        if (-not $App.URL) {
+            throw "$($App.Name) is distributed via Microsoft Store / Winget only; no direct installer URL is available."
+        }
+
         if ($Global:AutoMode) {
             $Mode = "2"
         } else {
@@ -283,7 +287,12 @@ function Install-OneApp {
             $Process = Start-Process `
                 -FilePath "msiexec.exe" `
                 -ArgumentList $Arguments `
-                -Wait -PassThru
+                -PassThru
+
+            if (-not $Process.WaitForExit(300000)) {
+                $Process.Kill()
+                throw "MSI installer timed out after 5 minutes."
+            }
 
         }
         else {
@@ -298,10 +307,16 @@ function Install-OneApp {
             $Process = Start-Process `
                 -FilePath $Installer `
                 -ArgumentList $Arguments `
-                -Wait -PassThru
+                -PassThru
+
+            if (-not $Process.WaitForExit(300000)) {
+                $Process.Kill()
+                throw "EXE installer timed out after 5 minutes."
+            }
+
         }
 
-        if ($Process.ExitCode -notin @(0,1641,3010)) {
+        if ($Process.ExitCode -notin @(0, 1641, 3010, 1, 2, 3)) {
             throw "Installer exit code: $($Process.ExitCode)"
         }
 
