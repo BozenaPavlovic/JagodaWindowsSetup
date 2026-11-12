@@ -57,9 +57,17 @@ JagodaWindowsSetup/
 ├── GUI/
 │   ├── MainMenu.ps1
 │   ├── Controllers/
+│   │   ├── MainMenuController.ps1
+│   │   └── ProfileController.ps1
 │   ├── Helpers/
+│   │   └── SystemInformationFormatter.ps1
 │   ├── Models/
+│   │   ├── MainMenuModel.ps1
+│   │   └── ProfileModel.ps1
 │   ├── Views/
+│   │   ├── MainMenuView.ps1
+│   │   ├── MainMenuPanel.ps1
+│   │   └── SystemInformationPanel.ps1
 │   └── OtherWindows/
 │       ├── About.ps1
 │       ├── AppsInstaller.ps1
@@ -90,7 +98,11 @@ JagodaWindowsSetup/
 │   ├── install.ps1
 │   └── Themes/ (Blue/Green/Pink/Yellow)
 │
-├── DATA/Photos/
+├── DATA/
+│   ├── Photos/
+│   └── Profiles/
+│       └── CustomProfiles.json   # custom user profiles (JSON)
+│
 ├── Logs/
 ├── Koncepti/
 ├── Linux/install.ps1
@@ -125,6 +137,15 @@ JagodaWindowsSetup/
 | `Core\ThemeEngine.ps1` | `Set-ThemeDword`, `ConvertTo-WindowsColor`, `New-AccentPalette`, `Invoke-ThemeRefresh`, `Set-WindowsAccentTheme` | Primjena Windows accent/theme podešavanja (registry + refresh). |
 | `Core\ThemeManager.ps1` | `Get-ThemeCatalog`, `Get-TargetThemeOS`, `Initialize-ThemeBackend`, `Get-ThemeDefinition`, `Invoke-Theme`, `Install-*Theme` | Katalog tema i dispatch primjene teme (OS-specifično ili Core fallback). |
 
+## GUI Model/Controller moduli (MVC)
+
+| Fajl | Funkcije / varijable | Opis |
+|------|-----------------------|------|
+| `GUI\Models\MainMenuModel.ps1` | `Get-SystemInformation` | Sistemski podaci (OS, verzija, build, CPU, GPU, RAM, disk, uptime, admin). |
+| `GUI\Models\ProfileModel.ps1` | `Get-ProfileStorePath`, `Read-ProfileStore`, `Write-ProfileStore`, `ConvertTo-ProfileObject`, `New-EmptyProfileStore` | JSON persistencija custom profila (`DATA\Profiles\CustomProfiles.json`). |
+| `GUI\Controllers\MainMenuController.ps1` | `Initialize-MainMenuController` | Mapiranje klikova glavnog menija na `GUI\OtherWindows`. |
+| `GUI\Controllers\ProfileController.ps1` | `Get-AllCustomProfiles`, `Save-CustomProfiles`, `Test-ProfileData`, `New-CustomProfile`, `Update-CustomProfile`, `Remove-CustomProfile`, `Get-CustomProfileById`, `Get-ApplicationById`, `Resolve-ProfileApplications` | CRUD operacije, validacija i resolucija custom profila za instalaciju. |
+
 ## Baza programa (`DATABASE`)
 
 - `DATABASE\ProgramDatabase.ps1`: učitava sve `.ps1` definicije iz `DATABASE\Installers\` i puni `$Global:Apps`.
@@ -144,7 +165,9 @@ JagodaWindowsSetup/
 | `GUI\Controllers\MainMenuController.ps1` | `Initialize-MainMenuController` (mapiranje klikova na `GUI\OtherWindows`). |
 | `GUI\OtherWindows\LoadInstallerBackend.ps1` | Učitava Core logging/database/helpers, dijeljeni `Core\Installers\Programs.ps1` i ThemeManager; postavlja `$Global:AutoMode = $true`. |
 | `GUI\OtherWindows\AppsInstaller.ps1` | GUI izbor i instalacija aplikacija (checkbox lista, Select/Deselect All, profili, `Install-OneApp` sa progresom). |
-| `GUI\OtherWindows\ProfileInstaller.ps1` | `Show-ProfileForm`; izbor profila (A/B/C) i pokretanje `AppsInstaller.ps1`. |
+| `GUI\OtherWindows\ProfileInstaller.ps1` | **Installation Manager** – potpuno novi GUI za upravljanje custom profilima (Create/Edit/Delete/Install). Koristi MVC: `ProfileModel.ps1` (JSON persistencija), `ProfileController.ps1` (CRUD/validacija), View u `OtherWindows`. Prikaz profila sa aplikacijama, pretraga, Select/Deselect All, grupiranje po kategorijama, instalacija preko shared `Install-OneApp` sa cooldown-om. |
+| `GUI\Models\ProfileModel.ps1` | JSON persistencija za custom profile (`DATA\Profiles\CustomProfiles.json`): `Get-ProfileStorePath`, `Read-ProfileStore`, `Write-ProfileStore`, `ConvertTo-ProfileObject`, `New-EmptyProfileStore`. |
+| `GUI\Controllers\ProfileController.ps1` | CRUD operacije i validacija: `Get-AllCustomProfiles`, `Save-CustomProfiles`, `Test-ProfileData`, `New-CustomProfile`, `Update-CustomProfile`, `Remove-CustomProfile`, `Get-CustomProfileById`, `Get-ApplicationById`, `Resolve-ProfileApplications`. |
 | `GUI\OtherWindows\ThemeManager.ps1` | Prikaz tema iz `Get-ThemeCatalog` i primjena preko `Invoke-Theme`. |
 | `GUI\OtherWindows\WallpaperManager.ps1` | Prikaz/listanje JPG wallpaper-a iz `DATA\Photos`. |
 | `GUI\OtherWindows\LogViewer.ps1` | `Load-Log`; prikaz `Logs\InstallationHistory.log`. |
@@ -186,15 +209,29 @@ JagodaWindowsSetup/
 
 ### GUI glavni meni
 - Profile Installer, Apps Installer, Theme Manager, Wallpaper Manager, Log Viewer, About, Exit
-
 ### GUI profili
+
 - **Profil A**: 2, 4, 6, 7 (Chrome, VLC, 7-Zip, Python)
 - **Profil B**: 2, 4 (Chrome, VLC)
 - **Profil C**: 6, 7 (7-Zip, Python)
 
+### Custom Profiles (novo – Phase 2)
+
+Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omogućava korisnicima da kreiraju, uređuju, brišu i instaliraju vlastite custom profile:
+
+| Mogućnost | Opis |
+|-----------|------|
+| **Create Profile** | Unos naziva profila + odabir aplikacija iz checkbox liste (sve aplikacije iz baze, grupirano po kategoriji, sa pretragom i Select/Deselect All). |
+| **Edit Profile** | Uređivanje postojećeg profila – promjena imena i/ili odabranih aplikacija. |
+| **Delete Profile** | Brisanje profila sa potvrdom (neobnovljivo). |
+| **Install Profile** | Pokreće instalaciju odabranih aplikacija profila preko shared `Install-OneApp` engine-a (sa 5s cooldown-om, progress `X of Y`, logiranje). Koristi `Resolve-ProfileApplications` za validaciju referenci na aplikacije. |
+| **Validacija** | Jedinstveni nazivi profila, minimalno 1 aplikacija, nema duplikata AppIds, provjera da aplikacije postoje u bazi. |
+| **Persistencija** | JSON fajl: `DATA\Profiles\CustomProfiles.json` (automatski se kreira ako ne postoji). |
+
 ## Podaci i logovi
 
 - `DATA\Photos\`: wallpaper slike (`.jpg`).
+- `DATA\Profiles\CustomProfiles.json`: custom user profiles (JSON) – kreira se automatski.
 - `Logs\`: runtime logovi (`main.log`, `Activity.log`, `Errors.log`, `Installation.log`, `InstallationHistory.log`, pojedinačni app logovi).
 - `START\Logs\`: log folder za START tok.
 - `Koncepti\`: tekstualni koncepti/dizajn (nije runtime kod).
