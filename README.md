@@ -190,32 +190,6 @@ JagodaWindowsSetup/
 | `Windows11\install.ps1` | (entry) | Elevacija i pokretanje Core kontrolera za Win11. |
 | `Windows11\Themes\*.ps1` | `Invoke-*Theme`, `Install-*Theme` | Win11 theme wrapperi (delegacija ka Core theme backend-u). |
 
-## Meniji i tokovi
-
-### START CLI (`START\PinkSetup.ps1`)
-- `[1]` Choose Wallpaper
-- `[2]` Choose Theme
-- `[3]` Install Programs
-- `[4]` OS Specifications
-- `[5]` Complete Installation
-- `[0]` Exit
-
-### Core CLI (`Core\Controller.ps1` / `Run-Installation`)
-- `[1]` Install Programs
-- `[2]` Apply Theme
-- `[3]` Set Wallpaper
-- `[4]` OS Specifications
-- `[0]` Exit
-
-### GUI glavni meni
-- Profile Installer, Apps Installer, Theme Manager, Wallpaper Manager, Log Viewer, About, Exit
-### GUI profili
-
-- **Profil A**: 2, 4, 6, 7 (Chrome, VLC, 7-Zip, Python)
-- **Profil B**: 2, 4 (Chrome, VLC)
-- **Profil C**: 6, 7 (7-Zip, Python)
-
-### Custom Profiles (novo – Phase 2)
 
 Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omogućava korisnicima da kreiraju, uređuju, brišu i instaliraju vlastite custom profile:
 
