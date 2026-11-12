@@ -1,4 +1,4 @@
-# main.ps1 - Application router with robust error handling
+# main.ps1 - OS router with robust error handling
 $root = $PSScriptRoot
 $logDir = Join-Path $root "Logs"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
@@ -17,7 +17,11 @@ try {
     Write-Host "Detected OS: $os" -ForegroundColor Green
     Write-Log "Detected OS: $os"
 
-    $target = Join-Path $root "Windows11\install.ps1"
+    switch ($os) {
+        "Windows10" { $target = Join-Path $root "Windows10\install.ps1" }
+        "Windows11" { $target = Join-Path $root "Windows11\install.ps1" }
+        default     { throw "Unsupported OS: $os" }
+    }
 
     if (!(Test-Path $target)) { throw "Missing $target" }
     & $target

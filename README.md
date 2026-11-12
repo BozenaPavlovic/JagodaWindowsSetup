@@ -153,9 +153,36 @@ JagodaWindowsSetup/
 
 | Fajl | Funkcije / varijable | Opis |
 |------|-----------------------|------|
+<<<<<<< HEAD
 | `Windows11\Config.ps1` | `$Global:PinkRoot`, `$Global:PinkWork`, `$Global:PinkConfig`, `$Global:WindowsConfig`, `$Global:PinkEnvironment` | Konfiguracija za Windows 11 (putanje, okruženje). |
 | `Windows11\install.ps1` | (entry) | Elevacija, učitavanje Core modula i pokretanje `Run-Installation`. |
 | `Windows11\Themes\*.ps1` | `Invoke-*Theme`, `Install-*Theme` | Windows 11 theme wrapperi (delegacija ka Core theme backend-u). |
+=======
+| `Windows10\Config.ps1` | `$Global:PinkRoot`, `$Global:PinkWork`, `$Global:PinkConfig`, `$Global:WindowsConfig`, `$Global:PinkEnvironment` | Konfiguracija za Win10 (putanje, okruženje; `EnableWidgets=$false`). |
+| `Windows10\Config\settings.json` | podešavanja | OS-specifična podešavanja (npr. verzija). |
+| `Windows10\install.ps1` | (entry) | Elevacija i pokretanje Core kontrolera za Win10. |
+| `Windows10\Installers\Programs.ps1` | (wrapper) | Delegira na `Core\Installers\Programs.ps1`. |
+| `Windows10\SystemTools\Get-SystemSpecs.ps1` | `Get-SystemSpecs`, `Test-IsWindows` | Prikupljanje i prikaz sistemskih specifikacija. |
+| `Windows10\SystemTools\PCInfo.ps1` | (pomoćni/rezervni) | Dodatne sistemske informacije. |
+| `Windows10\Themes\*.ps1` | `Invoke-*Theme`, `Install-*Theme` | OS-specifični theme wrapperi (delegacija ka Core theme backend-u). |
+| `Windows10\Wallpapers\Wallpaper.ps1` | `WALLPAPERS` | Postavljanje wallpaper-a (`SystemParametersInfo`). |
+| `Windows10\Modules\Logging.psm1` | `Write-Log` | Jednostavniji logging modul za Win10 skripte. |
+| `Windows11\Config.ps1` | `$Global:PinkRoot`, `$Global:PinkWork`, `$Global:PinkConfig`, `$Global:WindowsConfig`, `$Global:PinkEnvironment` | Konfiguracija za Win11 (npr. `EnableWidgets=$true`). |
+| `Windows11\install.ps1` | (entry) | Elevacija i pokretanje Core kontrolera za Win11. |
+| `Windows11\Themes\*.ps1` | `Invoke-*Theme`, `Install-*Theme` | Win11 theme wrapperi (delegacija ka Core theme backend-u). |
+
+
+Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omogućava korisnicima da kreiraju, uređuju, brišu i instaliraju vlastite custom profile:
+
+| Mogućnost | Opis |
+|-----------|------|
+| **Create Profile** | Unos naziva profila + odabir aplikacija iz checkbox liste (sve aplikacije iz baze, grupirano po kategoriji, sa pretragom i Select/Deselect All). |
+| **Edit Profile** | Uređivanje postojećeg profila – promjena imena i/ili odabranih aplikacija. |
+| **Delete Profile** | Brisanje profila sa potvrdom (neobnovljivo). |
+| **Install Profile** | Pokreće instalaciju odabranih aplikacija profila preko shared `Install-OneApp` engine-a (sa 5s cooldown-om, progress `X of Y`, logiranje). Koristi `Resolve-ProfileApplications` za validaciju referenci na aplikacije. |
+| **Validacija** | Jedinstveni nazivi profila, minimalno 1 aplikacija, nema duplikata AppIds, provjera da aplikacije postoje u bazi. |
+| **Persistencija** | JSON fajl: `DATA\Profiles\CustomProfiles.json` (automatski se kreira ako ne postoji). |
+>>>>>>> 85db6b55545d3dc1afabffa1fae406c35f68bb5e
 
 ## Podaci i logovi
 

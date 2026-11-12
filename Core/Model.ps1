@@ -5,13 +5,14 @@ function Get-WindowsVersion {
     if ($os -and $os.BuildNumber -ge 22000) {
         return "Windows11"
     }
-    return "Windows11"
+    return "Windows10"
 }
 
 function Get-OSConfig {
     $root = $PSScriptRoot
+    $os = Get-WindowsVersion
 
-    $configPath = Join-Path $root "..\Windows11\Config.ps1"
+    $configPath = Join-Path $root "..\$os\Config.ps1"
     if (!(Test-Path $configPath)) {
         throw "Config not found: $configPath"
     }

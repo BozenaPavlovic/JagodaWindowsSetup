@@ -19,9 +19,14 @@ function Initialize-InstallerBackend {
         $build = [int]$os.BuildNumber
     }
 
-    $osVersion = "Windows11"
+    if ($build -ge 22000) {
+        $osVersion = "Windows11"
+    }
+    else {
+        $osVersion = "Windows10"
+    }
 
-    $configPath = Join-Path $ProjectRoot "Windows11\Config.ps1"
+    $configPath = Join-Path $ProjectRoot "$osVersion\Config.ps1"
 
     if (-not (Test-Path $configPath)) {
         throw "Configuration not found: $configPath"
