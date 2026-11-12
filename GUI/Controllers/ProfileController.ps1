@@ -1,13 +1,13 @@
-﻿<#
+<#
 .SYNOPSIS
     Profile controller: load/create/update/delete/validate custom profiles and resolve for install.
 #>
 
-function Get-ProfileControllerStorePath {
+function global:Get-ProfileControllerStorePath {
     return (Get-ProfileStorePath)
 }
 
-function Get-AllCustomProfiles {
+function global:Get-AllCustomProfiles {
     $store = Read-ProfileStore
     # Normalize and filter invalid entries defensively
     $valid = @()
@@ -29,13 +29,13 @@ function Get-AllCustomProfiles {
     return @($valid)
 }
 
-function Save-CustomProfiles {
+function global:Save-CustomProfiles {
     param([Parameter(Mandatory)][AllowEmptyCollection()][array]$Profiles)
     $store = [PSCustomObject]@{ Profiles = @($Profiles) }
     Write-ProfileStore -Store $store
 }
 
-function Test-ProfileData {
+function global:Test-ProfileData {
     param(
         [string]$Name,
         [string[]]$AppIds,
@@ -77,7 +77,7 @@ function Test-ProfileData {
     }
 }
 
-function New-CustomProfile {
+function global:New-CustomProfile {
     param(
         [Parameter(Mandatory)][string]$Name,
         [Parameter(Mandatory)][string[]]$AppIds
@@ -109,7 +109,7 @@ function New-CustomProfile {
     return ($profiles | Where-Object { $_.Id -eq $newId } | Select-Object -First 1)
 }
 
-function Update-CustomProfile {
+function global:Update-CustomProfile {
     param(
         [Parameter(Mandatory)][string]$Id,
         [Parameter(Mandatory)][string]$Name,
@@ -138,7 +138,7 @@ function Update-CustomProfile {
     return ($updated | Where-Object { $_.Id -eq $Id } | Select-Object -First 1)
 }
 
-function Remove-CustomProfile {
+function global:Remove-CustomProfile {
     param([Parameter(Mandatory)][string]$Id)
 
     $profiles = @(Get-AllCustomProfiles)
@@ -150,7 +150,12 @@ function Remove-CustomProfile {
     return $true
 }
 
-function Get-ApplicationById {
+function global:Get-CustomProfileById {
+    param([Parameter(Mandatory)][string]$Id)
+    $profiles = @(Get-AllCustomProfiles)
+    return ($profiles | Where-Object { [string]$_.Id -eq [string]$Id } | Select-Object -First 1)
+}
+function global:Get-ApplicationById {
     param([Parameter(Mandatory)][string]$AppId)
     foreach ($app in @($Global:Apps)) {
         if ($null -ne $app -and [string]$app.Number -eq [string]$AppId) { return $app }
@@ -158,7 +163,7 @@ function Get-ApplicationById {
     return $null
 }
 
-function Resolve-ProfileApplications {
+function global:Resolve-ProfileApplications {
     param([Parameter(Mandatory)]$Profile)
 
     $resolved = @()
@@ -178,4 +183,5 @@ function Resolve-ProfileApplications {
         IsValid  = (@($resolved).Count -gt 0)
     }
 }
+
 

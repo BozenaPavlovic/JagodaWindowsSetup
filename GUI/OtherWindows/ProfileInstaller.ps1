@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Installation Manager GUI - custom profiles (Phase 2).
     View: uses ProfileModel/ProfileController for persistence and operations.
@@ -11,15 +11,43 @@ Add-Type -AssemblyName System.Drawing
 # LOAD MODEL / CONTROLLER (MVC)
 # ==========================================
 
-. (Join-Path $PSScriptRoot "..\Models\ProfileModel.ps1")
-. (Join-Path $PSScriptRoot "..\Controllers\ProfileController.ps1")
+$script:ProfileInstallerRoot = $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($script:ProfileInstallerRoot) -and $MyInvocation.MyCommand.Path) {
+    $script:ProfileInstallerRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+
+$profileModelPath = Join-Path $script:ProfileInstallerRoot "..\Models\ProfileModel.ps1"
+$profileControllerPath = Join-Path $script:ProfileInstallerRoot "..\Controllers\ProfileController.ps1"
+
+foreach ($modulePath in @($profileModelPath, $profileControllerPath)) {
+    if (-not (Test-Path -LiteralPath $modulePath -PathType Leaf)) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Required profile backend file not found:`n$modulePath",
+            "Installation Manager",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        ) | Out-Null
+        return
+    }
+    . $modulePath
+}
+
+if (-not (Get-Command Get-AllCustomProfiles -ErrorAction SilentlyContinue)) {
+    [System.Windows.Forms.MessageBox]::Show(
+        "Profile backend failed to load (Get-AllCustomProfiles is not available).",
+        "Installation Manager",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Error
+    ) | Out-Null
+    return
+}
 
 # ==========================================
 # LOAD APPLICATION DATABASE (read-only)
 # ==========================================
 
 try {
-    $coreDbPath = Join-Path $PSScriptRoot "..\..\Core\ProgramDatabase.ps1"
+    $coreDbPath = Join-Path $script:ProfileInstallerRoot "..\..\Core\ProgramDatabase.ps1"
     if (-not (Test-Path -LiteralPath $coreDbPath -PathType Leaf)) {
         throw "Application database not found: $coreDbPath"
     }
@@ -241,7 +269,7 @@ $editorActionsPanel.BringToFront()
 
 $script:AppCheckBoxes = @()
 
-function Update-SelectedCounter {
+function global:Update-SelectedCounter {
     $count = 0
     foreach ($cb in $script:AppCheckBoxes) {
         if ($cb.Checked) { $count++ }
@@ -249,7 +277,7 @@ function Update-SelectedCounter {
     $lblCounter.Text = "Selected: $count"
 }
 
-function Get-AppDisplayText {
+function global:Get-AppDisplayText {
     param($app)
     $text = [string]$app.Name
     if ($app.Version) { $text += " $($app.Version)" }
@@ -258,7 +286,7 @@ function Get-AppDisplayText {
     return $text
 }
 
-function Build-AppCheckboxList {
+function global:Build-AppCheckboxList {
     param([string[]]$selectedIds)
 
     $appListPanel.SuspendLayout()
@@ -306,7 +334,7 @@ function Build-AppCheckboxList {
     Update-SelectedCounter
 }
 
-function Apply-AppSearchFilter {
+function global:Apply-AppSearchFilter {
     param([string]$filter)
 
     $term = ""
@@ -330,7 +358,7 @@ function Apply-AppSearchFilter {
     $appListPanel.ResumeLayout()
 }
 
-function Get-SelectedEditorAppIds {
+function global:Get-SelectedEditorAppIds {
     $ids = @()
     foreach ($cb in $script:AppCheckBoxes) {
         if ($cb.Checked -and $cb.Tag -and $cb.Tag.Number) {
@@ -344,7 +372,7 @@ function Get-SelectedEditorAppIds {
 # VIEW NAVIGATION
 # ==========================================
 
-function Show-Overview {
+function global:Show-Overview {
     $script:CurrentView = "Overview"
     $editorPanel.Visible = $false
     $overviewPanel.Visible = $true
@@ -352,7 +380,7 @@ function Show-Overview {
     Refresh-ProfilesList
 }
 
-function Show-Editor {
+function global:Show-Editor {
     param(
         [string]$mode,
         $profile
@@ -386,7 +414,7 @@ function Show-Editor {
 # PROFILE OVERVIEW RENDERING
 # ==========================================
 
-function Refresh-ProfilesList {
+function global:Refresh-ProfilesList {
     $profilesList.SuspendLayout()
     $profilesList.Controls.Clear()
 
@@ -495,7 +523,7 @@ function Refresh-ProfilesList {
 # INSTALLATION (uses existing workflow)
 # ==========================================
 
-function Invoke-InstallCustomProfile {
+function global:Invoke-InstallCustomProfile {
     param([string]$ProfileId)
 
     $profile = @(Get-AllCustomProfiles | Where-Object { $_.Id -eq $ProfileId }) | Select-Object -First 1
@@ -532,7 +560,7 @@ function Invoke-InstallCustomProfile {
 
     # Load backend (logging, helpers, engine, theme) - same as AppsInstaller
     try {
-        . (Join-Path $PSScriptRoot "LoadInstallerBackend.ps1")
+        . (Join-Path $script:ProfileInstallerRoot "LoadInstallerBackend.ps1")
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show(

@@ -3,17 +3,17 @@
     Profile data model and JSON persistence for custom installation profiles.
 #>
 
-function Get-ProfileStorePath {
+function global:Get-ProfileStorePath {
     $root = Split-Path $PSScriptRoot -Parent
     $root = Split-Path $root -Parent
     return (Join-Path $root "DATA\Profiles\CustomProfiles.json")
 }
 
-function New-EmptyProfileStore {
+function global:New-EmptyProfileStore {
     return [PSCustomObject]@{ Profiles = @() }
 }
 
-function ConvertTo-ProfileObject {
+function global:ConvertTo-ProfileObject {
     param($raw)
     if ($null -eq $raw) { return $null }
     $id = ""
@@ -34,7 +34,7 @@ function ConvertTo-ProfileObject {
     }
 }
 
-function Read-ProfileStore {
+function global:Read-ProfileStore {
     param([string]$Path)
 
     if (-not $Path) { $Path = Get-ProfileStorePath }
@@ -79,7 +79,7 @@ function Read-ProfileStore {
     }
 }
 
-function Write-ProfileStore {
+function global:Write-ProfileStore {
     param(
         [Parameter(Mandatory)]$Store,
         [string]$Path
@@ -115,3 +115,4 @@ function Write-ProfileStore {
         throw
     }
 }
+
