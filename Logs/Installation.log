@@ -18,3 +18,5 @@
 [2026-11-09 12:46:32] [ERROR] [DESKTOP-GOT2GL4] [Božena] Installation failed: 7-Zip. Error: The term 'Invoke-AppInstallation' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
 [2026-11-09 12:46:32] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation requested: Python 3.14
 [2026-11-09 12:46:32] [ERROR] [DESKTOP-GOT2GL4] [Božena] Installation failed: Python 3.14. Error: The term 'Invoke-AppInstallation' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+[2026-11-11 12:36:07] [INFO] [DESKTOP-AGID67J] [Bozena] Installation cooldown for VLC Media Player: 5s
+[2026-11-11 12:36:14] [INFO] [DESKTOP-AGID67J] [Bozena] Installation cooldown for WhatsApp: 5s

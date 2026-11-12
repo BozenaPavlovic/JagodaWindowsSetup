@@ -119,12 +119,21 @@ function Get-ProgramInstaller {
             Remove-Item -LiteralPath $Temporary -Force
         }
 
-        Invoke-WebRequest `
-            -Uri $App.URL `
-            -OutFile $Temporary `
-            -UseBasicParsing `
-            -TimeoutSec 600 `
-            -ErrorAction Stop
+        $oldProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
+        try {
+            Invoke-WebRequest `
+                -Uri $App.URL `
+                -OutFile $Temporary `
+                -UseBasicParsing `
+                -TimeoutSec 600 `
+                -MaximumRedirection 10 `
+                -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" `
+                -ErrorAction Stop
+        }
+        finally {
+            $ProgressPreference = $oldProgressPreference
+        }
 
         if (!(Test-Path -LiteralPath $Temporary -PathType Leaf)) {
             throw "Downloaded file does not exist."
