@@ -13,17 +13,15 @@ function Initialize-InstallerBackend {
         $ProjectRoot = Split-Path $PSScriptRoot -Parent
     }
 
-    $os = Get-CimInstance Win32_OperatingSystem
-    $build = [int]$os.BuildNumber
-
-    if ($build -ge 22000) {
-        $osVersion = "Windows11"
-    }
-    else {
-        $osVersion = "Windows10"
+    $os = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
+    $build = 0
+    if ($os) {
+        $build = [int]$os.BuildNumber
     }
 
-    $configPath = Join-Path $ProjectRoot "$osVersion\Config.ps1"
+    $osVersion = "Windows11"
+
+    $configPath = Join-Path $ProjectRoot "Windows11\Config.ps1"
 
     if (-not (Test-Path $configPath)) {
         throw "Configuration not found: $configPath"

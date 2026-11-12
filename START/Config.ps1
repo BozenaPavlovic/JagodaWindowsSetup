@@ -47,16 +47,7 @@ foreach ($Folder in $Folders) {
         -ErrorAction Stop | Out-Null
 }
 
-$osName = "Windows10"
-try {
-    $build = [int](Get-CimInstance Win32_OperatingSystem).BuildNumber
-    if ($build -ge 22000) {
-        $osName = "Windows11"
-    }
-}
-catch {
-    $osName = "Windows10"
-}
+$osName = "Windows11"
 
 # NEW: Unified config used by Core/Model.ps1
 $Global:WindowsConfig = @{
@@ -64,7 +55,7 @@ $Global:WindowsConfig = @{
     Theme = "Pink"
     EnableDarkMode = $true
     InstallWinget = $true
-    EnableWidgets = ($osName -eq "Windows11")
+    EnableWidgets = $true
 }
 
 # ENVIRONMENT INFORMATION

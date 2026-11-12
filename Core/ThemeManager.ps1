@@ -26,10 +26,7 @@ function global:Get-TargetThemeOS {
     if (Get-Command Get-WindowsVersion -ErrorAction SilentlyContinue) {
         return Get-WindowsVersion
     }
-
-    $os = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
-    if ($os -and $os.BuildNumber -ge 22000) { return "Windows11" }
-    return "Windows10"
+    return "Windows11"
 }
 
 function global:Initialize-ThemeBackend {

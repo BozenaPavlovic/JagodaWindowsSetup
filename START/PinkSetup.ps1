@@ -25,7 +25,7 @@ try {
     # Check files
     $ThemeManagerPath = Join-Path $Root "..\Core\ThemeManager.ps1"
     $InstallerEnginePath = Join-Path $Root "..\Core\Installers\Programs.ps1"
-    $WallpaperPath = Join-Path $Root "..\Windows10\Wallpapers\Wallpaper.ps1"
+    $WallpaperPath = Join-Path $Root "..\Core\Wallpapers\Wallpaper.ps1"
     $Modules = @(
         "$Root\Config.ps1",
         $WallpaperPath,

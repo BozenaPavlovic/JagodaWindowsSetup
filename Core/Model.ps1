@@ -1,20 +1,17 @@
 # Core/Model.ps1 - OS detection and configuration loader
 
 function Get-WindowsVersion {
-    $os = Get-CimInstance Win32_OperatingSystem
-    if ($os.BuildNumber -ge 22000) {
+    $os = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
+    if ($os -and $os.BuildNumber -ge 22000) {
         return "Windows11"
     }
-    else {
-        return "Windows10"
-    }
+    return "Windows11"
 }
 
 function Get-OSConfig {
     $root = $PSScriptRoot
-    $os = Get-WindowsVersion
 
-    $configPath = Join-Path $root "..\$os\Config.ps1"
+    $configPath = Join-Path $root "..\Windows11\Config.ps1"
     if (!(Test-Path $configPath)) {
         throw "Config not found: $configPath"
     }

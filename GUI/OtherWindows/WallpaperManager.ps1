@@ -22,7 +22,7 @@ if (Test-Path -LiteralPath $pathsModule) {
 # LOAD WALLPAPER BACKEND
 # ==========================================
 
-$wallpaperModule = Join-Path $Global:ProjectRoot "Windows10\Wallpapers\Wallpaper.ps1"
+$wallpaperModule = Join-Path $Global:ProjectRoot "Core\Wallpapers\Wallpaper.ps1"
 if (Test-Path -LiteralPath $wallpaperModule) {
     . $wallpaperModule
 }

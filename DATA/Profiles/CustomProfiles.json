@@ -1,12 +1,5 @@
 ﻿{
     "Profiles":  [
-                     {
-                         "Id":  "6b3a0bf3-3327-44aa-b5c6-c87fd19c81a4",
-                         "Name":  "Test",
-                         "AppIds":  [
-                                        "6",
-                                        "16"
-                                    ]
-                     }
+
                  ]
 }
