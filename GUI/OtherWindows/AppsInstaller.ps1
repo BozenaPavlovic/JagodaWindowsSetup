@@ -263,6 +263,10 @@ $install.BackColor = [System.Drawing.Color]::LavenderBlush
 
 $install.Add_Click({
 
+    if (-not $install.Enabled) {
+        return
+    }
+
     $selectedApps = @(
         $checks |
             Where-Object { $_.Checked } |
@@ -293,7 +297,6 @@ $install.Add_Click({
     # ==========================================
     # INSTALL SELECTED APPLICATIONS
     # ==========================================
-
     $Global:AutoMode = $true
 
     $installErrors = @()
@@ -301,24 +304,39 @@ $install.Add_Click({
     $totalApps = @($selectedApps).Count
     $currentApp = 0
 
-    foreach ($app in $selectedApps) {
+    $install.Enabled = $false
+    $form.Enabled = $false
+    $form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor
 
-        $currentApp++
+    try {
 
-        try {
+        foreach ($app in $selectedApps) {
 
-            if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
-                Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+            $currentApp++
+
+            try {
+
+                if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
+                    Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+                }
+
+                Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+
             }
 
-            Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+            catch {
 
+                $installErrors += "$($app.Name): $($_.Exception.Message)"
+
+            }
+
+            [System.Windows.Forms.Application]::DoEvents()
         }
-        catch {
-
-            $installErrors += "$($app.Name): $($_.Exception.Message)"
-
-        }
+    }
+    finally {
+        $install.Enabled = $true
+        $form.Enabled = $true
+        $form.Cursor = [System.Windows.Forms.Cursors]::Default
     }
 
     # ==========================================

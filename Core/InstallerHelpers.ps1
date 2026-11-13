@@ -3,6 +3,39 @@
 # STRAWBERRY WINDOWS - INSTALLER HELPERS
 # ==========================================
 
+function Invoke-UiRefresh {
+
+    try {
+        if ("System.Windows.Forms.Application" -as [type]) {
+            [System.Windows.Forms.Application]::DoEvents()
+        }
+    } catch {}
+}
+
+function Wait-ProcessWithUiRefresh {
+
+    param(
+        [System.Diagnostics.Process]$Process,
+        [int]$TimeoutMs = 300000
+    )
+
+    $waited = 0
+
+    while (-not $Process.WaitForExit(1000)) {
+
+        Invoke-UiRefresh
+
+        $waited += 1000
+
+        if ($waited -ge $TimeoutMs) {
+            try { $Process.Kill() } catch {}
+            return $false
+        }
+    }
+
+    return $true
+}
+
 function Initialize-InstallerBackend {
 
     param(
@@ -119,6 +152,20 @@ function Find-InstalledApp {
         }
     }
 
+    $appx = Get-AppxPackage -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.Name -like "*$Pattern*" -or $_.PackageFullName -like "*$Pattern*"
+        } |
+        Select-Object -First 1
+
+    if ($appx) {
+        return [PSCustomObject]@{
+            DisplayName = $appx.Name
+            DisplayVersion = $appx.Version
+            PackageFullName = $appx.PackageFullName
+        }
+    }
+
     return $null
 }
 
@@ -141,15 +188,41 @@ function Install-WithWinget {
 
     Write-Host "Installing $($App.Name) with Winget..." -ForegroundColor Cyan
 
-    & winget.exe install `
-        --id $App.WingetID `
-        --exact `
-        --silent `
-        --accept-package-agreements `
-        --accept-source-agreements
+    $wingetExe = (Get-Command winget.exe -ErrorAction SilentlyContinue).Source
 
-    if ($LASTEXITCODE -notin @(0,3010)) {
-        throw "Winget failed with exit code $LASTEXITCODE"
+    if (-not $wingetExe) {
+        throw "winget.exe not found."
+    }
+
+    $wingetArguments = @(
+        "install",
+        "--id", $App.WingetID,
+        "--exact",
+        "--silent",
+        "--accept-package-agreements",
+        "--accept-source-agreements",
+        "--disable-interactivity"
+    )
+
+    $argumentString = $wingetArguments -join ' '
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = "$env:SystemRoot\System32\cmd.exe"
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $false
+    $startInfo.Arguments = "/v:on /c `"$wingetExe`" $argumentString & exit /b !errorlevel!"
+
+    $wingetProcess = [System.Diagnostics.Process]::Start($startInfo)
+
+    if (-not (Wait-ProcessWithUiRefresh -Process $wingetProcess -TimeoutMs 300000)) {
+        throw "Winget installation timed out after 5 minutes."
+    }
+
+    $wingetProcess.WaitForExit()
+    $exitCode = $wingetProcess.ExitCode
+
+    if ($exitCode -notin @(0, 3010)) {
+        throw "Winget failed with exit code $exitCode"
     }
 
     Write-Host "Winget installation completed." -ForegroundColor Green
@@ -178,12 +251,20 @@ function Get-ProgramInstaller {
         Remove-Item $temporary -Force
     }
 
-    Invoke-WebRequest `
-        -Uri $App.URL `
-        -OutFile $temporary `
-        -UseBasicParsing `
-        -TimeoutSec 600 `
-        -ErrorAction Stop
+    $client = New-Object System.Net.WebClient
+    $client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+    try {
+        $downloadTask = $client.DownloadFileTaskAsync($App.URL, $temporary)
+
+        if (-not $downloadTask.Wait(600000)) {
+            $client.CancelAsync()
+            throw "Download timed out after 10 minutes."
+        }
+    }
+    finally {
+        $client.Dispose()
+    }
 
     if (-not (Test-Path $temporary)) {
         throw "Download failed."
@@ -304,6 +385,7 @@ function Invoke-InstallCooldown {
             Write-Host ("`rCooldown: {0}s remaining... " -f $remaining) -NoNewline -ForegroundColor DarkGray
             if ($remaining -gt 0) {
                 Start-Sleep -Seconds 1
+                Invoke-UiRefresh
             }
         }
         Write-Host "`rCooldown complete.            " -ForegroundColor DarkGray

@@ -572,23 +572,44 @@ function global:Invoke-InstallCustomProfile {
         return
     }
 
+    if ($script:InstallInProgress) {
+        return
+    }
+
+    $script:InstallInProgress = $true
+
     $Global:AutoMode = $true
     $installErrors = @()
     $selectedApps = @($resolution.Resolved)
     $totalApps = $selectedApps.Count
     $currentApp = 0
 
-    foreach ($app in $selectedApps) {
-        $currentApp++
-        try {
-            if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
-                Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+    if ($form) {
+        $form.Enabled = $false
+        $form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor
+    }
+
+    try {
+        foreach ($app in $selectedApps) {
+            $currentApp++
+            try {
+                if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
+                    Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+                }
+                Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
             }
-            Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+            catch {
+                $installErrors += "$($app.Name): $($_.Exception.Message)"
+            }
+            [System.Windows.Forms.Application]::DoEvents()
         }
-        catch {
-            $installErrors += "$($app.Name): $($_.Exception.Message)"
+    }
+    finally {
+        if ($form) {
+            $form.Enabled = $true
+            $form.Cursor = [System.Windows.Forms.Cursors]::Default
         }
+        $script:InstallInProgress = $false
     }
 
     if ($installErrors.Count -eq 0) {

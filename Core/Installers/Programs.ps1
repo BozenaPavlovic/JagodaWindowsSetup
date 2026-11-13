@@ -51,6 +51,43 @@ New-Item -ItemType Directory -Force -Path $LogFolder | Out-Null
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # ==========================================
+# UI RESPONSIVENESS HELPERS
+# ==========================================
+
+function Invoke-UiRefresh {
+
+    try {
+        if ("System.Windows.Forms.Application" -as [type]) {
+            [System.Windows.Forms.Application]::DoEvents()
+        }
+    } catch {}
+}
+
+function Wait-ProcessWithUiRefresh {
+
+    param(
+        [System.Diagnostics.Process]$Process,
+        [int]$TimeoutMs = 300000
+    )
+
+    $waited = 0
+
+    while (-not $Process.WaitForExit(1000)) {
+
+        Invoke-UiRefresh
+
+        $waited += 1000
+
+        if ($waited -ge $TimeoutMs) {
+            try { $Process.Kill() } catch {}
+            return $false
+        }
+    }
+
+    return $true
+}
+
+# ==========================================
 # APPLICATION DATABASE
 # ==========================================
 
@@ -77,15 +114,27 @@ function Find-InstalledApp {
         "HKCU:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     )
 
-    foreach ($Path in $Paths) {
+    $Found = Get-ItemProperty $Paths -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.DisplayName -like "*$Pattern*"
+        } |
+        Select-Object -First 1
 
-        $Found = Get-ItemProperty $Path -ErrorAction SilentlyContinue |
-            Where-Object {
-                $_.DisplayName -like "*$Pattern*"
-            }
+    if ($Found) {
+        return $Found
+    }
 
-        if ($Found) {
-            return $Found | Select-Object -First 1
+    $appx = Get-AppxPackage -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.Name -like "*$Pattern*" -or $_.PackageFullName -like "*$Pattern*"
+        } |
+        Select-Object -First 1
+
+    if ($appx) {
+        return [PSCustomObject]@{
+            DisplayName = $appx.Name
+            DisplayVersion = $appx.Version
+            PackageFullName = $appx.PackageFullName
         }
     }
 
@@ -124,14 +173,20 @@ function Get-ProgramInstaller {
         $oldProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
         try {
-            Invoke-WebRequest `
-                -Uri $App.URL `
-                -OutFile $Temporary `
-                -UseBasicParsing `
-                -TimeoutSec 600 `
-                -MaximumRedirection 10 `
-                -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" `
-                -ErrorAction Stop
+            $client = New-Object System.Net.WebClient
+            $client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+            try {
+                $downloadTask = $client.DownloadFileTaskAsync($App.URL, $Temporary)
+
+                if (-not $downloadTask.Wait(600000)) {
+                    $client.CancelAsync()
+                    throw "Download timed out after 10 minutes."
+                }
+            }
+            finally {
+                $client.Dispose()
+            }
         }
         finally {
             $ProgressPreference = $oldProgressPreference
@@ -155,8 +210,14 @@ function Get-ProgramInstaller {
         return $Installer
     }
     catch {
+        $ex = $_.Exception
+
+        while ($ex -is [System.AggregateException] -and $ex.InnerException) {
+            $ex = $ex.InnerException
+        }
+
         Write-Host "DOWNLOAD DIAGNOSTICS:" -ForegroundColor Red
-        Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "Error: $($ex.Message)" -ForegroundColor Red
         Write-Host "Category: $($_.CategoryInfo.Category)" -ForegroundColor Yellow
         Write-Host "Target: $($_.CategoryInfo.TargetName)" -ForegroundColor Yellow
         Write-Host "Position: $($_.InvocationInfo.PositionMessage)" -ForegroundColor Yellow
@@ -171,12 +232,19 @@ function Get-ProgramInstaller {
 # ==========================================
 
 function Test-Winget {
+
+    if ($null -ne $script:WingetAvailable) {
+        return $script:WingetAvailable
+    }
+
     try {
         winget --version | Out-Null
-        return $true
+        $script:WingetAvailable = $true
     } catch {
-        return $false
+        $script:WingetAvailable = $false
     }
+
+    return $script:WingetAvailable
 }
 
 function Install-WithWinget {
@@ -185,10 +253,42 @@ function Install-WithWinget {
     Write-Host "Winget detected - using winget installer." -ForegroundColor Green
     Write-Host "Installing $($App.Name) using winget..." -ForegroundColor Cyan
 
-    winget install --id $App.WingetID --silent --accept-package-agreements --accept-source-agreements --force
+    $wingetExe = (Get-Command winget.exe -ErrorAction SilentlyContinue).Source
 
-    if ($LASTEXITCODE -ne 0) {
-        throw "Winget installation failed with exit code $LASTEXITCODE"
+    if (-not $wingetExe) {
+        throw "winget.exe not found."
+    }
+
+    $wingetArguments = @(
+        "install",
+        "--id", $App.WingetID,
+        "--exact",
+        "--silent",
+        "--accept-package-agreements",
+        "--accept-source-agreements",
+        "--disable-interactivity",
+        "--force"
+    )
+
+    $argumentString = $wingetArguments -join ' '
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = "$env:SystemRoot\System32\cmd.exe"
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $false
+    $startInfo.Arguments = "/v:on /c `"$wingetExe`" $argumentString & exit /b !errorlevel!"
+
+    $wingetProcess = [System.Diagnostics.Process]::Start($startInfo)
+
+    if (-not (Wait-ProcessWithUiRefresh -Process $wingetProcess -TimeoutMs 300000)) {
+        throw "Winget installation timed out after 5 minutes."
+    }
+
+    $wingetProcess.WaitForExit()
+    $exitCode = $wingetProcess.ExitCode
+
+    if ($exitCode -notin @(0, 3010)) {
+        throw "Winget installation failed with exit code $exitCode"
     }
 
     Write-Host "Winget installation successful!" -ForegroundColor Green
@@ -213,6 +313,8 @@ function Install-OneApp {
     Write-Host " $($App.Name)" -ForegroundColor Magenta
     Write-Host "========================================" -ForegroundColor Magenta
 
+    $didAttemptInstall = $false
+
     try {
 
         $Existing = Find-InstalledApp $App.Match
@@ -233,6 +335,8 @@ function Install-OneApp {
                 return
             }
         }
+
+        $didAttemptInstall = $true
 
         if ($Global:OSVersion -ne "Windows11") {
             if (Test-Winget) {
@@ -289,8 +393,7 @@ function Install-OneApp {
                 -ArgumentList $Arguments `
                 -PassThru
 
-            if (-not $Process.WaitForExit(300000)) {
-                $Process.Kill()
+            if (-not (Wait-ProcessWithUiRefresh -Process $Process -TimeoutMs 300000)) {
                 throw "MSI installer timed out after 5 minutes."
             }
 
@@ -309,26 +412,30 @@ function Install-OneApp {
                 -ArgumentList $Arguments `
                 -PassThru
 
-            if (-not $Process.WaitForExit(300000)) {
-                $Process.Kill()
+            if (-not (Wait-ProcessWithUiRefresh -Process $Process -TimeoutMs 300000)) {
                 throw "EXE installer timed out after 5 minutes."
             }
 
         }
 
-        if ($Process.ExitCode -notin @(0, 1641, 3010, 1, 2, 3)) {
-            throw "Installer exit code: $($Process.ExitCode)"
+        $Process.WaitForExit()
+        $ExitCode = $Process.ExitCode
+
+        if ($ExitCode -notin @(0, 1641, 3010, 1, 2, 3)) {
+            throw "Installer exit code: $ExitCode"
         }
 
         Write-Host "`nVERIFYING INSTALLATION..." -ForegroundColor Cyan
 
         $Verified = $null
 
-        for ($i = 1; $i -le 12; $i++) {
+        for ($i = 1; $i -le 6; $i++) {
 
-            Start-Sleep -Seconds 5
+            Start-Sleep -Seconds 3
 
             $Verified = Find-InstalledApp $App.Match
+
+            Invoke-UiRefresh
 
             if ($Verified) {
                 break
@@ -357,9 +464,11 @@ function Install-OneApp {
     }
     finally {
 
-        if (Get-Command Invoke-InstallCooldown -ErrorAction SilentlyContinue) {
+        if ($didAttemptInstall -and (Get-Command Invoke-InstallCooldown -ErrorAction SilentlyContinue)) {
             Invoke-InstallCooldown -AppName $App.Name
         }
+
+        Invoke-UiRefresh
     }
 
     if (-not $Global:AutoMode) {

@@ -40,7 +40,7 @@
         Category = "Messaging"
         Description = "Video Conferencing, Meetings, Calling"
         Version = ""
-        Match = "Microsoft Teams"
+        Match = "Teams"
         File = "TeamsBootstrapper.exe"
         URL = "https://go.microsoft.com/fwlink/?linkid=2243204&clcid=0x409"
         Type = "EXE"
@@ -93,14 +93,14 @@
         Version = ""
         Match = "WhatsApp"
         File = "WhatsAppSetup.exe"
-        # WhatsApp Desktop is distributed via Microsoft Store / Winget only;
-        # the legacy direct .exe URL (web.whatsapp.com) now returns HTTP 400.
+        # WhatsApp Desktop is distributed via Microsoft Store only.
+        # winget installs it from the msstore source using the Store product id.
         URL = $null
         Type = "EXE"
         InteractiveArguments = ""
         SilentArguments = "--silent"
         MinBytes = 50000000
         Publisher = "WhatsApp Inc."
-        WingetID = "WhatsApp.WhatsApp"
+        WingetID = "9NKSQGP7F2NH"
     }
 )
