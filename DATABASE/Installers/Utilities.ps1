@@ -69,23 +69,6 @@
     },
 
     @{
-        Number = "25"
-        Name = "Windows App"
-        Category = "Utilities"
-        Description = "Remote Desktop, Windows 365 and Azure Virtual Desktop Client"
-        Version = "2.0.1485"
-        Match = "Windows App"
-        File = "WindowsApp.msixbundle"
-        URL = "https://go.microsoft.com/fwlink/?linkid=2262633"
-        Type = "EXE"
-        InteractiveArguments = ""
-        SilentArguments = ""
-        MinBytes = 10000000
-        Publisher = "Microsoft Corporation"
-        WingetID = "Microsoft.WindowsApp"
-    },
-
-    @{
         Number = "26"
         Name = "ImgBurn"
         Category = "Utilities"
@@ -321,39 +304,5 @@
         MinBytes = 3000000
         Publisher = "Christian Kindahl"
         WingetID = "ChristianKindahl.InfraRecorder"
-    },
-
-    @{
-        Number = "40"
-        Name = "Open-Shell"
-        Category = "Utilities"
-        Description = "Old-Style Start Menu"
-        Version = "4.4.198"
-        Match = "Open-Shell"
-        File = "OpenShellSetup.exe"
-        URL = "https://github.com/Open-Shell/Open-Shell-Menu/releases/download/v4.4.198/OpenShellSetup_4_4_198.exe"
-        Type = "EXE"
-        InteractiveArguments = ""
-        SilentArguments = "/qn ADDLOCAL=StartMenu"
-        MinBytes = 5000000
-        Publisher = "Open-Shell"
-        WingetID = "Open-Shell.Open-Shell-Menu"
-    },
-
-    @{
-        Number = "41"
-        Name = "CCleaner"
-        Category = "Utilities"
-        Description = "PC Crap Remover"
-        Version = "6.41.11567"
-        Match = "CCleaner"
-        File = "CCleanerSetup.exe"
-        URL = "https://bits.avcdn.net/productfamily_CCLEANER/insttype_FREE/platform_WIN_PIR/installertype_ONLINE/build_RELEASE"
-        Type = "EXE"
-        InteractiveArguments = ""
-        SilentArguments = "/S"
-        MinBytes = 30000000
-        Publisher = "Piriform Ltd"
-        WingetID = "Piriform.CCleaner"
     }
 )

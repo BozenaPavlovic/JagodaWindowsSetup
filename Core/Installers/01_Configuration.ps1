@@ -1,46 +1,85 @@
+# ==========================================
+# STRAWBERRY WINDOWS - INSTALLER CONFIGURATION
+# Loads OS configuration, folders and TLS.
+# ==========================================
+
 $ErrorActionPreference = "Stop"
 
-# LOAD CONFIG
-if (-not $Global:PinkConfig) {
-    $detectedOS = "Windows10"
-    try {
-        $build = [int](Get-CimInstance Win32_OperatingSystem).BuildNumber
-        if ($build -ge 22000) {
-            $detectedOS = "Windows11"
-        }
-    }
-    catch {
-        $detectedOS = "Windows10"
-    }
+$InstallerProjectRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 
-    $ConfigPath = Join-Path $PSScriptRoot "..\..\$detectedOS\Config.ps1"
-    if (!(Test-Path $ConfigPath)) {
-        $ConfigPath = Join-Path $PSScriptRoot "..\..\Windows11\Config.ps1"
-    }
-    if (!(Test-Path $ConfigPath)) {
-        throw "Config.ps1 not found"
-    }
-
-    . $ConfigPath
-}
+# ==========================================
+# WINDOWS VERSION
+# ==========================================
 
 if (-not $Global:OSVersion) {
-    $Global:OSVersion = "Windows10"
+
+    $osBuild = 0
+
     try {
-        $build = [int](Get-CimInstance Win32_OperatingSystem).BuildNumber
-        if ($build -ge 22000) {
-            $Global:OSVersion = "Windows11"
-        }
+        $osBuild = [int](Get-CimInstance Win32_OperatingSystem -ErrorAction Stop).BuildNumber
     }
     catch {
+        $osBuild = 0
+    }
+
+    if ($osBuild -ge 22000) {
+        $Global:OSVersion = "Windows11"
+    }
+    else {
         $Global:OSVersion = "Windows10"
     }
 }
 
+# ==========================================
+# OS CONFIGURATION
+# ==========================================
+
+if (-not $Global:PinkConfig) {
+
+    $configPath = Join-Path $InstallerProjectRoot "$($Global:OSVersion)\Config.ps1"
+    $fallbackPath = Join-Path $InstallerProjectRoot "Windows11\Config.ps1"
+
+    if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+        $configPath = $fallbackPath
+    }
+
+    if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+        throw "Windows configuration not found. Checked '$configPath'."
+    }
+
+    . $configPath
+}
+
+# ==========================================
+# FOLDERS
+# ==========================================
+
 $DownloadFolder = $Global:PinkConfig.DownloadFolder
+
+if (-not $DownloadFolder) {
+    $DownloadFolder = Join-Path $InstallerProjectRoot "Downloads"
+}
+
 $LogFolder = $Global:PinkConfig.LogFolder
+
+if (-not $LogFolder) {
+    $LogFolder = Join-Path $InstallerProjectRoot "Logs"
+}
 
 New-Item -ItemType Directory -Force -Path $DownloadFolder | Out-Null
 New-Item -ItemType Directory -Force -Path $LogFolder | Out-Null
 
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$Global:DownloadFolder = $DownloadFolder
+$Global:LogFolder = $LogFolder
+
+# ==========================================
+# TLS
+# ==========================================
+
+try {
+    [Net.ServicePointManager]::SecurityProtocol = `
+        [Net.ServicePointManager]::SecurityProtocol -bor `
+        [Net.SecurityProtocolType]::Tls12
+}
+catch {
+}

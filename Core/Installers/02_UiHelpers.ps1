@@ -1,10 +1,17 @@
+# ==========================================
+# STRAWBERRY WINDOWS - UI HELPERS
+# Keeps WinForms responsive during waits.
+# ==========================================
+
 function Invoke-UiRefresh {
 
     try {
         if ("System.Windows.Forms.Application" -as [type]) {
             [System.Windows.Forms.Application]::DoEvents()
         }
-    } catch {}
+    }
+    catch {
+    }
 }
 
 function Wait-ProcessWithUiRefresh {
@@ -13,6 +20,10 @@ function Wait-ProcessWithUiRefresh {
         [System.Diagnostics.Process]$Process,
         [int]$TimeoutMs = 300000
     )
+
+    if (-not $Process) {
+        return $false
+    }
 
     $waited = 0
 

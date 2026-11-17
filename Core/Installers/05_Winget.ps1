@@ -1,3 +1,8 @@
+# ==========================================
+# STRAWBERRY WINDOWS - WINGET
+# Synchronous winget install with timeout.
+# ==========================================
+
 function Test-Winget {
 
     if ($null -ne $script:WingetAvailable) {
@@ -7,7 +12,8 @@ function Test-Winget {
     try {
         winget --version | Out-Null
         $script:WingetAvailable = $true
-    } catch {
+    }
+    catch {
         $script:WingetAvailable = $false
     }
 
@@ -15,11 +21,16 @@ function Test-Winget {
 }
 
 function Install-WithWinget {
+
     param($App)
 
     Write-Host "`n========================================" -ForegroundColor Cyan
     Write-Host " WINGET INSTALLATION: $($App.Name)" -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
+
+    if (-not $App.WingetID) {
+        throw "Winget ID missing for $($App.Name)."
+    }
 
     $wingetCommand = Get-Command winget.exe -ErrorAction SilentlyContinue
 
@@ -40,10 +51,21 @@ function Install-WithWinget {
         "--disable-interactivity"
     )
 
-    $argumentString = $wingetArguments -join ' '
+    $argumentString = $wingetArguments -join " "
 
-    $logFile = Join-Path $LogFolder (
-        ($App.Name -replace '[^a-zA-Z0-9]', '_') + "_Winget.log"
+    $logFolder = $LogFolder
+
+    if (-not $logFolder -and $Global:PinkConfig) {
+        $logFolder = $Global:PinkConfig.LogFolder
+    }
+
+    if (-not $logFolder) {
+        $projectRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+        $logFolder = Join-Path $projectRoot "Logs"
+    }
+
+    $logFile = Join-Path $logFolder (
+        ($App.Name -replace "[^a-zA-Z0-9]", "_") + "_Winget.log"
     )
 
     Write-Host "Package ID: $($App.WingetID)" -ForegroundColor Gray
@@ -56,12 +78,16 @@ function Install-WithWinget {
     $startInfo.Arguments = $argumentString
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $false
-    $startInfo.WorkingDirectory = $DownloadFolder
+
+    if ($DownloadFolder) {
+        $startInfo.WorkingDirectory = $DownloadFolder
+    }
 
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $startInfo
 
     try {
+
         if (-not $process.Start()) {
             throw "Unable to start Winget."
         }
@@ -95,7 +121,6 @@ function Install-WithWinget {
         $process.WaitForExit()
 
         $exitCode = $process.ExitCode
-
         $exitHex = "0x{0:X8}" -f $exitCode
 
         Add-Content -Path $logFile -Value @"

@@ -1,22 +1,27 @@
+# ==========================================
+# STRAWBERRY WINDOWS - APPLICATION DETECTION
+# Registry (Uninstall) + AppX detection.
+# ==========================================
+
 function Find-InstalledApp {
 
     param([string]$Pattern)
 
-    $Paths = @(
+    $paths = @(
         "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
         "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
         "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
         "HKCU:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     )
 
-    $Found = Get-ItemProperty $Paths -ErrorAction SilentlyContinue |
+    $found = Get-ItemProperty $paths -ErrorAction SilentlyContinue |
         Where-Object {
             $_.DisplayName -like "*$Pattern*"
         } |
         Select-Object -First 1
 
-    if ($Found) {
-        return $Found
+    if ($found) {
+        return $found
     }
 
     $appx = Get-AppxPackage -ErrorAction SilentlyContinue |
@@ -27,9 +32,9 @@ function Find-InstalledApp {
 
     if ($appx) {
         return [PSCustomObject]@{
-            DisplayName = $appx.Name
-            DisplayVersion = $appx.Version
-            PackageFullName = $appx.PackageFullName
+            DisplayName      = $appx.Name
+            DisplayVersion   = $appx.Version
+            PackageFullName  = $appx.PackageFullName
         }
     }
 

@@ -1,35 +1,52 @@
+# ==========================================
+# STRAWBERRY WINDOWS - INSTALLER DOWNLOAD
+# Downloads, validates and stages installers.
+# ==========================================
+
 function Get-ProgramInstaller {
+
     param($App)
 
     Write-Host "`nDOWNLOADING $($App.Name)..." -ForegroundColor Cyan
 
     try {
-        $DownloadFolder = [IO.Path]::GetFullPath(
-            $Global:PinkConfig.DownloadFolder
-        )
 
-        if (!(Test-Path -LiteralPath $DownloadFolder -PathType Container)) {
-            New-Item -ItemType Directory -Path $DownloadFolder -Force -ErrorAction Stop | Out-Null
+        $downloadFolder = $DownloadFolder
+
+        if (-not $downloadFolder -and $Global:PinkConfig) {
+            $downloadFolder = $Global:PinkConfig.DownloadFolder
         }
 
-        $Installer = Join-Path $DownloadFolder $App.File
-        $Temporary = "$Installer.partial"
+        if (-not $downloadFolder) {
+            $projectRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+            $downloadFolder = Join-Path $projectRoot "Downloads"
+        }
 
-        Write-Host "Download folder: $DownloadFolder" -ForegroundColor Gray
-        Write-Host "Installer path: $Installer" -ForegroundColor Gray
+        $downloadFolder = [IO.Path]::GetFullPath($downloadFolder)
 
-        if (Test-Path -LiteralPath $Temporary) {
-            Remove-Item -LiteralPath $Temporary -Force
+        if (-not (Test-Path -LiteralPath $downloadFolder -PathType Container)) {
+            New-Item -ItemType Directory -Path $downloadFolder -Force -ErrorAction Stop | Out-Null
+        }
+
+        $installer = Join-Path $downloadFolder $App.File
+        $temporary = "$installer.partial"
+
+        Write-Host "Download folder: $downloadFolder" -ForegroundColor Gray
+        Write-Host "Installer path: $installer" -ForegroundColor Gray
+
+        if (Test-Path -LiteralPath $temporary) {
+            Remove-Item -LiteralPath $temporary -Force
         }
 
         $oldProgressPreference = $ProgressPreference
-        $ProgressPreference = 'SilentlyContinue'
+        $ProgressPreference = "SilentlyContinue"
+
         try {
             $client = New-Object System.Net.WebClient
             $client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
             try {
-                $downloadTask = $client.DownloadFileTaskAsync($App.URL, $Temporary)
+                $downloadTask = $client.DownloadFileTaskAsync($App.URL, $temporary)
 
                 if (-not $downloadTask.Wait(600000)) {
                     $client.CancelAsync()
@@ -44,24 +61,25 @@ function Get-ProgramInstaller {
             $ProgressPreference = $oldProgressPreference
         }
 
-        if (!(Test-Path -LiteralPath $Temporary -PathType Leaf)) {
+        if (-not (Test-Path -LiteralPath $temporary -PathType Leaf)) {
             throw "Downloaded file does not exist."
         }
 
-        $Size = (Get-Item -LiteralPath $Temporary).Length
+        $size = (Get-Item -LiteralPath $temporary).Length
 
-        if ($Size -lt $App.MinBytes) {
-            throw "Incomplete download: $Size bytes."
+        if ($size -lt $App.MinBytes) {
+            throw "Incomplete download: $size bytes."
         }
 
-        Move-Item -LiteralPath $Temporary -Destination $Installer -Force
+        Move-Item -LiteralPath $temporary -Destination $installer -Force
 
         Write-Host "DOWNLOAD COMPLETE!" -ForegroundColor Green
-        Write-Host "Size: $([math]::Round($Size / 1MB, 2)) MB"
+        Write-Host "Size: $([math]::Round($size / 1MB, 2)) MB"
 
-        return $Installer
+        return $installer
     }
     catch {
+
         $ex = $_.Exception
 
         while ($ex -is [System.AggregateException] -and $ex.InnerException) {

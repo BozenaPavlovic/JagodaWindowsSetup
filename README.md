@@ -43,9 +43,9 @@ JagodaWindowsSetup/
 │   ├── Wallpapers/
 │   │   └── Wallpaper.ps1          # WALLPAPERS (SystemParametersInfo)
 │   ├── Controller.ps1             # Get-SelectedApps, Show-MainMenu, Show-OSSpecs, Run-Installation
-│   ├── Installer.ps1              # Install-OneApp wrapper (stvarna implementacija u 06_InstallApplication.ps1)
+│   ├── Installer.ps1              # kompatibilni shim -> Core\Installers\Programs.ps1
 │   ├── InstallerConfig.ps1        # $Global:InstallerSettings (InstallCooldownSeconds = 5s)
-│   ├── InstallerHelpers.ps1       # Initialize-InstallerBackend, Invoke-UiRefresh, Wait-ProcessWithUiRefresh, Find-InstalledApp, Test-Winget, Install-WithWinget, Get-ProgramInstaller, Write-InstallerLog, Get-InstallCooldownSeconds, Invoke-InstallCooldown, Install-YouTubeShortcut
+│   ├── InstallerHelpers.ps1       # Get-InstallCooldownSeconds, Invoke-InstallCooldown
 │   ├── Logging.ps1                # Write-AppLog (Activity.log, Installation.log, Errors.log)
 │   ├── Model.ps1                  # Get-WindowsVersion, Get-OSConfig
 │   ├── Paths.ps1                  # Get-ProjectRoot, $Global:ProjectRoot/DataFolder/PhotosFolder/LogsFolder
@@ -111,7 +111,7 @@ JagodaWindowsSetup/
 
 ## Instalacioni engine i cooldown (shared)
 
-- **`Core\Installers\Programs.ps1`** – djeljeni instalacioni engine. Agregira šest modula u redoslijedu: `01_Configuration.ps1` (config + foldovi), `02_UiHelpers.ps1` (`Invoke-UiRefresh`, `Wait-ProcessWithUiRefresh`), `03_AppDetection.ps1` (`Find-InstalledApp`), `04_Download.ps1` (`Get-ProgramInstaller`), `05_Winget.ps1` (`Test-Winget`, `Install-WithWinget`), `06_InstallApplication.ps1` (`Install-OneApp`, `Install-Programs`). Kasnije učitani moduli prevazilaze ranije definicije istih funkcija.
+- **`Core\Installers\Programs.ps1`** – jedini ulaz za učitavanje dijeljenog instalacionog engine-a. Validira da postoje svi moduli, učitava `Core\InstallerHelpers.ps1` (cooldown) i zatim dot-source-ira šest modula u redoslijedu: `01_Configuration.ps1` (OS config, `DownloadFolder`/`LogFolder`, TLS), `02_UiHelpers.ps1` (`Invoke-UiRefresh`, `Wait-ProcessWithUiRefresh`), `03_AppDetection.ps1` (`Find-InstalledApp`), `04_Download.ps1` (`Get-ProgramInstaller`), `05_Winget.ps1` (`Test-Winget`, `Install-WithWinget`), `06_InstallApplication.ps1` (`Install-OneApp`, `Install-Programs`). Moduli se učitavaju samo jednom; funkcije se ne izvršavaju pri učitavanju.
 - **Sekvencijalna instalacija:** svaka instalacija se čeka do završetka (`winget` ili `Start-Process -Wait -PassThru` za MSI/EXE) uz provjeru prisutnosti aplikacije u registru prije prelaska na sljedeću.
 - **Cooldown između aplikacija:** podrazumijevano **5 sekundi** (`Core\InstallerConfig.ps1`, `$Global:InstallerSettings.InstallCooldownSeconds`). `Core\InstallerHelpers.ps1`: `Get-InstallCooldownSeconds` i `Invoke-InstallCooldown` (log, odbrojavanje, `Start-Sleep`; 0 preskače čekanje). Poziva se u `finally` bloku `Install-OneApp` (`Core\Installers\06_InstallApplication.ps1`).
 - **Napredak:** CLI/GUI batch prikazuje progres (`X of Y`, `INSTALL PROGRESS: Index/Total`).
@@ -123,10 +123,10 @@ JagodaWindowsSetup/
 | `main.ps1` | `Write-Log` | OS router; detekcija OS-a, log u `Logs\main.log`, pokretanje `Windows10\install.ps1` ili `Windows11\install.ps1`. |
 | `Core\Model.ps1` | `Get-WindowsVersion`, `Get-OSConfig` | Detekcija OS-a (build >= 22000 → Windows11) i učitavanje odgovarajućeg `Windows10/Windows11\Config.ps1`. |
 | `Core\Controller.ps1` | `Get-SelectedApps`, `Show-MainMenu`, `Show-OSSpecs`, `Run-Installation` | CLI kontroler/meni (programi, tema, wallpaper, specifikacije). |
-| `Core\Installer.ps1` | `Install-OneApp` | Ulaz za instalaciju jedne aplikacije; stvarna implementacija je u `Core\Installers\06_InstallApplication.ps1`. |
+| `Core\Installer.ps1` | (shim) | Kompatibilni ulaz koji učitava `Core\Installers\Programs.ps1`. |
 | `Core\InstallerConfig.ps1` | `$Global:InstallerSettings` | Dijeljena konfiguracija instalera (`InstallCooldownSeconds = 5`). |
-| `Core\InstallerHelpers.ps1` | `Initialize-InstallerBackend`, `Invoke-UiRefresh`, `Wait-ProcessWithUiRefresh`, `Find-InstalledApp`, `Test-Winget`, `Install-WithWinget`, `Get-ProgramInstaller`, `Write-InstallerLog`, `Get-InstallCooldownSeconds`, `Invoke-InstallCooldown`, `Install-YouTubeShortcut` | Pomoćne funkcije za backend, detekciju, winget/download/log i cooldown. (Funkcije detekcije/download/winget se prevazilaze kada se učita `Core\Installers\Programs.ps1`.) |
-| `Core\Installers\Programs.ps1` | `Find-InstalledApp`, `Get-ProgramInstaller`, `Test-Winget`, `Install-WithWinget`, `Install-OneApp`, `Install-Programs` | Dijeljeni instalacioni engine (agregira 01–06). |
+| `Core\InstallerHelpers.ps1` | `Get-InstallCooldownSeconds`, `Invoke-InstallCooldown` | Cooldown između instalacija (log, odbrojavanje, `Start-Sleep`; 0 preskače čekanje). Učitava ga `Core\Installers\Programs.ps1` i GUI backend. |
+| `Core\Installers\Programs.ps1` | `Find-InstalledApp`, `Get-ProgramInstaller`, `Test-Winget`, `Install-WithWinget`, `Install-OneApp`, `Install-Programs` | Dijeljeni instalacioni engine (učitava module 01–06). |
 | `Core\Logging.ps1` | `Write-AppLog` | Centralizovano logovanje (`Activity.log`, `Installation.log`, `Errors.log`). |
 | `Core\Paths.ps1` | `Get-ProjectRoot`, `$Global:ProjectRoot`, `$Global:DataFolder`, `$Global:PhotosFolder`, `$Global:LogsFolder` | Pronalaženje root-a projekta i standardnih putanja. |
 | `Core\ProgramDatabase.ps1` | (wrapper) | Učitava `DATABASE\ProgramDatabase.ps1`. |

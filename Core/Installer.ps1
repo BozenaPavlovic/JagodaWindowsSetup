@@ -1,31 +1,13 @@
-# Core/Installer.ps1
+# ==========================================
+# STRAWBERRY WINDOWS - INSTALLER ENTRY POINT
+# Compatibility shim: loads the shared engine
+# from Core\Installers\Programs.ps1.
+# ==========================================
 
-function Install-OneApp {
-    param(
-        [Parameter(Mandatory)]
-        $App
-    )
+$InstallerEnginePath = Join-Path $PSScriptRoot "Installers\Programs.ps1"
 
-    Write-AppLog `
-        -Message "Installation requested: $($App.Name)" `
-        -LogType INSTALLATION
-
-    try {
-        $result = Invoke-AppInstallation -App $App
-
-        Write-AppLog `
-            -Message "Installation successful: $($App.Name)" `
-            -Level SUCCESS `
-            -LogType INSTALLATION
-
-        return $result
-    }
-    catch {
-        Write-AppLog `
-            -Message "Installation failed: $($App.Name). Error: $($_.Exception.Message)" `
-            -Level ERROR `
-            -LogType INSTALLATION
-
-        throw
-    }
+if (-not (Test-Path -LiteralPath $InstallerEnginePath -PathType Leaf)) {
+    throw "Installer engine not found: $InstallerEnginePath"
 }
+
+. $InstallerEnginePath

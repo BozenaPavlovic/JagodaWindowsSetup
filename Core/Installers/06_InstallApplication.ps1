@@ -1,3 +1,8 @@
+# ==========================================
+# STRAWBERRY WINDOWS - APPLICATION INSTALLATION
+# MSI / EXE / Winget installation flow.
+# ==========================================
+
 function Install-OneApp {
 
     param(
@@ -6,32 +11,51 @@ function Install-OneApp {
         [int]$Total = 0
     )
 
+    if (-not $App) {
+        throw "Install-OneApp requires an application."
+    }
+
     Write-Host "`n========================================" -ForegroundColor Magenta
+
     if ($Index -gt 0 -and $Total -gt 0) {
         Write-Host " INSTALL PROGRESS: $Index/$Total" -ForegroundColor Cyan
     }
+
     Write-Host " $($App.Name)" -ForegroundColor Magenta
     Write-Host "========================================" -ForegroundColor Magenta
+
+    $logFolder = $LogFolder
+
+    if (-not $logFolder -and $Global:PinkConfig) {
+        $logFolder = $Global:PinkConfig.LogFolder
+    }
+
+    if (-not $logFolder) {
+        $projectRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+        $logFolder = Join-Path $projectRoot "Logs"
+    }
+
+    $historyFile = Join-Path $logFolder "InstallationHistory.log"
 
     $didAttemptInstall = $false
 
     try {
 
-        $Existing = Find-InstalledApp $App.Match
+        $existing = Find-InstalledApp $App.Match
 
-        if ($Existing -and $Global:AutoMode) {
+        if ($existing -and $Global:AutoMode) {
             Write-Host "$($App.Name) already installed - verified, skipping." -ForegroundColor Green
             return
         }
 
-        if ($Existing -and -not $Global:AutoMode) {
+        if ($existing -and -not $Global:AutoMode) {
 
             Write-Host "ALREADY INSTALLED!" -ForegroundColor Yellow
-            Write-Host "Version: $($Existing.DisplayVersion)"
+            Write-Host "Version: $($existing.DisplayVersion)"
 
-            $Action = Read-Host "[S] Skip / [R] Reinstall"
+            $action = Read-Host "[S] Skip / [R] Reinstall"
 
-            if ($Action -notmatch "^[Rr]") {
+            if ($action -notmatch "^[Rr]") {
                 return
             }
         }
@@ -39,19 +63,21 @@ function Install-OneApp {
         $didAttemptInstall = $true
 
         if ($Global:OSVersion -ne "Windows11") {
+
             if (Test-Winget) {
+
                 try {
                     Install-WithWinget $App
 
                     Write-Host "Verifying Winget installation..." -ForegroundColor Cyan
 
-                    $Verified = $null
+                    $verified = $null
 
                     for ($i = 1; $i -le 10; $i++) {
 
-                        $Verified = Find-InstalledApp $App.Match
+                        $verified = Find-InstalledApp $App.Match
 
-                        if ($Verified) {
+                        if ($verified) {
                             break
                         }
 
@@ -59,25 +85,28 @@ function Install-OneApp {
                         Invoke-UiRefresh
                     }
 
-                    if (-not $Verified) {
+                    if (-not $verified) {
                         throw "Winget finished, but application verification failed: $($App.Name)"
                     }
 
                     Write-Host "INSTALLATION VERIFIED!" -ForegroundColor Green
-                    Write-Host "Application: $($Verified.DisplayName)"
-                    Write-Host "Version: $($Verified.DisplayVersion)"
+                    Write-Host "Application: $($verified.DisplayName)"
+                    Write-Host "Version: $($verified.DisplayVersion)"
 
-                    Add-Content "$LogFolder\InstallationHistory.log" `
-                        "$(Get-Date) SUCCESS: $($App.Name) - Winget verified"
+                    Add-Content -Path $historyFile `
+                        -Value "$(Get-Date) SUCCESS: $($App.Name) - Winget verified"
 
                     return
-                } catch {
+                }
+                catch {
                     Write-Host "Winget failed, falling back to classic installer." -ForegroundColor Yellow
                 }
-            } else {
+            }
+            else {
                 Write-Host "Winget not available - using classic installer." -ForegroundColor Yellow
             }
-        } else {
+        }
+        else {
             Write-Host "Detected Windows 11 - winget mode disabled." -ForegroundColor Yellow
         }
 
@@ -86,100 +115,99 @@ function Install-OneApp {
         }
 
         if ($Global:AutoMode) {
-            $Mode = "2"
-        } else {
+            $mode = "2"
+        }
+        else {
             Write-Host ""
             Write-Host "[1] Interactive installation"
             Write-Host "[2] Automatic installation"
 
-            $Mode = Read-Host "Choose installation mode"
+            $mode = Read-Host "Choose installation mode"
 
-            if ($Mode -notin @("1","2")) {
+            if ($mode -notin @("1", "2")) {
                 throw "Invalid installation mode."
             }
         }
 
-        $Installer = Get-ProgramInstaller $App
+        $installer = Get-ProgramInstaller $App
 
-        $SafeName = $App.Name -replace '[^a-zA-Z0-9]', '_'
-        $Log = Join-Path $LogFolder "$SafeName.log"
+        $safeName = $App.Name -replace "[^a-zA-Z0-9]", "_"
+        $logFile = Join-Path $logFolder "$safeName.log"
 
         Write-Host "`nSTARTING INSTALLATION..." -ForegroundColor Cyan
 
         if ($App.Type -eq "MSI") {
 
-            $Arguments = "/i `"$Installer`""
+            $arguments = "/i `"$installer`""
 
-            if ($Mode -eq "2") {
-                $Arguments += " $($App.SilentArguments)"
+            if ($mode -eq "2") {
+                $arguments += " $($App.SilentArguments)"
             }
 
-            $Arguments += " /L*v `"$Log`""
+            $arguments += " /L*v `"$logFile`""
 
-            $Process = Start-Process `
+            $process = Start-Process `
                 -FilePath "msiexec.exe" `
-                -ArgumentList $Arguments `
+                -ArgumentList $arguments `
                 -PassThru
 
-            if (-not (Wait-ProcessWithUiRefresh -Process $Process -TimeoutMs 300000)) {
+            if (-not (Wait-ProcessWithUiRefresh -Process $process -TimeoutMs 300000)) {
                 throw "MSI installer timed out after 5 minutes."
             }
-
         }
         else {
 
-            if ($Mode -eq "2") {
-                $Arguments = $App.SilentArguments
+            if ($mode -eq "2") {
+                $arguments = $App.SilentArguments
             }
             else {
-                $Arguments = $App.InteractiveArguments
+                $arguments = $App.InteractiveArguments
             }
 
-            $Process = Start-Process `
-                -FilePath $Installer `
-                -ArgumentList $Arguments `
+            $process = Start-Process `
+                -FilePath $installer `
+                -ArgumentList $arguments `
                 -PassThru
 
-            if (-not (Wait-ProcessWithUiRefresh -Process $Process -TimeoutMs 300000)) {
+            if (-not (Wait-ProcessWithUiRefresh -Process $process -TimeoutMs 300000)) {
                 throw "EXE installer timed out after 5 minutes."
             }
-
         }
 
-        $Process.WaitForExit()
-        $ExitCode = $Process.ExitCode
+        $process.WaitForExit()
+        $exitCode = $process.ExitCode
 
-        if ($ExitCode -notin @(0, 1641, 3010, 1, 2, 3)) {
-            throw "Installer exit code: $ExitCode"
+        if ($exitCode -notin @(0, 1641, 3010, 1, 2, 3)) {
+            throw "Installer exit code: $exitCode"
         }
 
         Write-Host "`nVERIFYING INSTALLATION..." -ForegroundColor Cyan
 
-        $Verified = $null
+        $verified = $null
 
         for ($i = 1; $i -le 6; $i++) {
 
             Start-Sleep -Seconds 3
 
-            $Verified = Find-InstalledApp $App.Match
+            $verified = Find-InstalledApp $App.Match
 
             Invoke-UiRefresh
 
-            if ($Verified) {
+            if ($verified) {
                 break
             }
         }
 
-        if (!$Verified) {
+        if (-not $verified) {
             throw "Application not found in Windows registry."
         }
 
         Write-Host "`nINSTALLATION SUCCESSFUL!" -ForegroundColor Green
-        Write-Host "Application: $($Verified.DisplayName)"
-        Write-Host "Version: $($Verified.DisplayVersion)"
+        Write-Host "Application: $($verified.DisplayName)"
+        Write-Host "Version: $($verified.DisplayVersion)"
 
-        Add-Content "$LogFolder\InstallationHistory.log" `
-            "$(Get-Date) SUCCESS: $($App.Name)"
+        Add-Content -Path $historyFile `
+            -Value "$(Get-Date) SUCCESS: $($App.Name)"
 
     }
     catch {
@@ -187,8 +215,8 @@ function Install-OneApp {
         Write-Host "`nINSTALLATION FAILED!" -ForegroundColor Red
         Write-Host $_.Exception.Message -ForegroundColor Red
 
-        Add-Content "$LogFolder\InstallationHistory.log" `
-            "$(Get-Date) FAILED: $($App.Name) - $($_.Exception.Message)"
+        Add-Content -Path $historyFile `
+            -Value "$(Get-Date) FAILED: $($App.Name) - $($_.Exception.Message)"
     }
     finally {
 
@@ -224,34 +252,36 @@ function Install-Programs {
         Write-Host "[0] Back"
         Write-Host ""
 
-        $Choice = Read-Host "Choose program"
+        $choice = Read-Host "Choose program"
 
-        if ($Choice -eq "0") {
+        if ($choice -eq "0") {
             return
         }
 
-        if ($Choice -eq "1") {
+        if ($choice -eq "1") {
             $Global:AutoMode = $true
-            $Selected = $Global:Apps
-        } else {
+            $selected = $Global:Apps
+        }
+        else {
             $Global:AutoMode = $false
-            $Selected = @($Global:Apps | Where-Object {
-                $_.Number -eq $Choice
+            $selected = @($Global:Apps | Where-Object {
+                $_.Number -eq $choice
             })
         }
 
-        if ($Selected.Count -eq 0) {
+        if (@($selected).Count -eq 0) {
             Write-Host "Invalid option!" -ForegroundColor Red
             Start-Sleep 2
             continue
         }
 
-        $totalApps = @($Selected).Count
+        $totalApps = @($selected).Count
         $currentApp = 0
-        foreach ($App in $Selected) {
+
+        foreach ($app in $selected) {
             $currentApp++
             Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
-            Install-OneApp -App $App -Index $currentApp -Total $totalApps
+            Install-OneApp -App $app -Index $currentApp -Total $totalApps
         }
 
         Write-Host "`nINSTALLATION SESSION FINISHED!" -ForegroundColor Magenta
