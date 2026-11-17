@@ -206,23 +206,6 @@
 
     @{
         Number = "33"
-        Name = "CDBurnerXP"
-        Category = "Utilities"
-        Description = "Disc Burner"
-        Version = "4.5.8.7128"
-        Match = "CDBurnerXP"
-        File = "CDBurnerXPSetup.msi"
-        URL = "https://download.cdburnerxp.se/msi/cdbxp_setup_x64_4.5.8.7128.msi"
-        Type = "MSI"
-        InteractiveArguments = ""
-        SilentArguments = "/qn /norestart"
-        MinBytes = 5000000
-        Publisher = "Canneverbe Limited"
-        WingetID = "Canneverbe.CDBurnerXP"
-    },
-
-    @{
-        Number = "34"
         Name = "Revo Uninstaller"
         Category = "Utilities"
         Description = "App Uninstaller/Reverse Ninite"
@@ -239,7 +222,7 @@
     },
 
     @{
-        Number = "35"
+        Number = "34"
         Name = "Launchy"
         Category = "Utilities"
         Description = "Hotkey Launcher"
@@ -256,7 +239,7 @@
     },
 
     @{
-        Number = "36"
+        Number = "35"
         Name = "WinDirStat"
         Category = "Utilities"
         Description = "Directory Statistics"
@@ -273,7 +256,7 @@
     },
 
     @{
-        Number = "37"
+        Number = "36"
         Name = "WizTree"
         Category = "Utilities"
         Description = "Directory Statistics"
@@ -290,7 +273,7 @@
     },
 
     @{
-        Number = "38"
+        Number = "37"
         Name = "Advanced IP Scanner"
         Category = "Utilities"
         Description = "Network Scanner"
@@ -307,7 +290,7 @@
     },
 
     @{
-        Number = "39"
+        Number = "38"
         Name = "Glary Utilities"
         Category = "Utilities"
         Description = "System Utilities"
@@ -324,7 +307,7 @@
     },
 
     @{
-        Number = "40"
+        Number = "39"
         Name = "InfraRecorder"
         Category = "Utilities"
         Description = "Disc Burner"
@@ -341,7 +324,7 @@
     },
 
     @{
-        Number = "41"
+        Number = "40"
         Name = "Open-Shell"
         Category = "Utilities"
         Description = "Old-Style Start Menu"
@@ -358,7 +341,7 @@
     },
 
     @{
-        Number = "42"
+        Number = "41"
         Name = "CCleaner"
         Category = "Utilities"
         Description = "PC Crap Remover"
