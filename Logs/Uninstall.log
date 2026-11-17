@@ -1,0 +1,3 @@
+﻿[2026-11-17 12:46:12] [UNINSTALL] [FAILED] [DESKTOP-GOT2GL4] [Božena] True [ExitCode: 0] | Program not found: True
+[2026-11-17 12:46:12] [UNINSTALL] [FAILED] [DESKTOP-GOT2GL4] [Božena] True [ExitCode: 0] | Cannot validate argument on parameter 'Level'. The argument "FAILED" does not belong to the set "INFO;SUCCESS;WARNING;ERROR" specified by the ValidateSet attribute. Supply an argument that is in the set and then try the command again.
+[2026-11-17 12:50:42] [UNINSTALL] [FAILED] [DESKTOP-GOT2GL4] [Božena] True [ExitCode: 0] | Program not found: True

@@ -9,8 +9,13 @@
 #>
 
 param(
-    [string]$ProfileName
+    [string]$ProfileName,
+
+    [ValidateSet("Install", "Uninstall")]
+    [string]$Mode = "Install"
 )
+
+$script:InstallerMode = $Mode
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -37,6 +42,41 @@ catch {
 }
 
 # ==========================================
+# LOAD UNINSTALLER ENGINE (shared for both modes)
+# ==========================================
+
+$UninstallerPath = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) "Core\Uninstaller.ps1"
+
+if (-not (Test-Path -LiteralPath $UninstallerPath -PathType Leaf)) {
+
+    [System.Windows.Forms.MessageBox]::Show(
+        "Uninstaller engine not found:`n$UninstallerPath",
+        "Apps Installer",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Error
+    ) | Out-Null
+
+    return
+}
+
+try {
+
+    . $UninstallerPath
+
+}
+catch {
+
+    [System.Windows.Forms.MessageBox]::Show(
+        "Failed to load uninstaller engine: $($_.Exception.Message)",
+        "Apps Installer",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Error
+    ) | Out-Null
+
+    return
+}
+
+# ==========================================
 # PROFILE DEFINITIONS
 # ==========================================
 
@@ -47,60 +87,26 @@ $profiles = @{
 }
 
 # ==========================================
-# FILTER APPLICATIONS
-# ==========================================
-
-if ($ProfileName) {
-
-    if (-not $profiles.ContainsKey($ProfileName)) {
-
-        [System.Windows.Forms.MessageBox]::Show(
-            "Unknown profile: $ProfileName",
-            "Apps Installer"
-        ) | Out-Null
-
-        return
-    }
-
-    $selectedIds = $profiles[$ProfileName]
-
-    $appsToDisplay = @(
-        $Apps | Where-Object {
-            [string]$_.Number -in $selectedIds
-        }
-    )
-
-}
-else {
-
-    $appsToDisplay = @($Apps)
-}
-
-# ==========================================
-# CHECK APPLICATIONS
-# ==========================================
-
-if ($appsToDisplay.Count -eq 0) {
-
-    [System.Windows.Forms.MessageBox]::Show(
-        "No applications found for this selection.",
-        "Apps Installer"
-    ) | Out-Null
-
-    return
-}
-
-# ==========================================
 # MAIN FORM
 # ==========================================
 
 $form = New-Object System.Windows.Forms.Form
 
-$form.Text = if ($ProfileName) {
-    "STRAWBERRY WINDOWS - $ProfileName"
+$form.Text = if ($script:InstallerMode -eq "Uninstall") {
+    if ($ProfileName) {
+        "STRAWBERRY WINDOWS - $ProfileName - UNINSTALL"
+    }
+    else {
+        "STRAWBERRY WINDOWS - APP UNINSTALLER"
+    }
 }
 else {
-    "STRAWBERRY WINDOWS - APPS INSTALLER"
+    if ($ProfileName) {
+        "STRAWBERRY WINDOWS - $ProfileName"
+    }
+    else {
+        "STRAWBERRY WINDOWS - APPS INSTALLER"
+    }
 }
 
 $form.Size = New-Object System.Drawing.Size(700, 680)
@@ -114,11 +120,21 @@ $form.BackColor = [System.Drawing.Color]::WhiteSmoke
 
 $title = New-Object System.Windows.Forms.Label
 
-$title.Text = if ($ProfileName) {
-    "$ProfileName - SELECT APPLICATIONS"
+$title.Text = if ($script:InstallerMode -eq "Uninstall") {
+    if ($ProfileName) {
+        "$ProfileName - UNINSTALL APPLICATIONS"
+    }
+    else {
+        "UNINSTALL APPLICATIONS"
+    }
 }
 else {
-    "SELECT APPLICATIONS"
+    if ($ProfileName) {
+        "$ProfileName - SELECT APPLICATIONS"
+    }
+    else {
+        "SELECT APPLICATIONS"
+    }
 }
 
 $title.Font = New-Object System.Drawing.Font(
@@ -152,59 +168,129 @@ $appPanel.BackColor = [System.Drawing.Color]::White
 $form.Controls.Add($appPanel)
 
 # ==========================================
-# APPLICATION CHECKBOXES (GROUPED BY CATEGORY)
+# APPLICATION LIST REFRESH
 # ==========================================
 
-$checks = @()
+function Refresh-AppList {
 
-$groupedApps = $appsToDisplay | Group-Object -Property {
-    if ($_.Category) { $_.Category } else { "Other" }
-} | Sort-Object Name
+    $script:checks = @()
+    $appPanel.Controls.Clear()
 
-$y = 10
+    if ($script:InstallerMode -eq "Uninstall") {
 
-foreach ($group in $groupedApps) {
+        $installed = @(Get-InstalledPrograms)
+        $appsToDisplay = @()
 
-    $header = New-Object System.Windows.Forms.Label
-    $header.Text = $group.Name
-    $header.Font = New-Object System.Drawing.Font(
-        "Segoe UI", 10, [System.Drawing.FontStyle]::Bold
-    )
-    $header.Location = New-Object System.Drawing.Point(10, $y)
-    $header.Size = New-Object System.Drawing.Size(600, 22)
-    $header.ForeColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
+        foreach ($inst in $installed) {
 
-    $appPanel.Controls.Add($header)
-    $y += 26
+            $found = $Global:Apps | Where-Object {
+                $inst.DisplayName -like "*$($_.Name)*" -or
+                $inst.DisplayName -like "*$($_.Match)*" -or
+                $inst.Name -like "*$($_.Name)*" -or
+                $inst.Name -like "*$($_.Match)*"
+            } | Select-Object -First 1
 
-    foreach ($app in ($group.Group | Sort-Object Name)) {
-
-        $cb = New-Object System.Windows.Forms.CheckBox
-
-        $displayText = $app.Name
-        if ($app.Version) {
-            $displayText += " $($app.Version)"
-        }
-        if ($app.Description) {
-            $displayText += "  -  $($app.Description)"
+            if ($found) {
+                $appsToDisplay += $inst
+            }
         }
 
-        $cb.Text = $displayText
-        $cb.Tag = $app
-        $cb.Checked = $true
-        $cb.Location = New-Object System.Drawing.Point(28, $y)
-        $cb.Size = New-Object System.Drawing.Size(590, 24)
-        $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
-        $cb.AutoEllipsis = $true
+    }
+    else {
 
-        $appPanel.Controls.Add($cb)
-        $checks += $cb
+        if ($ProfileName) {
 
-        $y += 26
+            if (-not $profiles.ContainsKey($ProfileName)) {
+
+                return
+            }
+
+            $selectedIds = $profiles[$ProfileName]
+
+            $appsToDisplay = @(
+                $Apps | Where-Object {
+                    [string]$_.Number -in $selectedIds
+                }
+            )
+
+        }
+        else {
+
+            $appsToDisplay = @($Apps)
+        }
     }
 
-    $y += 8
+    if ($appsToDisplay.Count -eq 0) {
+
+        return
+    }
+
+    $groupedApps = $appsToDisplay | Group-Object -Property {
+        if ($_.Category) { $_.Category } else { "Other" }
+    } | Sort-Object Name
+
+    $y = 10
+
+    foreach ($group in $groupedApps) {
+
+        $header = New-Object System.Windows.Forms.Label
+        $header.Text = $group.Name
+        $header.Font = New-Object System.Drawing.Font(
+            "Segoe UI", 10, [System.Drawing.FontStyle]::Bold
+        )
+        $header.Location = New-Object System.Drawing.Point(10, $y)
+        $header.Size = New-Object System.Drawing.Size(600, 22)
+        $header.ForeColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
+
+        $appPanel.Controls.Add($header)
+        $y += 26
+
+        foreach ($app in ($group.Group | Sort-Object Name)) {
+
+            $cb = New-Object System.Windows.Forms.CheckBox
+
+            $displayText = if ($app.DisplayName) { $app.DisplayName } else { $app.Name }
+            if ($app.Version) {
+                $displayText += " $($app.Version)"
+            }
+            if ($app.Description) {
+                $displayText += "  -  $($app.Description)"
+            }
+
+            $cb.Text = $displayText
+            $cb.Tag = $app
+            $cb.Checked = $true
+            $cb.Location = New-Object System.Drawing.Point(28, $y)
+            $cb.Size = New-Object System.Drawing.Size(590, 24)
+            $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+            $cb.AutoEllipsis = $true
+
+            $appPanel.Controls.Add($cb)
+            $script:checks += $cb
+
+            $y += 26
+        }
+
+        $y += 8
+    }
 }
+
+# ==========================================
+# INITIAL APPLICATION LIST
+# ==========================================
+
+Refresh-AppList
+
+if ($script:checks.Count -eq 0) {
+
+    [System.Windows.Forms.MessageBox]::Show(
+        "No applications found for this selection.",
+        "Apps Installer"
+    ) | Out-Null
+
+    return
+}
+
 
 # ==========================================
 # SELECT ALL BUTTON
@@ -219,7 +305,7 @@ $selectAll.Anchor = "Bottom, Left"
 
 $selectAll.Add_Click({
 
-    foreach ($cb in $checks) {
+    foreach ($cb in $script:checks) {
         $cb.Checked = $true
     }
 
@@ -240,7 +326,7 @@ $deselectAll.Anchor = "Bottom, Left"
 
 $deselectAll.Add_Click({
 
-    foreach ($cb in $checks) {
+    foreach ($cb in $script:checks) {
         $cb.Checked = $false
     }
 
@@ -249,12 +335,71 @@ $deselectAll.Add_Click({
 $form.Controls.Add($deselectAll)
 
 # ==========================================
+# MODE TOGGLE BUTTON
+# ==========================================
+
+$toggleMode = New-Object System.Windows.Forms.Button
+
+$toggleMode.Text = if ($script:InstallerMode -eq "Uninstall") { "Switch to Install Mode" } else { "Switch to Uninstall Mode" }
+$toggleMode.Location = New-Object System.Drawing.Point(270, 545)
+$toggleMode.Size = New-Object System.Drawing.Size(160, 35)
+$toggleMode.Anchor = "Bottom, Left"
+
+$toggleMode.Add_Click({
+
+    $script:InstallerMode = if ($script:InstallerMode -eq "Uninstall") { "Install" } else { "Uninstall" }
+
+    $toggleMode.Text = if ($script:InstallerMode -eq "Uninstall") { "Switch to Install Mode" } else { "Switch to Uninstall Mode" }
+
+    $form.Text = if ($script:InstallerMode -eq "Uninstall") {
+        if ($ProfileName) {
+            "STRAWBERRY WINDOWS - $ProfileName - UNINSTALL"
+        }
+        else {
+            "STRAWBERRY WINDOWS - APP UNINSTALLER"
+        }
+    }
+    else {
+        if ($ProfileName) {
+            "STRAWBERRY WINDOWS - $ProfileName"
+        }
+        else {
+            "STRAWBERRY WINDOWS - APPS INSTALLER"
+        }
+    }
+
+    $title.Text = if ($script:InstallerMode -eq "Uninstall") {
+        if ($ProfileName) {
+            "$ProfileName - UNINSTALL APPLICATIONS"
+        }
+        else {
+            "UNINSTALL APPLICATIONS"
+        }
+    }
+    else {
+        if ($ProfileName) {
+            "$ProfileName - SELECT APPLICATIONS"
+        }
+        else {
+            "SELECT APPLICATIONS"
+        }
+    }
+
+    $install.Text = if ($script:InstallerMode -eq "Uninstall") { "Uninstall Selected" } else { "Install Selected" }
+
+    Refresh-AppList
+
+})
+
+$form.Controls.Add($toggleMode)
+
+# ==========================================
 # INSTALL BUTTON
 # ==========================================
 
 $install = New-Object System.Windows.Forms.Button
 
-$install.Text = "Install Selected"
+$install.Text = if ($script:InstallerMode -eq "Uninstall") { "Uninstall Selected" } else { "Install Selected" }
 $install.Location = New-Object System.Drawing.Point(495, 545)
 $install.Size = New-Object System.Drawing.Size(170, 35)
 $install.Anchor = "Bottom, Right"
@@ -268,7 +413,7 @@ $install.Add_Click({
     }
 
     $selectedApps = @(
-        $checks |
+        $script:checks |
             Where-Object { $_.Checked } |
             ForEach-Object { $_.Tag }
     )
@@ -283,9 +428,11 @@ $install.Add_Click({
         return
     }
 
+    $actionWord = if ($script:InstallerMode -eq "Uninstall") { "Uninstall" } else { "Install" }
+
     $confirmation = [System.Windows.Forms.MessageBox]::Show(
-        "Install $($selectedApps.Count) selected applications?",
-        "Confirm Installation",
+        "$actionWord $($selectedApps.Count) selected applications?",
+        $(if ($script:InstallerMode -eq "Uninstall") { "Confirm Uninstall" } else { "Confirm Installation" }),
         [System.Windows.Forms.MessageBoxButtons]::YesNo,
         [System.Windows.Forms.MessageBoxIcon]::Question
     )
@@ -295,14 +442,9 @@ $install.Add_Click({
     }
 
     # ==========================================
-    # INSTALL SELECTED APPLICATIONS
+    # ACTION SELECTED APPLICATIONS
     # ==========================================
     $Global:AutoMode = $true
-
-    $installErrors = @()
-
-    $totalApps = @($selectedApps).Count
-    $currentApp = 0
 
     $install.Enabled = $false
     $form.Enabled = $false
@@ -310,27 +452,49 @@ $install.Add_Click({
 
     try {
 
-        foreach ($app in $selectedApps) {
+        if ($script:InstallerMode -eq "Uninstall") {
 
-            $currentApp++
+            $uninstallResults = Uninstall-MultipleApps -Programs $selectedApps -Silent
 
-            try {
+            $installErrors = @()
 
-                if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
-                    Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+            foreach ($r in $uninstallResults) {
+                if ($r.Status -eq "FAILED") {
+                    $installErrors += "$($r.ProgramName): $($r.Message)"
+                }
+            }
+
+        }
+        else {
+
+            $installErrors = @()
+
+            $totalApps = @($selectedApps).Count
+            $currentApp = 0
+
+            foreach ($app in $selectedApps) {
+
+                $currentApp++
+
+                try {
+
+                    if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
+                        Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
+                    }
+
+                    Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+
                 }
 
-                Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+                catch {
 
+                    $installErrors += "$($app.Name): $($_.Exception.Message)"
+
+                }
+
+                [System.Windows.Forms.Application]::DoEvents()
             }
 
-            catch {
-
-                $installErrors += "$($app.Name): $($_.Exception.Message)"
-
-            }
-
-            [System.Windows.Forms.Application]::DoEvents()
         }
     }
     finally {
@@ -346,7 +510,7 @@ $install.Add_Click({
     if ($installErrors.Count -eq 0) {
 
         [System.Windows.Forms.MessageBox]::Show(
-            "Installation session finished.",
+            $(if ($script:InstallerMode -eq "Uninstall") { "Uninstall session finished." } else { "Installation session finished." }),
             "Apps Installer",
             [System.Windows.Forms.MessageBoxButtons]::OK,
             [System.Windows.Forms.MessageBoxIcon]::Information
@@ -356,8 +520,8 @@ $install.Add_Click({
     else {
 
         [System.Windows.Forms.MessageBox]::Show(
-            "Some installations failed:`n`n$($installErrors -join "`n")",
-            "Installation Results",
+            $(if ($script:InstallerMode -eq "Uninstall") { "Some uninstalls failed:`n`n$($installErrors -join "`n")" } else { "Some installations failed:`n`n$($installErrors -join "`n")" }),
+            $(if ($script:InstallerMode -eq "Uninstall") { "Uninstall Results" } else { "Installation Results" }),
             [System.Windows.Forms.MessageBoxButtons]::OK,
             [System.Windows.Forms.MessageBoxIcon]::Warning
         ) | Out-Null
