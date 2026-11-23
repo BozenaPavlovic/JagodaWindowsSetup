@@ -73,6 +73,18 @@ $Global:DownloadFolder = $DownloadFolder
 $Global:LogFolder = $LogFolder
 
 # ==========================================
+# INSTALLER SETTINGS
+# ==========================================
+
+if (-not $Global:InstallerSettings) {
+    $Global:InstallerSettings = @{}
+}
+
+if (-not $Global:InstallerSettings.ContainsKey("InstallCooldownSeconds")) {
+    $Global:InstallerSettings.InstallCooldownSeconds = 5
+}
+
+# ==========================================
 # TLS
 # ==========================================
 

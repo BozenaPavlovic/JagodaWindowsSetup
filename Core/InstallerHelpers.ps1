@@ -5,10 +5,14 @@
 
 function Get-InstallCooldownSeconds {
 
-    $configPath = Join-Path $PSScriptRoot "InstallerConfig.ps1"
-
-    if (-not $Global:InstallerSettings -and (Test-Path -LiteralPath $configPath)) {
-        . $configPath
+    if (-not $Global:InstallerSettings) {
+        # Try to load from OS config if available (set by Core/Installers/01_Configuration.ps1)
+        if ($Global:WindowsConfig -and $Global:WindowsConfig.ContainsKey("InstallCooldownSeconds")) {
+            $Global:InstallerSettings = @{ InstallCooldownSeconds = $Global:WindowsConfig.InstallCooldownSeconds }
+        }
+        elseif ($Global:PinkConfig -and $Global:PinkConfig.ContainsKey("InstallCooldownSeconds")) {
+            $Global:InstallerSettings = @{ InstallCooldownSeconds = $Global:PinkConfig.InstallCooldownSeconds }
+        }
     }
 
     $value = $null

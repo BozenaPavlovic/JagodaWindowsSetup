@@ -45,7 +45,7 @@ catch {
 # LOAD UNINSTALLER ENGINE (shared for both modes)
 # ==========================================
 
-$UninstallerPath = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) "Core\Uninstaller.ps1"
+$UninstallerPath = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) "Core\Uninstallers\Uninstaller.ps1"
 
 if (-not (Test-Path -LiteralPath $UninstallerPath -PathType Leaf)) {
 
