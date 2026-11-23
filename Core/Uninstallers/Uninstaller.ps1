@@ -208,7 +208,7 @@ function Uninstall-MultipleApps {
             Write-Host "`nProgress: $current of $total applications" -ForegroundColor Cyan
         }
 
-        $result = Uninstall-OneApp -ProgramName $appName -Program $app -Silent:$Silent
+        $result = Uninstall-OneApp -ProgramName $appName -InputProgram $app -Silent:$Silent
 
         $results += $result
     }

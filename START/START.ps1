@@ -9,6 +9,19 @@ try {
 
     $Root = $PSScriptRoot
 
+    # ==========================================
+    # ELEVATION (required for MSI/EXE install & uninstall)
+    # ==========================================
+
+    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+    if (-not $isAdmin) {
+        Write-Host ""
+        Write-Host "Administrator privileges required. Relaunching elevated..." -ForegroundColor Yellow
+        Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        exit
+    }
+
     Write-Host ""
     Write-Host "STRAWBERRY WINDOWS PORTABLE STARTER" -ForegroundColor Magenta
     Write-Host "Project: $Root" -ForegroundColor Cyan

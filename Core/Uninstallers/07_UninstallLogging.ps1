@@ -49,8 +49,7 @@ function Read-ManagedStore {
 
 function Write-ManagedStore {
     param(
-        [Parameter(Mandatory)]
-        [hashtable[]]$Programs
+        [object[]]$Programs = @()
     )
 
     $path = Get-UninstallStorePath

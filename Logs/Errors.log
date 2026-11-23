@@ -17,3 +17,5 @@
 [2026-11-23 10:03:12] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Cannot bind argument to parameter 'Programs' because it is an empty array.
 [2026-11-23 10:03:44] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Uninstaller exit code: -1978335230
 [2026-11-23 10:05:39] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Uninstaller exit code: -1978335212
+[2026-11-23 10:27:05] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: FAILED | Uninstaller exit code: 1603
+[2026-11-23 10:33:54] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: FAILED | Uninstaller exit code: 1603

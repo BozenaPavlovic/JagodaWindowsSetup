@@ -1,0 +1,4 @@
+﻿[2026-11-23 10:27:05] [UNINSTALL] [FAILED] [DESKTOP-GOT2GL4] [Božena] VLC Media Player [ExitCode: 1603] | Command: msiexec.exe /x "{585C109D-9729-4B98-A2B8-EACD8885D115}" /qn | Uninstaller exit code: 1603
+[2026-11-23 10:33:54] [UNINSTALL] [FAILED] [DESKTOP-GOT2GL4] [Božena] VLC Media Player [ExitCode: 1603] | Command: msiexec.exe /x "{585C109D-9729-4B98-A2B8-EACD8885D115}" /qn | Uninstaller exit code: 1603
+[2026-11-23 10:41:12] [UNINSTALL] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] VLC Media Player [ExitCode: 0] | Command: msiexec.exe /x "{585C109D-9729-4B98-A2B8-EACD8885D115}" /qn | Program uninstalled successfully.
+[2026-11-23 10:41:15] [UNINSTALL] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Zoom [ExitCode: 0] | Command: msiexec.exe /x "{BFA42BDB-0E66-4161-8D09-B48D2C9FC90F}" /qn | Program uninstalled successfully.
