@@ -9,13 +9,8 @@
 #>
 
 param(
-    [string]$ProfileName,
-
-    [ValidateSet("Install", "Uninstall")]
-    [string]$Mode = "Install"
+    [string]$ProfileName
 )
-
-$script:InstallerMode = $Mode
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -34,41 +29,6 @@ catch {
     [System.Windows.Forms.MessageBox]::Show(
         $_.Exception.Message,
         "Backend Error",
-        [System.Windows.Forms.MessageBoxButtons]::OK,
-        [System.Windows.Forms.MessageBoxIcon]::Error
-    ) | Out-Null
-
-    return
-}
-
-# ==========================================
-# LOAD UNINSTALLER ENGINE (shared for both modes)
-# ==========================================
-
-$UninstallerPath = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) "Core\Uninstallers\Uninstaller.ps1"
-
-if (-not (Test-Path -LiteralPath $UninstallerPath -PathType Leaf)) {
-
-    [System.Windows.Forms.MessageBox]::Show(
-        "Uninstaller engine not found:`n$UninstallerPath",
-        "Apps Installer",
-        [System.Windows.Forms.MessageBoxButtons]::OK,
-        [System.Windows.Forms.MessageBoxIcon]::Error
-    ) | Out-Null
-
-    return
-}
-
-try {
-
-    . $UninstallerPath
-
-}
-catch {
-
-    [System.Windows.Forms.MessageBox]::Show(
-        "Failed to load uninstaller engine: $($_.Exception.Message)",
-        "Apps Installer",
         [System.Windows.Forms.MessageBoxButtons]::OK,
         [System.Windows.Forms.MessageBoxIcon]::Error
     ) | Out-Null
