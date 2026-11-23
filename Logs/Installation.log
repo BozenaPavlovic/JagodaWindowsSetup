@@ -80,3 +80,22 @@
 [2026-11-23 10:33:54] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: FAILED | Uninstaller exit code: 1603
 [2026-11-23 10:41:12] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: SUCCESS | Program uninstalled successfully.
 [2026-11-23 10:41:15] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Zoom: SUCCESS | Program uninstalled successfully.
+[2026-11-23 10:43:08] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14: SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:30:17] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for VLC Media Player: 5s
+[2026-11-23 12:31:07] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:14] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall 7-Zip 26.06 (x64 edition): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:17] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall PeaZip 11.3.0 (WIN64): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:17] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall WinRAR 7.23 (64-bit): FAILED | Command not found: C:\Program
+[2026-11-23 12:46:21] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 Standard Library (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:23] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 Tcl/Tk Support (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:24] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 pip Bootstrap (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:25] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 Core Interpreter (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:28] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 Documentation (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:28] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 Add to Path (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:29] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 Executables (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:30] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.7 (64-bit): SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:46:43] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Discord: SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:47:14] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall MSTeams: SUCCESS | AppX package removed.
+[2026-11-23 12:47:17] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Slack: SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:47:18] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Telegram Desktop: SUCCESS | Program uninstalled successfully.
+[2026-11-23 12:47:19] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall 5319275A.WhatsAppDesktop: SUCCESS | AppX package removed.

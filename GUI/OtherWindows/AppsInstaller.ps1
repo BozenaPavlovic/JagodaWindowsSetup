@@ -180,6 +180,7 @@ function Refresh-AppList {
 
         $installed = @(Get-InstalledPrograms)
         $appsToDisplay = @()
+        $seen = @{}
 
         foreach ($inst in $installed) {
 
@@ -190,18 +191,47 @@ function Refresh-AppList {
                 $inst.Name -like "*$($_.Match)*"
             } | Select-Object -First 1
 
-            if ($found) {
-                # Attach the installed app info to the database app for reference
-                $found | Add-Member -MemberType NoteProperty -Name "InstalledDisplayName" -Value $inst.DisplayName -Force
-                $found | Add-Member -MemberType NoteProperty -Name "InstalledVersion" -Value $inst.DisplayVersion -Force
-                $found | Add-Member -MemberType NoteProperty -Name "InstalledSource" -Value $inst.Source -Force
-                $found | Add-Member -MemberType NoteProperty -Name "InstalledName" -Value $inst.Name -Force
-                $found | Add-Member -MemberType NoteProperty -Name "PackageFullName" -Value $inst.PackageFullName -Force
-                $found | Add-Member -MemberType NoteProperty -Name "PSChildName" -Value $inst.PSChildName -Force
-                $found | Add-Member -MemberType NoteProperty -Name "UninstallString" -Value $inst.UninstallString -Force
-                $found | Add-Member -MemberType NoteProperty -Name "QuietUninstallString" -Value $inst.QuietUninstallString -Force
-                
-                $appsToDisplay += $found
+            if (-not $found) {
+                continue
+            }
+
+            $key = if ($null -ne $found.Number) { [string]$found.Number } else { [string]$found.Name }
+
+            if (-not $seen.ContainsKey($key)) {
+
+                $entry = [PSCustomObject]@{
+                    Number            = $found.Number
+                    Name              = $found.Name
+                    DisplayName       = $found.DisplayName
+                    Category          = $found.Category
+                    Version           = $found.Version
+                    Description       = $found.Description
+                    WingetID          = $found.WingetID
+                    Match             = $found.Match
+                    Publisher         = $found.Publisher
+                    File              = $found.File
+                    Type              = $found.Type
+                    InstalledPrograms = @()
+                    InstalledVersion  = $null
+                }
+
+                $seen[$key] = $entry
+                $appsToDisplay += $entry
+            }
+
+            $seen[$key].InstalledPrograms += [PSCustomObject]@{
+                DisplayName          = $inst.DisplayName
+                DisplayVersion       = $inst.DisplayVersion
+                Name                 = $inst.Name
+                PSChildName          = $inst.PSChildName
+                PackageFullName      = $inst.PackageFullName
+                UninstallString      = $inst.UninstallString
+                QuietUninstallString = $inst.QuietUninstallString
+                Source               = $inst.Source
+            }
+
+            if (-not $seen[$key].InstalledVersion -and $inst.DisplayVersion) {
+                $seen[$key].InstalledVersion = $inst.DisplayVersion
             }
         }
 

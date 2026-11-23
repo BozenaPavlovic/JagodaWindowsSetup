@@ -127,7 +127,8 @@ function Execute-UninstallCommand {
         $process.WaitForExit()
         $exitCode = $process.ExitCode
 
-        $successCodes = @(0, 1641, 3010, 1, 2, 3)
+        # 1605 = product is no longer installed (safe for multi-component apps like Python)
+        $successCodes = @(0, 1641, 3010, 1, 2, 3, 1605)
         $success = $successCodes -contains $exitCode
 
         return @{ ExitCode = $exitCode; Success = $success }

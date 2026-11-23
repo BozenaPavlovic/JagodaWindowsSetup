@@ -183,10 +183,32 @@ function Uninstall-MultipleApps {
     $programs = @($Programs)
     $results = @()
 
-    $total = $programs.Count
-    $current = 0
+    # Expand apps that carry multiple installed components (e.g. Python's 9 MSI entries)
+    # so each component gets its own uninstall pass.
+    $expanded = @()
 
     foreach ($app in $programs) {
+
+        $subs = @()
+
+        if ($app -is [PSCustomObject] -and $app.PSObject.Properties['InstalledPrograms']) {
+            $subs = @($app.InstalledPrograms | Where-Object { $null -ne $_ })
+        }
+
+        if ($subs.Count -gt 0) {
+            foreach ($sub in $subs) {
+                $expanded += $sub
+            }
+        }
+        else {
+            $expanded += $app
+        }
+    }
+
+    $total = $expanded.Count
+    $current = 0
+
+    foreach ($app in $expanded) {
         $current++
 
         $appName = $null
@@ -215,9 +237,9 @@ function Uninstall-MultipleApps {
 
     Write-Host "`nUNINSTALL SESSION FINISHED!" -ForegroundColor Magenta
 
-    $successCount = ($results | Where-Object { $_.Status -eq "SUCCESS" }).Count
-    $failedCount = ($results | Where-Object { $_.Status -eq "FAILED" }).Count
-    $skippedCount = ($results | Where-Object { $_.Status -eq "SKIPPED" }).Count
+    $successCount = @($results | Where-Object { $_.Status -eq "SUCCESS" }).Count
+    $failedCount = @($results | Where-Object { $_.Status -eq "FAILED" }).Count
+    $skippedCount = @($results | Where-Object { $_.Status -eq "SKIPPED" }).Count
 
     Write-Host "SUCCESS: $successCount | FAILED: $failedCount | SKIPPED: $skippedCount" -ForegroundColor Cyan
 
