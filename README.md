@@ -31,13 +31,13 @@ JagodaWindowsSetup/
 │
 ├── Core/
 │   ├── Installers/
-│   │   ├── 01_Configuration.ps1   # učitava OS Config, postavlja DownloadFolder/LogFolder
+│   │   ├── 01_Configuration.ps1   # učitava OS Config, postavlja DownloadFolder/LogFolder, TLS
 │   │   ├── 02_UiHelpers.ps1       # Invoke-UiRefresh, Wait-ProcessWithUiRefresh
-│   │   ├── 03_AppDetection.ps1    # Find-InstalledApp
-│   │   ├── 04_Download.ps1        # Get-ProgramInstaller
-│   │   ├── 05_Winget.ps1          # Test-Winget, Install-WithWinget
+│   │   ├── 03_AppDetection.ps1    # Find-InstalledApp (registry + AppX)
+│   │   ├── 04_Download.ps1        # Get-ProgramInstaller (WebClient, .partial, MinBytes)
+│   │   ├── 05_Winget.ps1          # Test-Winget, Install-WithWinget (sync, 15 min timeout)
 │   │   ├── 06_InstallApplication.ps1  # Install-OneApp, Install-Programs
-│   │   └── Programs.ps1           # agreguje 01–06 (dijeljeni instalacioni engine)
+│   │   └── Programs.ps1           # agregira 01–06 (dijeljeni instalacioni engine)
 │   ├── SystemTools/
 │   │   └── Get-SystemSpecs.ps1    # Get-SystemSpecs, Test-IsWindows
 │   ├── Wallpapers/
@@ -51,7 +51,8 @@ JagodaWindowsSetup/
 │   ├── Paths.ps1                  # Get-ProjectRoot, $Global:ProjectRoot/DataFolder/PhotosFolder/LogsFolder
 │   ├── ProgramDatabase.ps1        # wrapper -> DATABASE\ProgramDatabase.ps1
 │   ├── ThemeEngine.ps1            # Set-ThemeDword, ConvertTo-WindowsColor, New-AccentPalette, Invoke-ThemeRefresh, Set-WindowsAccentTheme
-│   └── ThemeManager.ps1           # Get-ThemeCatalog, Get-TargetThemeOS, Initialize-ThemeBackend, Get-ThemeDefinition, Invoke-Theme, Install-*-Theme aliasi
+│   ├── ThemeManager.ps1           # Get-ThemeCatalog, Get-TargetThemeOS, Initialize-ThemeBackend, Get-ThemeDefinition, Invoke-Theme, Install-*-Theme aliasi
+│   └── Uninstaller.ps1            # Get-InstalledPrograms, Find-UninstallCommand, Uninstall-OneApp, Uninstall-MultipleApps, ...
 │
 ├── DATABASE/
 │   ├── ProgramDatabase.ps1        # učitava definicije iz DATABASE\Installers
@@ -80,7 +81,7 @@ JagodaWindowsSetup/
 │   │   └── SystemInformationPanel.ps1
 │   └── OtherWindows/
 │       ├── About.ps1
-│       ├── AppsInstaller.ps1
+│       ├── AppsInstaller.ps1       # dual-mode: Install / Uninstall
 │       ├── LoadInstallerBackend.ps1
 │       ├── LogViewer.ps1
 │       ├── ProfileInstaller.ps1
@@ -102,19 +103,32 @@ JagodaWindowsSetup/
 │   └── Profiles/
 │       └── CustomProfiles.json    # custom user profiles (JSON, automatski se kreira)
 │
-├── Logs/
+├── Logs/                          # main.log, Activity.log, Errors.log, Installation.log,
+│                                  # InstallationHistory.log, Uninstall.log (+ ManagedPrograms.json)
 ├── START\Logs/
 ├── Koncepti/                      # konceptne datoteke (Prvi/Drugi/Treći/Četvrti Koncept.txt)
-├── Linux/install.ps1
-└── MacOS/install.ps1
+├── Linux/install.ps1              # prazan placeholder
+└── MacOS/install.ps1              # prazan placeholder
 ```
 
 ## Instalacioni engine i cooldown (shared)
 
 - **`Core\Installers\Programs.ps1`** – jedini ulaz za učitavanje dijeljenog instalacionog engine-a. Validira da postoje svi moduli, učitava `Core\InstallerHelpers.ps1` (cooldown) i zatim dot-source-ira šest modula u redoslijedu: `01_Configuration.ps1` (OS config, `DownloadFolder`/`LogFolder`, TLS), `02_UiHelpers.ps1` (`Invoke-UiRefresh`, `Wait-ProcessWithUiRefresh`), `03_AppDetection.ps1` (`Find-InstalledApp`), `04_Download.ps1` (`Get-ProgramInstaller`), `05_Winget.ps1` (`Test-Winget`, `Install-WithWinget`), `06_InstallApplication.ps1` (`Install-OneApp`, `Install-Programs`). Moduli se učitavaju samo jednom; funkcije se ne izvršavaju pri učitavanju.
-- **Sekvencijalna instalacija:** svaka instalacija se čeka do završetka (`winget` ili `Start-Process -Wait -PassThru` za MSI/EXE) uz provjeru prisutnosti aplikacije u registru prije prelaska na sljedeću.
+- **Download (`04_Download.ps1`):** `System.Net.WebClient` sa Chrome User-Agent-om, 10-minutni timeout, privremeni `.partial` fajl i provjera `MinBytes` prije premještanja.
+- **Winget (`05_Winget.ps1`):** sinhronizovano (`--silent --exact --accept-package-agreements --accept-source-agreements --disable-interactivity`), 15-minutni timeout, log `<App>_Winget.log`. Koristi se samo na **Windows 10** putanji (`$Global:OSVersion -ne "Windows11"`) i kada je winget dostupan; pri neuspjehu pada na klasični installer.
+- **Klasična instalacija (`06_InstallApplication.ps1`):** `Start-Process -PassThru` + `Wait-ProcessWithUiRefresh` (5-minutni timeout) za MSI (`msiexec`) i EXE; prihvaćeni exit kodovi `0/1641/3010/1/2/3`, zatim verifikacija u registru/AppX (`Find-InstalledApp`).
+- **Sekvencijalna instalacija:** svaka instalacija se čeka do završetka uz provjeru prisutnosti aplikacije prije prelaska na sljedeću.
 - **Cooldown između aplikacija:** podrazumijevano **5 sekundi** (`Core\InstallerConfig.ps1`, `$Global:InstallerSettings.InstallCooldownSeconds`). `Core\InstallerHelpers.ps1`: `Get-InstallCooldownSeconds` i `Invoke-InstallCooldown` (log, odbrojavanje, `Start-Sleep`; 0 preskače čekanje). Poziva se u `finally` bloku `Install-OneApp` (`Core\Installers\06_InstallApplication.ps1`).
-- **Napredak:** CLI/GUI batch prikazuje progres (`X of Y`, `INSTALL PROGRESS: Index/Total`).
+- **Napredak:** CLI/GUI batch prikazuje progres (`Progress: X of Y`, `INSTALL PROGRESS: Index/Total`).
+
+## Deinstalacija (Uninstaller)
+
+- **`Core\Uninstaller.ps1`** – funkcij: `Get-UninstallStorePath`, `Read-ManagedStore`, `Write-ManagedStore`, `Register-ManagedProgram`, `Unregister-ManagedProgram`, `Get-InstalledPrograms`, `Get-ManagedPrograms`, `Find-UninstallCommand`, `Write-UninstallLog`, `Uninstall-OneApp`, `Uninstall-MultipleApps`.
+- **Detekcija:** `Get-InstalledPrograms` čita registar `Uninstall` (HKLM/HKCU, 64/32-bit) i AppX pakete.
+- **Komanda:** `Find-UninstallCommand` bira `msiexec /x {GUID} /qn` za MSI, `Remove-AppxPackage` za AppX, ili `UninstallString`/`QuietUninstallString` za ostale.
+- **Izvršavanje:** `Uninstall-OneApp` pokreće deinstalaciju (opciono silent), čeka (10-minutni timeout), verifikuje uklanjanje, piše u `Logs\Uninstall.log` i uklanja unos iz managed stora. `Uninstall-MultipleApps` radi istu stvar po aplikaciji sa progresom.
+- **Managed store:** `Logs\ManagedPrograms.json` (preko `Get-UninstallStorePath`).
+- **Pristup:** kroz GUI **Apps Installer** u **Uninstall** modu (dugme "Switch to Uninstall Mode") ili direktno pozivom funkcija iz `Core\Uninstaller.ps1`.
 
 ## Core moduli i funkcije
 
@@ -123,15 +137,22 @@ JagodaWindowsSetup/
 | `main.ps1` | `Write-Log` | OS router; detekcija OS-a, log u `Logs\main.log`, pokretanje `Windows10\install.ps1` ili `Windows11\install.ps1`. |
 | `Core\Model.ps1` | `Get-WindowsVersion`, `Get-OSConfig` | Detekcija OS-a (build >= 22000 → Windows11) i učitavanje odgovarajućeg `Windows10/Windows11\Config.ps1`. |
 | `Core\Controller.ps1` | `Get-SelectedApps`, `Show-MainMenu`, `Show-OSSpecs`, `Run-Installation` | CLI kontroler/meni (programi, tema, wallpaper, specifikacije). |
-| `Core\Installer.ps1` | (shim) | Kompatibilni ulaz koji učitava `Core\Installers\Programs.ps1`. |
+| `Core\Installer.ps1` | (shim) | Kompatibilni ulaz koji učitava `Core\Installers\Programs.ps1` (nije korišten u aktivnim tokovima). |
 | `Core\InstallerConfig.ps1` | `$Global:InstallerSettings` | Dijeljena konfiguracija instalera (`InstallCooldownSeconds = 5`). |
 | `Core\InstallerHelpers.ps1` | `Get-InstallCooldownSeconds`, `Invoke-InstallCooldown` | Cooldown između instalacija (log, odbrojavanje, `Start-Sleep`; 0 preskače čekanje). Učitava ga `Core\Installers\Programs.ps1` i GUI backend. |
-| `Core\Installers\Programs.ps1` | `Find-InstalledApp`, `Get-ProgramInstaller`, `Test-Winget`, `Install-WithWinget`, `Install-OneApp`, `Install-Programs` | Dijeljeni instalacioni engine (učitava module 01–06). |
+| `Core\Installers\01_Configuration.ps1` | `$Global:OSVersion`, `$Global:PinkConfig`, `$Global:DownloadFolder`, `$Global:LogFolder` | OS detekcija, učitavanje OS config-a, folderi, TLS. |
+| `Core\Installers\02_UiHelpers.ps1` | `Invoke-UiRefresh`, `Wait-ProcessWithUiRefresh` | Održavanje WinForms responzivnosti tokom čekanja. |
+| `Core\Installers\03_AppDetection.ps1` | `Find-InstalledApp` | Detekcija instaliranih aplikacija (registry Uninstall + AppX). |
+| `Core\Installers\04_Download.ps1` | `Get-ProgramInstaller` | Download i validacija instalera (WebClient, `.partial`, MinBytes). |
+| `Core\Installers\05_Winget.ps1` | `Test-Winget`, `Install-WithWinget` | Winget detekcija i sinhrona instalacija (15 min timeout). |
+| `Core\Installers\06_InstallApplication.ps1` | `Install-OneApp`, `Install-Programs` | MSI/EXE/winget tok instalacije + verifikacija + cooldown. |
+| `Core\Installers\Programs.ps1` | (loader) | Učitava module 01–06 i `Core\InstallerHelpers.ps1`; nema vlastitih funkcija. |
 | `Core\Logging.ps1` | `Write-AppLog` | Centralizovano logovanje (`Activity.log`, `Installation.log`, `Errors.log`). |
 | `Core\Paths.ps1` | `Get-ProjectRoot`, `$Global:ProjectRoot`, `$Global:DataFolder`, `$Global:PhotosFolder`, `$Global:LogsFolder` | Pronalaženje root-a projekta i standardnih putanja. |
 | `Core\ProgramDatabase.ps1` | (wrapper) | Učitava `DATABASE\ProgramDatabase.ps1`. |
 | `Core\ThemeEngine.ps1` | `Set-ThemeDword`, `ConvertTo-WindowsColor`, `New-AccentPalette`, `Invoke-ThemeRefresh`, `Set-WindowsAccentTheme` | Primjena Windows accent/theme podešavanja. |
 | `Core\ThemeManager.ps1` | `Get-ThemeCatalog`, `Get-TargetThemeOS`, `Initialize-ThemeBackend`, `Get-ThemeDefinition`, `Invoke-Theme`, `Install-PinkTheme`, `Install-BlueTheme`, `Install-YellowTheme`, `Install-GreenTheme` | Katalog tema i dispatch primjene teme. |
+| `Core\Uninstaller.ps1` | `Get-UninstallStorePath`, `Read-ManagedStore`, `Write-ManagedStore`, `Register-ManagedProgram`, `Unregister-ManagedProgram`, `Get-InstalledPrograms`, `Get-ManagedPrograms`, `Find-UninstallCommand`, `Write-UninstallLog`, `Uninstall-OneApp`, `Uninstall-MultipleApps` | Deinstalacija (registry + AppX) i managed store (`Logs\ManagedPrograms.json`, `Logs\Uninstall.log`). |
 | `Core\Wallpapers\Wallpaper.ps1` | `WALLPAPERS` | Postavljanje wallpaper-a (`SystemParametersInfo`). |
 | `Core\SystemTools\Get-SystemSpecs.ps1` | `Get-SystemSpecs`, `Test-IsWindows` | Prikupljanje sistemskih specifikacija. |
 
@@ -153,13 +174,13 @@ JagodaWindowsSetup/
 | `GUI\Views\SystemInformationPanel.ps1` | Panel sistemskih informacija. |
 | `GUI\Controllers\MainMenuController.ps1` | `Initialize-MainMenuController` (mapiranje klikova na `GUI\OtherWindows`). |
 | `GUI\OtherWindows\LoadInstallerBackend.ps1` | Učitava Core logging/database/helpers, `Core\Installers\Programs.ps1` i ThemeManager; postavlja `$Global:AutoMode = $true`. |
-| `GUI\OtherWindows\AppsInstaller.ps1` | GUI izbor i instalacija aplikacija (checkbox lista, Select/Deselect All, profili, `Install-OneApp` sa progresom). |
+| `GUI\OtherWindows\AppsInstaller.ps1` | Dual-mode GUI (`-Mode Install|Uninstall` + dugme za prebacivanje moda). Učitava `Core\Uninstaller.ps1`; prikazuje/aplikira aplikacije (checkbox lista, Select/Deselect All, profili). Install: `Install-OneApp` sa progresom. Uninstall: `Uninstall-MultipleApps -Silent` nad instaliranim aplikacijama iz baze. |
 | `GUI\OtherWindows\ProfileInstaller.ps1` | Installation Manager – custom profili (Create/Edit/Delete/Install) uz `ProfileModel`/`ProfileController`. |
 | `GUI\Models\ProfileModel.ps1` | JSON persistencija custom profila (`DATA\Profiles\CustomProfiles.json`). |
 | `GUI\Controllers\ProfileController.ps1` | CRUD operacije i validacija profila. |
 | `GUI\OtherWindows\ThemeManager.ps1` | Prikaz tema iz `Get-ThemeCatalog` i primjena preko `Invoke-Theme`. |
 | `GUI\OtherWindows\WallpaperManager.ps1` | Prikaz/listanje JPG wallpaper-a iz `DATA\Photos`. |
-| `GUI\OtherWindows\LogViewer.ps1` | `Load-Log`; prikaz `Logs\InstallationHistory.log`. |
+| `GUI\OtherWindows\LogViewer.ps1` | `Load-Log`; combobox izbor log fajla (`InstallationHistory.log` podrazumijevano, uz `Activity.log`, `Errors.log`, `Installation.log`, `Google_Chrome.log`). |
 | `GUI\OtherWindows\About.ps1` | About dijalog. |
 
 ## Windows 10 i Windows 11 moduli
@@ -188,10 +209,13 @@ Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omoguća
 
 - `DATA\Photos\`: wallpaper slike (`.jpg`).
 - `DATA\Profiles\CustomProfiles.json`: custom user profiles (JSON) – kreira se automatski.
-- `Logs\`: runtime logovi (`main.log`, `Activity.log`, `Errors.log`, `Installation.log`, `InstallationHistory.log`).
+- `Logs\`: runtime logovi (`main.log`, `Activity.log`, `Errors.log`, `Installation.log`, `InstallationHistory.log`, `Uninstall.log`) i managed store (`ManagedPrograms.json`, po potrebi). Pojedinačni instalacijski logovi (npr. `Google_Chrome.log`) nastaju po aplikaciji.
 - `START\Logs\`: log folder za START tok.
 
 ## Napomene
 
-- Zajedničke komponente: `Core/`, `DATABASE/`, `GUI/`, `START/`; Windows-specific: `Windows10/` i `Windows11/` (config, entry, theme wrapperi). Instalacioni engine, cooldown, wallpaper i system-spec helper su dijeljeni u `Core/`.
-- `Linux/install.ps1` i `MacOS/install.ps1` su prisutni kao zasebni ulazi u strukturi repozitorija.
+- Zajedničke komponente: `Core/`, `DATABASE/`, `GUI/`, `START/`; Windows-specific: `Windows10/` i `Windows11/` (config, entry, theme wrapperi). Instalacioni engine (moduli 01–06), cooldown, uninstaller, wallpaper i system-spec helper su dijeljeni u `Core/`.
+- `Core\Installer.ps1` je kompatibilni shim koji učitava `Core\Installers\Programs.ps1`; aktivni tokovi (GUI backend, `PinkSetup.ps1`) učitavaju `Programs.ps1` direktno.
+- Deinstalacija je dostupna kroz GUI **Apps Installer** (Uninstall mod) i funkcije `Core\Uninstaller.ps1`.
+- `Linux\install.ps1` i `MacOS\install.ps1` su prazni placeholderi.
+- `START\PinkSetup.ps1` opcija 5 ("Complete Installation") poziva `GUI\ProgramInstaller.ps1`, koji nije prisutan u projektu.

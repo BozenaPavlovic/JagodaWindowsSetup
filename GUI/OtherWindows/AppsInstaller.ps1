@@ -191,7 +191,17 @@ function Refresh-AppList {
             } | Select-Object -First 1
 
             if ($found) {
-                $appsToDisplay += $inst
+                # Attach the installed app info to the database app for reference
+                $found | Add-Member -MemberType NoteProperty -Name "InstalledDisplayName" -Value $inst.DisplayName -Force
+                $found | Add-Member -MemberType NoteProperty -Name "InstalledVersion" -Value $inst.DisplayVersion -Force
+                $found | Add-Member -MemberType NoteProperty -Name "InstalledSource" -Value $inst.Source -Force
+                $found | Add-Member -MemberType NoteProperty -Name "InstalledName" -Value $inst.Name -Force
+                $found | Add-Member -MemberType NoteProperty -Name "PackageFullName" -Value $inst.PackageFullName -Force
+                $found | Add-Member -MemberType NoteProperty -Name "PSChildName" -Value $inst.PSChildName -Force
+                $found | Add-Member -MemberType NoteProperty -Name "UninstallString" -Value $inst.UninstallString -Force
+                $found | Add-Member -MemberType NoteProperty -Name "QuietUninstallString" -Value $inst.QuietUninstallString -Force
+                
+                $appsToDisplay += $found
             }
         }
 
@@ -250,8 +260,18 @@ function Refresh-AppList {
             $cb = New-Object System.Windows.Forms.CheckBox
 
             $displayText = if ($app.DisplayName) { $app.DisplayName } else { $app.Name }
-            if ($app.Version) {
-                $displayText += " $($app.Version)"
+            
+            # In uninstall mode, show installed version if available
+            $versionToShow = $null
+            if ($script:InstallerMode -eq "Uninstall" -and $app.InstalledVersion) {
+                $versionToShow = $app.InstalledVersion
+            }
+            elseif ($app.Version) {
+                $versionToShow = $app.Version
+            }
+            
+            if ($versionToShow) {
+                $displayText += " $versionToShow"
             }
             if ($app.Description) {
                 $displayText += "  -  $($app.Description)"

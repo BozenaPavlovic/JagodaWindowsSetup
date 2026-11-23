@@ -67,3 +67,12 @@
 [2026-11-17 12:02:44] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Vivaldi: 5s
 [2026-11-17 12:04:07] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Mozilla Firefox: 5s
 [2026-11-17 12:50:42] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall True: FAILED | Program not found: True
+[2026-11-23 09:42:34] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall True: FAILED | Program not found: True
+[2026-11-23 09:51:58] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Cannot bind argument to parameter 'Programs' because it is an empty array.
+[2026-11-23 09:52:45] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Program not found: Microsoft Teams
+[2026-11-23 09:53:28] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Program not found: Microsoft Teams
+[2026-11-23 10:02:07] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Cannot bind parameter because parameter 'ProgramName' is specified more than once. To provide multiple values to parameters that can accept multiple values, use the array syntax. For example, "-parameter value1,value2,value3".
+[2026-11-23 10:03:12] [SUCCESS] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: SUCCESS | AppX package removed.
+[2026-11-23 10:03:12] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Cannot bind argument to parameter 'Programs' because it is an empty array.
+[2026-11-23 10:03:44] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Uninstaller exit code: -1978335230
+[2026-11-23 10:05:39] [ERROR] [DESKTOP-AGID67J] [Bozena] Uninstall Microsoft Teams: FAILED | Uninstaller exit code: -1978335212
