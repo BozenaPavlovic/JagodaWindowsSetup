@@ -78,8 +78,16 @@ try {
     Write-Host ""
     Write-Host "ALL CHECKS PASSED!" -ForegroundColor Green
 
-    # Start application
-    & "$Root\..\GUI\MainMenu.ps1"
+    # Start application as a separate process so the GUI message pump
+    # runs cleanly. The console stays visible for installation progress.
+    $guiPath = Join-Path $Root "..\GUI\MainMenu.ps1"
+    Start-Process powershell.exe -ArgumentList @(
+        "-NoProfile",
+        "-ExecutionPolicy Bypass",
+        "-File `"$guiPath`""
+    )
+
+    exit
 
 }
 catch {

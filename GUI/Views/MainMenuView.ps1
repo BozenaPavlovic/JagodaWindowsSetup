@@ -54,3 +54,14 @@ $script:Form.Controls.Add($script:MainMenuPanel)
 
 # System information stays at the bottom.
 $script:Form.Controls.Add($script:SystemInformationPanel)
+
+# ==========================================
+# ENSURE FORM STAYS ABOVE CONSOLE
+# ==========================================
+
+$script:Form.Add_Load({
+    $script:Form.TopMost = $true
+    $script:Form.Focus()
+    Start-Sleep -Milliseconds 200
+    $script:Form.TopMost = $false
+})
