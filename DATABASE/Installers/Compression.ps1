@@ -18,23 +18,6 @@
     },
 
     @{
-        Number = "13"
-        Name = "PeaZip"
-        Category = "Compression"
-        Description = "File Compression Tool"
-        Version = "11.4.0"
-        Match = "PeaZip"
-        File = "PeaZipSetup.exe"
-        URL = "https://github.com/peazip/PeaZip/releases/download/11.4.0/peazip-11.4.0.WIN64.exe"
-        Type = "EXE"
-        InteractiveArguments = ""
-        SilentArguments = "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-"
-        MinBytes = 5000000
-        Publisher = "Giorgio Tani"
-        WingetID = "GiorgioTani.PeaZip"
-    },
-
-    @{
         Number = "14"
         Name = "WinRAR"
         Category = "Compression"

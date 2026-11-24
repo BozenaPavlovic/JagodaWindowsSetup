@@ -54,8 +54,6 @@ $script:MenuButtons = @()
 $script:MenuItems = @(
     "Profile Installer",
     "Apps Installer",
-    "Theme Manager",
-    "Wallpaper Manager",
     "Log Viewer",
     "About"
 )
