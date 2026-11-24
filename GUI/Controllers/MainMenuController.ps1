@@ -118,9 +118,5 @@ function Initialize-MainMenuController {
     # EXIT BUTTON
     # ==========================================
 
-    $script:ExitButton.Add_Click({
-
-        $script:Form.Close()
-
-    })
+    # Application closure is reserved for the window's X button only.
 }

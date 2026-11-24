@@ -29,5 +29,4 @@ try {
 catch {
     Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
     Write-Log "FATAL: $($_.Exception.Message)"
-    exit 1
 }

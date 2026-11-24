@@ -87,8 +87,6 @@ try {
         "-File `"$guiPath`""
     )
 
-    exit
-
 }
 catch {
 

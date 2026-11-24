@@ -158,3 +158,15 @@
 [2026-11-24 12:01:36] [INFO] [DESKTOP-AGID67J] [Bozena] 7-Zip already installed (v26.06.00.0), skipping
 [2026-11-24 12:01:37] [INFO] [DESKTOP-AGID67J] [Bozena] Starting Winget install for Zoom (ID: Zoom.Zoom)
 [2026-11-24 12:06:53] [INFO] [DESKTOP-AGID67J] [Bozena] Zoom already installed (v7.2.51704), skipping
+[2026-11-24 12:08:35] [INFO] [DESKTOP-AGID67J] [Bozena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 12:08:36] [INFO] [DESKTOP-AGID67J] [Bozena] Python 3.14 already installed (v3.14.10150.0), skipping
+[2026-11-24 12:08:36] [INFO] [DESKTOP-AGID67J] [Bozena] Zoom already installed (v7.2.51704), skipping
+[2026-11-24 12:08:36] [INFO] [DESKTOP-AGID67J] [Bozena] Starting Winget install for Vivaldi (ID: Vivaldi.Vivaldi)
+[2026-11-24 12:10:08] [INFO] [DESKTOP-AGID67J] [Bozena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 12:10:08] [INFO] [DESKTOP-AGID67J] [Bozena] Python 3.14 already installed (v3.14.10150.0), skipping
+[2026-11-24 12:10:08] [INFO] [DESKTOP-AGID67J] [Bozena] Zoom already installed (v7.2.51704), skipping
+[2026-11-24 12:10:08] [INFO] [DESKTOP-AGID67J] [Bozena] Vivaldi already installed (v8.3.4191.47), skipping
+[2026-11-24 12:14:38] [INFO] [DESKTOP-AGID67J] [Bozena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 12:14:38] [INFO] [DESKTOP-AGID67J] [Bozena] Python 3.14 already installed (v3.14.10150.0), skipping
+[2026-11-24 12:14:38] [INFO] [DESKTOP-AGID67J] [Bozena] Zoom already installed (v7.2.51704), skipping
+[2026-11-24 12:14:38] [INFO] [DESKTOP-AGID67J] [Bozena] Vivaldi already installed (v8.3.4191.47), skipping
