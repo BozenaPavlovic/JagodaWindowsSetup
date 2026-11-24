@@ -154,6 +154,19 @@ function Install-OneApp {
             if (-not (Wait-ProcessWithUiRefresh -Process $process -TimeoutMs 300000)) {
                 throw "MSI installer timed out after 5 minutes."
             }
+
+            if ($process.ExitCode -eq 1925 -or $process.ExitCode -eq -1978335230) {
+                Write-Host "MSI requires elevation; retrying with RunAs..." -ForegroundColor Yellow
+                $process = Start-Process `
+                    -FilePath "msiexec.exe" `
+                    -ArgumentList $arguments `
+                    -Verb RunAs `
+                    -PassThru
+
+                if (-not (Wait-ProcessWithUiRefresh -Process $process -TimeoutMs 300000)) {
+                    throw "MSI installer timed out after 5 minutes."
+                }
+            }
         }
         else {
 
