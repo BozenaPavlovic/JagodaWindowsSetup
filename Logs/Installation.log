@@ -99,3 +99,57 @@
 [2026-11-23 12:47:17] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Slack: SUCCESS | Program uninstalled successfully.
 [2026-11-23 12:47:18] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall Telegram Desktop: SUCCESS | Program uninstalled successfully.
 [2026-11-23 12:47:19] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] Uninstall 5319275A.WhatsAppDesktop: SUCCESS | AppX package removed.
+[2026-11-24 10:11:15] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for WinRAR: 5s
+[2026-11-24 10:11:23] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for 7-Zip: 5s
+[2026-11-24 10:11:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Python 3.14: 5s
+[2026-11-24 10:12:36] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for VLC Media Player: 5s
+[2026-11-24 10:13:02] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Slack: 5s
+[2026-11-24 10:13:22] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Telegram: 5s
+[2026-11-24 10:13:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for WhatsApp: 5s
+[2026-11-24 10:14:29] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Zoom: 5s
+[2026-11-24 10:15:02] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Discord: 5s
+[2026-11-24 10:15:36] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Microsoft Teams: 5s
+[2026-11-24 10:17:33] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for LibreOffice: 5s
+[2026-11-24 10:18:00] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Google Drive for Desktop: 5s
+[2026-11-24 10:19:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Dropbox: 5s
+[2026-11-24 10:19:27] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for InfraRecorder: 5s
+[2026-11-24 10:20:30] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Brave: 5s
+[2026-11-24 10:21:14] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Vivaldi: 5s
+[2026-11-24 11:09:25] [INFO] [DESKTOP-GOT2GL4] [Božena] Test log entry
+[2026-11-24 11:22:30] [INFO] [DESKTOP-GOT2GL4] [Božena] WhatsApp already installed (v2.2645.101.0), skipping
+[2026-11-24 11:22:30] [INFO] [DESKTOP-GOT2GL4] [Božena] Discord already installed (v1.0.9269), skipping
+[2026-11-24 11:22:30] [INFO] [DESKTOP-GOT2GL4] [Božena] Vivaldi already installed (v8.3.4191.47), skipping
+[2026-11-24 11:22:31] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting Winget install for Google Chrome (ID: Google.Chrome)
+[2026-11-24 11:22:31] [WARNING] [DESKTOP-GOT2GL4] [Božena] Winget failed for Google Chrome, falling back to classic installer: Cannot find an overload for "StreamWriter" and the argument count: "3".
+[2026-11-24 11:24:15] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting MSI installation for Google Chrome from C:\Users\Božena\AppData\Local\Temp\PinkWindowsSetup\Downloads\ChromeEnterprise.msi (MSI Log: C:\Users\Božena\Desktop\JagodaWindowsSetup\Windows10\Logs\Google_Chrome_MSI.log)
+[2026-11-24 11:24:48] [ERROR] [DESKTOP-GOT2GL4] [Božena] Installation failed for Google Chrome: Classic (MSI): The term 'if' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+[2026-11-24 11:24:48] [INFO] [DESKTOP-GOT2GL4] [Božena] Installation cooldown for Google Chrome: 5s
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] WinRAR already installed (v7.23.0), skipping
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Python 3.14 already installed (v3.14.10150.0), skipping
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] VLC Media Player already installed (v3.0.24.0), skipping
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Slack already installed (v4.53.292), skipping
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Telegram already installed (v7.4.6), skipping
+[2026-11-24 11:41:58] [INFO] [DESKTOP-GOT2GL4] [Božena] WhatsApp already installed (v2.2645.101.0), skipping
+[2026-11-24 11:41:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting Winget install for Zoom (ID: Zoom.Zoom)
+[2026-11-24 11:45:42] [INFO] [DESKTOP-GOT2GL4] [Božena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 11:45:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Telegram already installed (v7.4.6), skipping
+[2026-11-24 11:45:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Zoom already installed (v7.2.51704), skipping
+[2026-11-24 11:45:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Discord already installed (v1.0.9269), skipping
+[2026-11-24 11:45:53] [INFO] [DESKTOP-GOT2GL4] [Božena] WinRAR already installed (v7.23.0), skipping
+[2026-11-24 11:45:53] [INFO] [DESKTOP-GOT2GL4] [Božena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 11:45:53] [INFO] [DESKTOP-GOT2GL4] [Božena] Python 3.14 already installed (v3.14.10150.0), skipping
+[2026-11-24 11:45:53] [INFO] [DESKTOP-GOT2GL4] [Božena] VLC Media Player already installed (v3.0.24.0), skipping
+[2026-11-24 11:45:53] [INFO] [DESKTOP-GOT2GL4] [Božena] Slack already installed (v4.53.292), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Telegram already installed (v7.4.6), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] WhatsApp already installed (v2.2645.101.0), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Zoom already installed (v7.2.51704), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Discord already installed (v1.0.9269), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Microsoft Teams already installed (v26288.2004.5269.3420), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] LibreOffice already installed (v26.8.3.1), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] OneDrive already installed (v26.212.1029.0006), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Google Drive for Desktop already installed (v134.0.1.0), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] Dropbox already installed (v280.4.5053), skipping
+[2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] InfraRecorder already installed (v0.53.00.00), skipping
+[2026-11-24 11:45:55] [INFO] [DESKTOP-GOT2GL4] [Božena] Microsoft Edge already installed (v158.0.4370.33), skipping
+[2026-11-24 11:45:55] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting Winget install for Brave (ID: Brave.Brave)

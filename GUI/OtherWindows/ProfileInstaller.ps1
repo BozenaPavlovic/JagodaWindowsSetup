@@ -708,7 +708,9 @@ $btnSave.Add_Click({
 $form.Add_MouseWheel({
     param($sender, $e)
 
-    $point = $form.PointToClient([System.Windows.Forms.Control]::Cursor.Position)
+    $cursorPos = [System.Windows.Forms.Control]::Cursor.Position
+    if ($cursorPos -eq $null -or $cursorPos.IsEmpty) { return }
+    $point = $form.PointToClient($cursorPos)
     $ctl = $form.GetChildAtPoint($point)
 
     while ($ctl) {
