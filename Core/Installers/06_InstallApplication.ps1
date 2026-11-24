@@ -103,7 +103,6 @@ function Install-OneApp {
             else {
                 Write-Host "Winget not available - using classic installer." -ForegroundColor Yellow
             }
-        }
 
         if (-not $App.URL) {
             throw "$($App.Name) is distributed via Microsoft Store / Winget only; no direct installer URL is available."
