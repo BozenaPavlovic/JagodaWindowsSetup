@@ -25,18 +25,26 @@ function Wait-ProcessWithUiRefresh {
         return $false
     }
 
-    $waited = 0
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($TimeoutMs)
 
-    while (-not $Process.WaitForExit(1000)) {
+    while (-not $Process.HasExited) {
 
-        Invoke-UiRefresh
+        $remaining = ($deadline - [DateTime]::UtcNow).TotalMilliseconds
 
-        $waited += 1000
-
-        if ($waited -ge $TimeoutMs) {
+        if ($remaining -le 0) {
             try { $Process.Kill() } catch {}
             return $false
         }
+
+        $slice = [math]::Min(500, [int]$remaining)
+
+        $completed = $Process.WaitForExit($slice)
+
+        if ($completed) {
+            return $true
+        }
+
+        Invoke-UiRefresh
     }
 
     return $true

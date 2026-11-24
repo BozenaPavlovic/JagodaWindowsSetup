@@ -62,9 +62,7 @@ function Install-OneApp {
 
         $didAttemptInstall = $true
 
-        if ($Global:OSVersion -ne "Windows11") {
-
-            if (Test-Winget) {
+        if (Test-Winget) {
 
                 try {
                     Install-WithWinget $App
@@ -105,9 +103,6 @@ function Install-OneApp {
             else {
                 Write-Host "Winget not available - using classic installer." -ForegroundColor Yellow
             }
-        }
-        else {
-            Write-Host "Detected Windows 11 - winget mode disabled." -ForegroundColor Yellow
         }
 
         if (-not $App.URL) {
@@ -187,7 +182,6 @@ function Install-OneApp {
             }
         }
 
-        $process.WaitForExit()
         $exitCode = $process.ExitCode
 
         if ($exitCode -notin @(0, 1641, 3010, 1, 2, 3)) {
