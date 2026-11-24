@@ -394,6 +394,7 @@ $toggleMode.Text = if ($script:InstallerMode -eq "Uninstall") { "Switch to Insta
 $toggleMode.Location = New-Object System.Drawing.Point(270, 545)
 $toggleMode.Size = New-Object System.Drawing.Size(160, 35)
 $toggleMode.Anchor = "Bottom, Left"
+$toggleMode.Visible = $false
 
 $toggleMode.Add_Click({
 
