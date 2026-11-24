@@ -580,8 +580,7 @@ $install.Add_Click({
     }
 
     $form.Tag = "Done"
-    $form.Close()
-
+    Refresh-AppList
 })
 
 $form.Controls.Add($install)

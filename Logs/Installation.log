@@ -153,3 +153,8 @@
 [2026-11-24 11:45:54] [INFO] [DESKTOP-GOT2GL4] [Božena] InfraRecorder already installed (v0.53.00.00), skipping
 [2026-11-24 11:45:55] [INFO] [DESKTOP-GOT2GL4] [Božena] Microsoft Edge already installed (v158.0.4370.33), skipping
 [2026-11-24 11:45:55] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting Winget install for Brave (ID: Brave.Brave)
+[2026-11-24 11:54:04] [INFO] [DESKTOP-AGID67J] [Bozena] Starting Winget install for WinRAR (ID: RARLab.WinRAR)
+[2026-11-24 12:01:36] [INFO] [DESKTOP-AGID67J] [Bozena] WinRAR already installed (v7.23.0), skipping
+[2026-11-24 12:01:36] [INFO] [DESKTOP-AGID67J] [Bozena] 7-Zip already installed (v26.06.00.0), skipping
+[2026-11-24 12:01:37] [INFO] [DESKTOP-AGID67J] [Bozena] Starting Winget install for Zoom (ID: Zoom.Zoom)
+[2026-11-24 12:06:53] [INFO] [DESKTOP-AGID67J] [Bozena] Zoom already installed (v7.2.51704), skipping
