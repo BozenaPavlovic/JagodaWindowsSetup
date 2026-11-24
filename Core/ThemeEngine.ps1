@@ -111,9 +111,17 @@ public class StrawberryThemeRefresh {
     # Shared refresh for Win10/Win11; OS hook point for future divergence.
     Write-Host "Refreshing Windows taskbar..." -ForegroundColor Yellow
 
-    Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Milliseconds 1500
-    Start-Process "$env:WINDIR\explorer.exe" -ArgumentList "/n,/e,::{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
+    # Send settings change notification without killing explorer.
+    # Killing explorer.exe during GUI backend load freezes the shell.
+    $null = [StrawberryThemeRefresh]::SendMessageTimeout(
+        [IntPtr]0xffff,
+        0x001A,
+        [UIntPtr]::Zero,
+        "ImmersiveColorSet",
+        2,
+        5000,
+        [ref]$Result
+    )
 }
 
 function global:Set-WindowsAccentTheme {
