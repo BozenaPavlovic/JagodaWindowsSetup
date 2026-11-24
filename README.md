@@ -119,6 +119,20 @@ JagodaWindowsSetup/
 - **Cooldown između aplikacija:** podrazumijevano **5 sekundi** (`Core\Installers\01_Configuration.ps1`, `$Global:InstallerSettings.InstallCooldownSeconds = 5`). `Core\InstallerHelpers.ps1`: `Get-InstallCooldownSeconds` i `Invoke-InstallCooldown` (log, odbrojavanje, `Start-Sleep`; 0 preskače čekanje). Poziva se u `finally` bloku `Install-OneApp` (`Core\Installers\06_InstallApplication.ps1`).
 - **Napredak:** CLI/GUI batch prikazuje progres (`Progress: X of Y`, `INSTALL PROGRESS: Index/Total`).
 
+## Kako radi detekcija i upravljanje postojećim/novijim/starim verzijama
+
+- **Detekcija (`Find-InstalledApp`):** `Install-OneApp` prije svake instalacije provjerava da li je aplikacija već instalirana. Pretraga se vrši po 4 registry putanje (`HKLM:\SOFTWARE\...\Uninstall\*`, `HKLM:\SOFTWARE\WOW6432Node\...\Uninstall\*`, `HKCU:\SOFTWARE\...\Uninstall\*`, `HKCU:\SOFTWARE\WOW6432Node\...\Uninstall\*`) po polju `DisplayName` uz `*Pattern*` (gdje je `Pattern` vrijednost `Match` iz baze). Ako ništa ne pronađe, provjerava AppX pakete (za Microsoft Store aplikacije). Vraćeni objekat sadrži `DisplayVersion` (broj verzije).
+
+- **AutoMode (batch / GUI "Install Selected"):** Ako je aplikacija već instalirana, **automatski se preskače**. Nema usporedbe verzija — provjerava se samo prisutnost.
+
+- **Interaktivni način:** Ako je aplikacija već instalirana, prikazuje se `ALREADY INSTALLED!` uz trenutnu verziju i ponuđuje `[S] Skip / [R] Reinstall`. Odabir **S** preskače, **R** reinstalira bez obzira na verziju.
+
+- **Nema logike za "novija/stara verzija":** Baza podataka (`Version`, `URL`) predstavlja jedini izvor istine. Instalator **neuspoređuje** instaliranu verziju sa `Version` iz baze — ne detektira da li je instalirano novija verzija i ne preskače je, niti provjerava da li je starija i da li treba upgrade. Ako korisnik želi ažuriranje, mora ručno odabrati **Reinstall**.
+
+- **Winget putanja (samo Windows 10):** Ako je winget dostupan, `Install-WithWinget` se poziva prvo koristeći `WingetID` iz baze. Winget samostalno rješava verziju — instalira najnoviju dostupnu iz winget repozitorija i može vratiti "već instalirano" ako je zadovoljeno. Pri neuspjehu pada na direktni URL installer.
+
+- **Direktni installer:** Preuzima se fiksni URL iz baze (npr. `python-3.14.7-amd64.exe`), pokreće se i zatim se provjerava prisutnost u registru/AppX. Verifikacija se ponavlja do 6 puta sa 3-sekundnim pauzama.
+
 ## Core moduli i funkcije
 
 | Fajl | Funkcije / varijable | Opis |
@@ -157,11 +171,11 @@ JagodaWindowsSetup/
 | `GUI\Models\MainMenuModel.ps1` | `Get-SystemInformation` (OS, verzija, build, CPU, GPU, RAM, disk, uptime, admin itd.). |
 | `GUI\Helpers\SystemInformationFormatter.ps1` | `Format-SystemInformation`. |
 | `GUI\Views\MainMenuView.ps1` | Kreira glavnu formu i dodaje panele. |
-| `GUI\Views\MainMenuPanel.ps1` | Dugmad: Profile Installer, Apps Installer, Theme Manager, Wallpaper Manager, Log Viewer, About, Exit. |
+| `GUI\Views\MainMenuPanel.ps1` | Dugmad: Profile Installer, Apps Installer, About (Exit i Log Viewer su sakrjeni). |
 | `GUI\Views\SystemInformationPanel.ps1` | Panel sistemskih informacija. |
 | `GUI\Controllers\MainMenuController.ps1` | `Initialize-MainMenuController` (mapiranje klikova na `GUI\OtherWindows`). |
 | `GUI\OtherWindows\LoadInstallerBackend.ps1` | Učitava Core logging/database/helpers, `Core\Installers\Programs.ps1` i ThemeManager; postavlja `$Global:AutoMode = $true`. |
-| `GUI\OtherWindows\AppsInstaller.ps1` | Instalacioni GUI (checkbox lista aplikacija iz baze, Select/Deselect All, profili). Poziva `Install-OneApp` sa progresom. Sadrži i ogranak za **Uninstall** (dugme "Switch to Uninstall Mode") koji poziva `Get-InstalledPrograms` i `Uninstall-MultipleApps`; te funkcije su trenutno **nedefinirane** jer je `Core\Uninstallers\` uklonjen (vidi Napomene). |
+| `GUI\OtherWindows\AppsInstaller.ps1` | Instalacioni GUI (checkbox lista aplikacija iz baze, Select/Deselect All, profili). Poziva `Install-OneApp` sa progresom. Uninstall ogranak je **sakrjen** (dugme "Switch to Uninstall Mode" je nevidljivo), ali je backend `Core\Uninstallers\` i dalje prisutan. |
 | `GUI\OtherWindows\ProfileInstaller.ps1` | Installation Manager – custom profili (Create/Edit/Delete/Install) uz `ProfileModel`/`ProfileController`. |
 | `GUI\Models\ProfileModel.ps1` | JSON persistencija custom profila (`DATA\Profiles\CustomProfiles.json`). |
 | `GUI\Controllers\ProfileController.ps1` | CRUD operacije i validacija profila. |
@@ -203,6 +217,6 @@ Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omoguća
 
 - Zajedničke komponente: `Core/`, `DATABASE/`, `GUI/`, `START/`; Windows-specific: `Windows10/` i `Windows11/` (config, entry, theme wrapperi). Instalacioni engine (moduli 01–06), cooldown, wallpaper i system-spec helper su dijeljeni u `Core/`.
 - `Core\Installer.ps1` je kompatibilni shim koji učitava `Core\Installers\Programs.ps1`; aktivni tokovi (GUI backend, `PinkSetup.ps1`) učitavaju `Programs.ps1` direktno.
-- **Deinstalacija:** `Core\Uninstallers\` engine (uključujući `Uninstaller.ps1`, `Uninstall-OneApp`, `Uninstall-MultipleApps`, `Get-InstalledPrograms`, `Find-UninstallCommand` i dr.) je **uklonjen** iz projekta. `GUI\OtherWindows\AppsInstaller.ps1` i dalje ima Uninstall ogranak koji poziva te funkcije, ali one više nisu definirane, pa taj tok nije funkcionalan. Preostali zapisi (`Logs\Uninstall.log`, `Windows11\Logs\Uninstall.log`, `Logs\ManagedPrograms.json`, `START\Logs\*_Winget.log`) su historijski artefakti ranije verzije.
+- **Deinstalacija:** `Core\Uninstallers\` engine (uključujući `Uninstaller.ps1`, `Uninstall-OneApp`, `Uninstall-MultipleApps`, `Get-InstalledPrograms`, `Find-UninstallCommand` i dr.) je **preostao** iz originalne implementacije i dostupan je u pozadini. `GUI\OtherWindows\AppsInstaller.ps1` i dalje ima Uninstall ogranak, ali je dugme "Switch to Uninstall Mode" **sakrjeno** pa korisnik ne može preći u Uninstall režim preko GUI-ja. Preostali zapisi (`Logs\Uninstall.log`, `Windows11\Logs\Uninstall.log`, `Logs\ManagedPrograms.json`, `START\Logs\*_Winget.log`) su historijski artefakti ranije verzije.
 - `START\PinkSetup.ps1` opcija 5 ("Complete Installation") poziva `GUI\ProgramInstaller.ps1`, koji nije prisutan u projektu.
 - `Linux\install.ps1` i `MacOS\install.ps1` su prazni placeholderi.
