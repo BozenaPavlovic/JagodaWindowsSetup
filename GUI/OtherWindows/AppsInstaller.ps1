@@ -614,6 +614,29 @@ $back.Add_Click({
 $form.Controls.Add($back)
 
 # ==========================================
+# MOUSE WHEEL HOVER SCROLLING
+# ==========================================
+
+$form.Add_MouseWheel({
+    param($sender, $e)
+
+    $point = $form.PointToClient([System.Windows.Forms.Control]::Cursor.Position)
+    $ctl = $form.GetChildAtPoint($point)
+
+    while ($ctl) {
+        if ($ctl.AutoScroll) {
+            $x = $ctl.AutoScrollPosition.X
+            $y = $ctl.AutoScrollPosition.Y - $e.Delta
+            if ($y -lt 0) { $y = 0 }
+            $ctl.ScrollTo([System.Math]::Max(0, $x), $y)
+            $e.Handled = $true
+            return
+        }
+        $ctl = $ctl.Parent
+    }
+})
+
+# ==========================================
 # SHOW FORM
 # ==========================================
 
