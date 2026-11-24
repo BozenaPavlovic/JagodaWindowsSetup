@@ -103,40 +103,6 @@
     },
 
     @{
-        Number = "28"
-        Name = "UltraVNC"
-        Category = "Utilities"
-        Description = "VNC Remote Desktop Viewer and Server"
-        Version = "1.8.3.2"
-        Match = "UltraVNC"
-        File = "UltraVNCSetup.exe"
-        URL = "https://uvnc.eu/download/1832/UltraVNC_1_8_3_2_X64_Setup.exe"
-        Type = "EXE"
-        InteractiveArguments = ""
-        SilentArguments = "/VERYSILENT /NORESTART"
-        MinBytes = 4000000
-        Publisher = "UltraVNC Team"
-        WingetID = "uvncbvba.UltraVnc"
-    },
-
-    @{
-        Number = "29"
-        Name = "RustDesk"
-        Category = "Utilities"
-        Description = "Open-Source Remote Desktop"
-        Version = "1.5.1"
-        Match = "RustDesk"
-        File = "RustDeskSetup.exe"
-        URL = "https://github.com/rustdesk/rustdesk/releases/download/1.5.1/rustdesk-1.5.1-x86_64.exe"
-        Type = "EXE"
-        InteractiveArguments = ""
-        SilentArguments = "--silent-install"
-        MinBytes = 10000000
-        Publisher = "RustDesk"
-        WingetID = "RustDesk.RustDesk"
-    },
-
-    @{
         Number = "30"
         Name = "Tailscale"
         Category = "Utilities"
