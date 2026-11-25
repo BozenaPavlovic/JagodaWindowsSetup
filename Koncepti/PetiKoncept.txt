@@ -9,3 +9,14 @@ ododati qualitly of life funkcionalnosti
 dodati još APPS u DATABASE
 
 dodati male ikone pored app koje user selekta
+
+
+
+ZA OBZ http://192.168.254.22/instalacije/
+Dodati  mali gui apps section s ovog linka ( naprvitit da je dinami svaki put se povlači s linka apps i instalira )
+također neka se apps nalaze u apps installer pod section OBZ aplikacije , i ako nema apps za instlazije stavi 
+varijablu koja će se prikazivati msg( kao npr trenutno na Linku neam apps )
+također trebalo bi bitit moguće ovov dodati u profile i da profili
+
+
+
