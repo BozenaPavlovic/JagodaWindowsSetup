@@ -17,6 +17,9 @@ Dodati  mali gui apps section s ovog linka ( naprvitit da je dinami svaki put se
 također neka se apps nalaze u apps installer pod section OBZ aplikacije , i ako nema apps za instlazije stavi 
 varijablu koja će se prikazivati msg( kao npr trenutno na Linku neam apps )
 također trebalo bi bitit moguće ovov dodati u profile i da profili
-
-
-
+Index of /instalacije
+[ICO]	Name	Last modified	Size	Description
+[PARENTDIR]	Parent Directory	 	-	 
+[   ]	OBZ32OcsPackage.exe	2026-11-25 09:57	5.6M	 
+[   ]	OBZ64OcsPackage.exe	2026-11-25 09:57	6.1M	 
+Apache/2.4.71 (Debian) Server at 192.168.254.22 Port 80
