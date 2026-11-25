@@ -21,6 +21,18 @@ if (-not $Global:OBZSettings.ContainsKey("ApplicationDirectoryUrl")) {
 }
 
 # ==========================================
+# OBZ DISPLAY NAME OVERRIDES
+# Maps filename (without .exe) to actual installed DisplayName for detection
+# ==========================================
+
+if (-not $Global:OBZSettings.ContainsKey("DisplayNameOverrides")) {
+    $Global:OBZSettings.DisplayNameOverrides = @{
+        "OBZ32OcsPackage" = "OCS Inventory NG Agent"
+        "OBZ64OcsPackage" = "OCS Inventory NG Agent"
+    }
+}
+
+# ==========================================
 # OBZ MESSAGES
 # ==========================================
 
@@ -56,17 +68,9 @@ if (-not $Global:OBZSettings.ContainsKey("DownloadFolder")) {
     $Global:OBZSettings.DownloadFolder = Join-Path $OBZProjectRoot "DATABASE\OBZ\Downloads"
 }
 
-if (-not $Global:OBZSettings.ContainsKey("DownloadTimeoutSeconds")) {
-    $Global:OBZSettings.DownloadTimeoutSeconds = 300
-}
-
-if (-not $Global:OBZSettings.ContainsKey("DownloadRetries")) {
-    $Global:OBZSettings.DownloadRetries = 3
-}
-
-if (-not $Global:OBZSettings.ContainsKey("RetryDelaySeconds")) {
-    $Global:OBZSettings.RetryDelaySeconds = 5
-}
+$Global:OBZSettings.DownloadTimeoutSeconds = 60
+$Global:OBZSettings.DownloadRetries = 2
+$Global:OBZSettings.RetryDelaySeconds = 3
 
 # ==========================================
 # OBZ TIMEOUT SETTINGS

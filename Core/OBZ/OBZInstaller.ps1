@@ -55,6 +55,17 @@ function Write-OBZLog {
     catch {
         Write-Warning "OBZ logging failed: $($_.Exception.Message)"
     }
+
+    # Also output to console (like standard installer)
+    $color = switch ($Level) {
+        "SUCCESS" { "Green" }
+        "WARNING" { "Yellow" }
+        "ERROR"   { "Red" }
+        default   { "Cyan" }
+    }
+    if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
+        Write-Host "[OBZ] $Message" -ForegroundColor $color
+    }
 }
 
 # ==========================================
@@ -154,6 +165,84 @@ function Test-OBZInstallerFile {
 }
 
 # ==========================================
+# PRE-INSTALL CHECK
+# ==========================================
+
+function Test-OBZAppInstalled {
+    <#
+        Checks if an OBZ application is already installed on the system.
+        Uses the standard registry + AppX detection (same as uninstaller).
+        Matches by application Name or DisplayName from OBZ database.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [psobject]$Application
+    )
+
+    # Load uninstaller detection functions if not already loaded
+    $UninstallerRoot = Join-Path $OBZInstallerRoot "Core\Uninstallers"
+    $RegistryDetection = Join-Path $UninstallerRoot "02_RegistryDetection.ps1"
+    $AppXDetection = Join-Path $UninstallerRoot "03_AppXDetection.ps1"
+
+    if (-not (Get-Command Get-InstalledProgramsFromRegistry -ErrorAction SilentlyContinue)) {
+        if (Test-Path -LiteralPath $RegistryDetection) {
+            . $RegistryDetection
+        }
+    }
+
+    if (-not (Get-Command Get-InstalledProgramsFromAppx -ErrorAction SilentlyContinue)) {
+        if (Test-Path -LiteralPath $AppXDetection) {
+            . $AppXDetection
+        }
+    }
+
+    $searchNames = @()
+    if ($Application.Name) { $searchNames += $Application.Name }
+    if ($Application.DisplayName) { $searchNames += $Application.DisplayName }
+    if ($Application.FileName) { $searchNames += [System.IO.Path]::GetFileNameWithoutExtension($Application.FileName) }
+
+    # Add display name overrides from config
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($Application.FileName)
+    if ($Global:OBZSettings.DisplayNameOverrides -and $Global:OBZSettings.DisplayNameOverrides.ContainsKey($baseName)) {
+        $override = $Global:OBZSettings.DisplayNameOverrides[$baseName]
+        if ($override) { $searchNames += $override }
+    }
+
+    Write-OBZLog -Level INFO -Message "Checking if already installed: $($Application.Name) (search names: $($searchNames -join ', '))"
+
+    foreach ($name in $searchNames) {
+        if ([string]::IsNullOrWhiteSpace($name)) { continue }
+
+        # Check registry programs
+        try {
+            $regMatches = Get-InstalledProgramsFromRegistry -Pattern $name
+            if ($regMatches -and $regMatches.Count -gt 0) {
+                Write-OBZLog -Level INFO -Message "OBZ app '$($Application.Name)' already installed (registry match: $name) - found: $($regMatches.DisplayName -join ', ')"
+                return $true
+            }
+        }
+        catch { 
+            Write-OBZLog -Level WARNING -Message "Registry check failed for '$name': $($_.Exception.Message)"
+        }
+
+        # Check AppX programs
+        try {
+            $appxMatches = Get-InstalledProgramsFromAppx -Pattern $name
+            if ($appxMatches -and $appxMatches.Count -gt 0) {
+                Write-OBZLog -Level INFO -Message "OBZ app '$($Application.Name)' already installed (AppX match: $name) - found: $($appxMatches.Name -join ', ')"
+                return $true
+            }
+        }
+        catch { 
+            Write-OBZLog -Level WARNING -Message "AppX check failed for '$name': $($_.Exception.Message)"
+        }
+    }
+
+    Write-OBZLog -Level INFO -Message "Not installed: $($Application.Name)"
+    return $false
+}
+
+# ==========================================
 # DOWNLOAD
 # ==========================================
 
@@ -181,10 +270,12 @@ function Get-OBZInstallerFile {
     $installer = Join-Path $downloadFolder $Application.FileName
     $temporary = "$installer.partial"
 
-    $timeoutMs = [int]$Global:OBZSettings.DownloadTimeoutSeconds * 1000
+    $timeoutSec = [int]$Global:OBZSettings.DownloadTimeoutSeconds
     $retries = [int]$Global:OBZSettings.DownloadRetries
     if ($retries -lt 1) { $retries = 1 }
     $retryDelay = [int]$Global:OBZSettings.RetryDelaySeconds
+
+    Write-OBZLog -Level INFO -Message "Downloading: $($Application.FileName) from $($Application.DownloadUrl) (timeout: ${timeoutSec}s, retries: $retries)"
 
     $oldProgressPreference = $ProgressPreference
     $ProgressPreference = "SilentlyContinue"
@@ -197,23 +288,19 @@ function Get-OBZInstallerFile {
             }
 
             try {
-                $client = New-Object System.Net.WebClient
-                $client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                Write-OBZLog -Level INFO -Message "Download attempt $attempt of $retries for $($Application.FileName)"
 
-                try {
-                    $task = $client.DownloadFileTaskAsync($Application.DownloadUrl, $temporary)
-                    if (-not $task.Wait($timeoutMs)) {
-                        $client.CancelAsync()
-                        throw "Download timed out after $($timeoutMs / 1000) seconds."
-                    }
-                }
-                finally {
-                    $client.Dispose()
+                $headers = @{
+                    "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 }
 
+                Invoke-WebRequest -Uri $Application.DownloadUrl -OutFile $temporary -Headers $headers -TimeoutSec $timeoutSec -UseBasicParsing -ErrorAction Stop
+                
+                Write-OBZLog -Level INFO -Message "Download completed for $($Application.FileName) on attempt $attempt"
                 break
             }
             catch {
+                Write-OBZLog -Level WARNING -Message "Download attempt $attempt failed for $($Application.FileName): $($_.Exception.Message)"
                 if ($attempt -ge $retries) {
                     throw
                 }
@@ -235,6 +322,8 @@ function Get-OBZInstallerFile {
 
     Move-Item -LiteralPath $temporary -Destination $installer -Force
 
+    Write-OBZLog -Level INFO -Message "Installer saved to: $installer"
+
     return $installer
 }
 
@@ -251,7 +340,7 @@ function Install-OBZApplication {
         only the stored database values are used.
 
         Returns an object:
-            Status = "Success" | "Error"
+            Status = "Success" | "Error" | "Skipped"
             ExitCode = process exit code (when available)
             InstallerPath = local installer path
             Message = human readable message
@@ -279,7 +368,24 @@ function Install-OBZApplication {
             throw "Download URL is not a valid OBZ server URL."
         }
 
+        # --- Pre-install check ---
+        if (Test-OBZAppInstalled -Application $app) {
+            Write-OBZLog -Level INFO -Message "OBZ app already installed, skipping: $($app.Name) [$($app.Id)]"
+            Write-Host "`n========================================" -ForegroundColor Magenta
+            Write-Host " OBZ PROGRESS: $($app.Name) - ALREADY INSTALLED" -ForegroundColor Green
+            Write-Host "========================================" -ForegroundColor Magenta
+            return [pscustomobject]@{
+                Status        = "Skipped"
+                ExitCode      = $null
+                InstallerPath = $null
+                Message       = "$($app.Name) is already installed."
+            }
+        }
+
         Write-OBZLog -Level INFO -Message "Starting OBZ install: $($app.Name) [$($app.Id)]"
+        Write-Host "`n========================================" -ForegroundColor Magenta
+        Write-Host " OBZ PROGRESS: $($app.Name)" -ForegroundColor Cyan
+        Write-Host "========================================" -ForegroundColor Magenta
 
         $installerPath = Get-OBZInstallerFile -Application $app
 
@@ -288,6 +394,7 @@ function Install-OBZApplication {
         }
 
         Write-OBZLog -Level INFO -Message "Executing: $installerPath"
+        Write-Host "Starting installation..." -ForegroundColor Cyan
 
         if ($Arguments -and $Arguments.Count -gt 0) {
             $process = Start-Process -FilePath $installerPath -ArgumentList $Arguments -Wait -PassThru
@@ -301,6 +408,9 @@ function Install-OBZApplication {
         # Success codes: 0, 1641 (reboot initiated), 3010 (reboot required).
         if ($exitCode -eq 0 -or $exitCode -eq 1641 -or $exitCode -eq 3010) {
             Write-OBZLog -Level SUCCESS -Message "OBZ install succeeded: $($app.Name) (exit $exitCode)"
+            Write-Host "`nINSTALLATION SUCCESSFUL!" -ForegroundColor Green
+            Write-Host "Application: $($app.Name)" -ForegroundColor Green
+            Write-Host "Exit code: $exitCode" -ForegroundColor Green
             return [pscustomobject]@{
                 Status        = "Success"
                 ExitCode      = $exitCode
@@ -310,6 +420,9 @@ function Install-OBZApplication {
         }
 
         Write-OBZLog -Level ERROR -Message "OBZ install failed: $($app.Name) (exit $exitCode)"
+        Write-Host "`nINSTALLATION FAILED!" -ForegroundColor Red
+        Write-Host "Application: $($app.Name)" -ForegroundColor Red
+        Write-Host "Exit code: $exitCode" -ForegroundColor Red
         return [pscustomobject]@{
             Status        = "Error"
             ExitCode      = $exitCode
@@ -320,6 +433,8 @@ function Install-OBZApplication {
     catch {
         $message = $_.Exception.Message
         Write-OBZLog -Level ERROR -Message "OBZ install error: $message"
+        Write-Host "`nINSTALLATION ERROR!" -ForegroundColor Red
+        Write-Host $message -ForegroundColor Red
         return [pscustomobject]@{
             Status        = "Error"
             ExitCode      = $null
