@@ -74,12 +74,42 @@ catch {
     ) | Out-Null
 
     return
+
+}
+
+# ==========================================
+# LOAD OBZ BACKEND (independent of standard engine)
+# ==========================================
+
+$script:ObzAvailable = $false
+$script:ObzRefreshResult = $null
+
+$ObzRoot = Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) "Core\OBZ"
+$ObzProviderPath = Join-Path $ObzRoot "OBZApplicationProvider.ps1"
+$ObzInstallerPath = Join-Path $ObzRoot "OBZInstaller.ps1"
+
+if ((Test-Path -LiteralPath $ObzProviderPath -PathType Leaf) -and (Test-Path -LiteralPath $ObzInstallerPath -PathType Leaf)) {
+
+    try {
+
+        . $ObzProviderPath
+        . $ObzInstallerPath
+
+        $script:ObzAvailable = $true
+        $script:ObzRefreshResult = Update-OBZApplicationDatabase
+
+    }
+    catch {
+
+        Write-Warning "OBZ backend failed to load: $($_.Exception.Message)"
+
+    }
+
 }
 
 # ==========================================
 # PROFILE DEFINITIONS
 # ==========================================
-
 $profiles = @{
     "Profil A" = @("2", "4", "6", "7")
     "Profil B" = @("2", "4")
@@ -152,8 +182,8 @@ $form.Controls.Add($title)
 
 $appPanel = New-Object System.Windows.Forms.Panel
 
-$appPanel.Location = New-Object System.Drawing.Point(20, 50)
-$appPanel.Size = New-Object System.Drawing.Size(645, 480)
+$appPanel.Location = New-Object System.Drawing.Point(20, 215)
+$appPanel.Size = New-Object System.Drawing.Size(645, 315)
 $appPanel.Anchor = (
     [System.Windows.Forms.AnchorStyles]::Top -bor
     [System.Windows.Forms.AnchorStyles]::Bottom -bor
@@ -166,6 +196,27 @@ $appPanel.BorderStyle = "FixedSingle"
 $appPanel.BackColor = [System.Drawing.Color]::White
 
 $form.Controls.Add($appPanel)
+
+# ==========================================
+# OBZ APPLICATION PANEL (TOP)
+# ==========================================
+
+$obzPanel = New-Object System.Windows.Forms.Panel
+
+$obzPanel.Location = New-Object System.Drawing.Point(20, 50)
+$obzPanel.Size = New-Object System.Drawing.Size(645, 150)
+$obzPanel.Anchor = (
+    [System.Windows.Forms.AnchorStyles]::Top -bor
+    [System.Windows.Forms.AnchorStyles]::Left -bor
+    [System.Windows.Forms.AnchorStyles]::Right
+)
+
+$obzPanel.AutoScroll = $true
+$obzPanel.BorderStyle = "FixedSingle"
+$obzPanel.BackColor = [System.Drawing.Color]::White
+$obzPanel.Visible = ($script:InstallerMode -eq "Install")
+
+$form.Controls.Add($obzPanel)
 
 # ==========================================
 # APPLICATION LIST REFRESH
@@ -326,12 +377,89 @@ function Refresh-AppList {
 }
 
 # ==========================================
+# OBZ APPLICATION LIST REFRESH
+# ==========================================
+
+function Refresh-OBZList {
+
+    $script:obzChecks = @()
+
+    if (-not $obzPanel) {
+        return
+    }
+
+    $obzPanel.Controls.Clear()
+
+    $header = New-Object System.Windows.Forms.Label
+    $header.Text = "OBZ APPLICATIONS"
+    $header.Font = New-Object System.Drawing.Font(
+        "Segoe UI", 10, [System.Drawing.FontStyle]::Bold
+    )
+    $header.Location = New-Object System.Drawing.Point(10, 6)
+    $header.Size = New-Object System.Drawing.Size(400, 22)
+    $header.ForeColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
+    $obzPanel.Controls.Add($header)
+
+    $refreshBtn = New-Object System.Windows.Forms.Button
+    $refreshBtn.Text = "Refresh OBZ"
+    $refreshBtn.Location = New-Object System.Drawing.Point(520, 4)
+    $refreshBtn.Size = New-Object System.Drawing.Size(115, 24)
+    $refreshBtn.Add_Click({
+        if ($script:ObzAvailable) {
+            $script:ObzRefreshResult = Update-OBZApplicationDatabase
+            Refresh-OBZList
+        }
+    })
+    $obzPanel.Controls.Add($refreshBtn)
+
+    $y = 34
+
+    if (-not $script:ObzAvailable) {
+        $lbl = New-Object System.Windows.Forms.Label
+        $lbl.Text = "OBZ unavailable."
+        $lbl.Location = New-Object System.Drawing.Point(10, $y)
+        $lbl.Size = New-Object System.Drawing.Size(600, 22)
+        $obzPanel.Controls.Add($lbl)
+        return
+    }
+
+    $obzApps = @(Get-OBZApplication)
+
+    if ($obzApps.Count -eq 0) {
+        $lbl = New-Object System.Windows.Forms.Label
+        $lbl.Text = $Global:OBZSettings.Messages.NoApplicationsAvailable
+        $lbl.Location = New-Object System.Drawing.Point(10, $y)
+        $lbl.Size = New-Object System.Drawing.Size(600, 22)
+        $obzPanel.Controls.Add($lbl)
+        return
+    }
+
+    foreach ($obzApp in ($obzApps | Sort-Object Name)) {
+
+        $cb = New-Object System.Windows.Forms.CheckBox
+        $cb.Text = "$($obzApp.Name)  ($($obzApp.FileName))"
+        $cb.Tag = $obzApp
+        $cb.Checked = $true
+        $cb.Location = New-Object System.Drawing.Point(28, $y)
+        $cb.Size = New-Object System.Drawing.Size(600, 24)
+        $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+        $cb.AutoEllipsis = $true
+
+        $obzPanel.Controls.Add($cb)
+        $script:obzChecks += $cb
+
+        $y += 26
+    }
+}
+
+# ==========================================
 # INITIAL APPLICATION LIST
 # ==========================================
 
 Refresh-AppList
+Refresh-OBZList
 
-if ($script:checks.Count -eq 0) {
+if ($script:checks.Count -eq 0 -and $script:obzChecks.Count -eq 0) {
 
     [System.Windows.Forms.MessageBox]::Show(
         "No applications found for this selection.",
@@ -359,6 +487,10 @@ $selectAll.Add_Click({
         $cb.Checked = $true
     }
 
+    foreach ($cb in $script:obzChecks) {
+        $cb.Checked = $true
+    }
+
 })
 
 $form.Controls.Add($selectAll)
@@ -377,6 +509,10 @@ $deselectAll.Anchor = "Bottom, Left"
 $deselectAll.Add_Click({
 
     foreach ($cb in $script:checks) {
+        $cb.Checked = $false
+    }
+
+    foreach ($cb in $script:obzChecks) {
         $cb.Checked = $false
     }
 
@@ -437,7 +573,10 @@ $toggleMode.Add_Click({
 
     $install.Text = if ($script:InstallerMode -eq "Uninstall") { "Uninstall Selected" } else { "Install Selected" }
 
+    $obzPanel.Visible = ($script:InstallerMode -eq "Install")
+
     Refresh-AppList
+    Refresh-OBZList
 
 })
 
@@ -468,7 +607,16 @@ $install.Add_Click({
             ForEach-Object { $_.Tag }
     )
 
-    if ($selectedApps.Count -eq 0) {
+    $selectedObz = @()
+    if ($script:InstallerMode -eq "Install") {
+        $selectedObz = @(
+            $script:obzChecks |
+                Where-Object { $_.Checked } |
+                ForEach-Object { $_.Tag }
+        )
+    }
+
+    if ($selectedApps.Count -eq 0 -and $selectedObz.Count -eq 0) {
 
         [System.Windows.Forms.MessageBox]::Show(
             "Select at least one application.",
@@ -481,7 +629,7 @@ $install.Add_Click({
     $actionWord = if ($script:InstallerMode -eq "Uninstall") { "Uninstall" } else { "Install" }
 
     $confirmation = [System.Windows.Forms.MessageBox]::Show(
-        "$actionWord $($selectedApps.Count) selected applications?",
+        "$actionWord $(($selectedApps.Count + $selectedObz.Count)) selected applications?",
         $(if ($script:InstallerMode -eq "Uninstall") { "Confirm Uninstall" } else { "Confirm Installation" }),
         [System.Windows.Forms.MessageBoxButtons]::YesNo,
         [System.Windows.Forms.MessageBoxIcon]::Question
@@ -519,6 +667,32 @@ $install.Add_Click({
 
             $installErrors = @()
 
+            # --- OBZ applications (independent backend) ---
+            if ($selectedObz.Count -gt 0 -and $script:ObzAvailable) {
+
+                $obzTotal = $selectedObz.Count
+                $obzCurrent = 0
+
+                foreach ($obzApp in $selectedObz) {
+
+                    $obzCurrent++
+
+                    if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
+                        Write-Host "`nOBZ Progress: $obzCurrent of $obzTotal applications" -ForegroundColor Cyan
+                    }
+
+                    $obzResult = Install-OBZApplication -Id $obzApp.Id
+
+                    if ($obzResult.Status -ne "Success") {
+                        $installErrors += "$($obzApp.Name): $($obzResult.Message)"
+                    }
+
+                    [System.Windows.Forms.Application]::DoEvents()
+                }
+
+            }
+
+            # --- Standard applications (existing backend) ---
             $totalApps = @($selectedApps).Count
             $currentApp = 0
 

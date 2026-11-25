@@ -1,0 +1,6 @@
+﻿[2026-11-25 10:35:34] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Application 'deadbeef' does not exist in the current OBZ database.
+[2026-11-25 10:35:34] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download URL is not a valid OBZ server URL.
+[2026-11-25 10:35:34] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: ok [2fca830c9b9a1877c9dca755acb92fd9]
+[2026-11-25 10:35:36] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download timed out after 2 seconds.
+[2026-11-25 10:37:45] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obztest [43147a92bc0f4ae0aefb0afe33ba11ac]
+[2026-11-25 10:38:15] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download timed out after 30 seconds.
