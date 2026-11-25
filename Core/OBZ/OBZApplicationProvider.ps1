@@ -74,8 +74,17 @@ function Get-OBZInstallerLinks {
 
         if ([string]::IsNullOrWhiteSpace($leaf)) { continue }
 
-        # Initially support EXE installers only.
-        if ($leaf -notmatch '\.exe$') { continue }
+        # Supported installers: EXE and MSI.
+        $installerType = $null
+        if ($leaf -match '\.exe$') {
+            $installerType = "exe"
+        }
+        elseif ($leaf -match '\.msi$') {
+            $installerType = "msi"
+        }
+        else {
+            continue
+        }
 
         # Build the absolute download URL from the raw (encoded) href.
         $baseUri = New-Object System.Uri($BaseUrl)
@@ -88,8 +97,9 @@ function Get-OBZInstallerLinks {
         $seen[$key] = $true
 
         $results += [pscustomobject]@{
-            FileName    = $leaf
-            DownloadUrl = $downloadUrl
+            FileName      = $leaf
+            DownloadUrl   = $downloadUrl
+            InstallerType = $installerType
         }
     }
 

@@ -128,8 +128,10 @@ function Test-OBZDownloadUrl {
 
 function Test-OBZInstallerFile {
     <#
-        Validates a downloaded EXE: exists, non-empty, and has a
-        valid DOS/PE "MZ" header.
+        Validates a downloaded installer by content (extension-independent,
+        because downloads are staged as *.partial): exists, non-empty, and
+        has a valid header. EXE uses the DOS/PE "MZ" header; MSI uses the
+        OLE compound file header (D0 CF 11 E0).
     #>
     param(
         [Parameter(Mandatory = $true)]
@@ -148,10 +150,18 @@ function Test-OBZInstallerFile {
     try {
         $stream = [System.IO.File]::OpenRead($Path)
         try {
-            $buffer = New-Object byte[] 2
-            $read = $stream.Read($buffer, 0, 2)
-            if ($read -lt 2) { return $false }
-            if ($buffer[0] -ne 0x4D -or $buffer[1] -ne 0x5A) { return $false }
+            $buffer = New-Object byte[] 8
+            $read = $stream.Read($buffer, 0, 8)
+
+            # EXE: DOS/PE "MZ"
+            if ($read -ge 2 -and $buffer[0] -eq 0x4D -and $buffer[1] -eq 0x5A) {
+                return $true
+            }
+
+            # MSI: OLE compound file D0 CF 11 E0
+            if ($read -ge 4 -and $buffer[0] -eq 0xD0 -and $buffer[1] -eq 0xCF -and $buffer[2] -eq 0x11 -and $buffer[3] -eq 0xE0) {
+                return $true
+            }
         }
         finally {
             $stream.Dispose()
@@ -161,7 +171,7 @@ function Test-OBZInstallerFile {
         return $false
     }
 
-    return $true
+    return $false
 }
 
 # ==========================================
@@ -356,12 +366,12 @@ function Install-OBZApplication {
     try {
         $app = Resolve-OBZApplicationReference -Id $Id -Application $Application
 
-        if ($app.InstallerType -and $app.InstallerType -ne "exe") {
+        if ($app.InstallerType -and $app.InstallerType -ne "exe" -and $app.InstallerType -ne "msi") {
             throw "Unsupported OBZ installer type '$($app.InstallerType)'."
         }
 
-        if ($app.FileName -notmatch '\.exe$') {
-            throw "Only EXE installers are supported. File: $($app.FileName)"
+        if ($app.FileName -notmatch '\.(exe|msi)$') {
+            throw "Only EXE and MSI installers are supported. File: $($app.FileName)"
         }
 
         if (-not (Test-OBZDownloadUrl -DownloadUrl $app.DownloadUrl)) {
@@ -396,8 +406,20 @@ function Install-OBZApplication {
         Write-OBZLog -Level INFO -Message "Executing: $installerPath"
         Write-Host "Starting installation..." -ForegroundColor Cyan
 
+        $argumentsList = @()
         if ($Arguments -and $Arguments.Count -gt 0) {
-            $process = Start-Process -FilePath $installerPath -ArgumentList $Arguments -Wait -PassThru
+            $argumentsList = @($Arguments)
+        }
+
+        if ($app.FileName -match '\.msi$') {
+            $msiArgs = @("/i", "`"$installerPath`"", "/qn", "/norestart")
+            if ($argumentsList.Count -gt 0) {
+                $msiArgs += $argumentsList
+            }
+            $process = Start-Process -FilePath "msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru
+        }
+        elseif ($argumentsList.Count -gt 0) {
+            $process = Start-Process -FilePath $installerPath -ArgumentList $argumentsList -Wait -PassThru
         }
         else {
             $process = Start-Process -FilePath $installerPath -Wait -PassThru

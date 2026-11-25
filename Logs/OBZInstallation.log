@@ -14,3 +14,22 @@
 [2026-11-25 10:59:41] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obzcmd [ecb2f0e87213d8843709e4e893d08242]
 [2026-11-25 10:59:42] [INFO] [DESKTOP-AGID67J] [Bozena] Executing: C:\Users\Bozena\Documents\JagodaWindowsSetup\DATABASE\OBZ\Downloads\obzcmd.exe
 [2026-11-25 10:59:43] [SUCCESS] [DESKTOP-AGID67J] [Bozena] OBZ install succeeded: obzcmd (exit 0)
+[2026-11-25 11:52:19] [INFO] [DESKTOP-AGID67J] [Bozena] Checking if already installed: fake (search names: fake, fake)
+[2026-11-25 11:52:21] [INFO] [DESKTOP-AGID67J] [Bozena] Not installed: fake
+[2026-11-25 11:52:21] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: fake [cebeb0647115c29a7b391d26a4788ebf]
+[2026-11-25 11:52:21] [INFO] [DESKTOP-AGID67J] [Bozena] Downloading: fake.msi from http://127.0.0.1:8741/fake.msi (timeout: 30s, retries: 1)
+[2026-11-25 11:52:21] [INFO] [DESKTOP-AGID67J] [Bozena] Download attempt 1 of 1 for fake.msi
+[2026-11-25 11:52:21] [INFO] [DESKTOP-AGID67J] [Bozena] Download completed for fake.msi on attempt 1
+[2026-11-25 11:52:21] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Downloaded file failed validation.
+[2026-11-25 11:52:40] [INFO] [DESKTOP-AGID67J] [Bozena] Checking if already installed: fake (search names: fake, fake)
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Not installed: fake
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: fake [cebeb0647115c29a7b391d26a4788ebf]
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Downloading: fake.msi from http://127.0.0.1:8742/fake.msi (timeout: 30s, retries: 1)
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Download attempt 1 of 1 for fake.msi
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Download completed for fake.msi on attempt 1
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Installer saved to: C:\Users\Bozena\Documents\JagodaWindowsSetup\DATABASE\OBZ\Downloads\fake.msi
+[2026-11-25 11:52:41] [INFO] [DESKTOP-AGID67J] [Bozena] Executing: C:\Users\Bozena\Documents\JagodaWindowsSetup\DATABASE\OBZ\Downloads\fake.msi
+[2026-11-25 11:52:42] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install failed: fake (exit 1620)
+[2026-11-25 11:52:56] [INFO] [DESKTOP-AGID67J] [Bozena] Checking if already installed: ok (search names: ok, ok)
+[2026-11-25 11:52:57] [INFO] [DESKTOP-AGID67J] [Bozena] OBZ app 'ok' already installed (AppX match: ok) - found: Facebook.InstagramBeta, Microsoft.AAD.BrokerPlugin, Microsoft.OutlookForWindows
+[2026-11-25 11:52:57] [INFO] [DESKTOP-AGID67J] [Bozena] OBZ app already installed, skipping: ok [2fca830c9b9a1877c9dca755acb92fd9]

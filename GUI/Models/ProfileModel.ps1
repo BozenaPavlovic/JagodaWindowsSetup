@@ -1,6 +1,16 @@
 ﻿<#
 .SYNOPSIS
     Profile data model and JSON persistence for custom installation profiles.
+
+    Application references are stored canonically as objects with:
+        AppId  - stable identifier (Standard: Number, OBZ: filename-derived Id)
+        Source - "Standard" or "OBZ"
+        Name   - display name (informational only)
+
+    Backward compatibility:
+        - Legacy "AppIds"/"ApplicationIds" string arrays are read as Standard refs.
+        - "AppIds" is still written as a mirror of Applications' AppIds.
+        - Checkbox positions / list indexes are never stored.
 #>
 
 function global:Get-ProfileStorePath {
@@ -13,24 +23,100 @@ function global:New-EmptyProfileStore {
     return [PSCustomObject]@{ Profiles = @() }
 }
 
+function global:ConvertTo-ProfileAppReference {
+    param($raw)
+
+    if ($null -eq $raw) { return $null }
+
+    $appId = ""
+    $source = "Standard"
+    $name = ""
+
+    if ($raw -is [string]) {
+        $appId = $raw
+    }
+    else {
+        if ($raw.PSObject.Properties['AppId'] -and $null -ne $raw.AppId) {
+            $appId = [string]$raw.AppId
+        }
+        elseif ($raw.PSObject.Properties['Id'] -and $null -ne $raw.Id) {
+            $appId = [string]$raw.Id
+        }
+
+        if ($raw.PSObject.Properties['Source'] -and -not [string]::IsNullOrWhiteSpace([string]$raw.Source)) {
+            $source = [string]$raw.Source
+        }
+
+        if ($raw.PSObject.Properties['Name'] -and $null -ne $raw.Name) {
+            $name = [string]$raw.Name
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($appId)) { return $null }
+
+    return [PSCustomObject]@{
+        AppId  = $appId
+        Source = $source
+        Name   = $name
+    }
+}
+
+function global:Get-ProfileAppReferences {
+    param($Profile)
+
+    if ($null -eq $Profile) { return @() }
+
+    $refs = @()
+
+    if ($Profile.PSObject.Properties['Applications'] -and $null -ne $Profile.Applications) {
+        foreach ($a in @($Profile.Applications)) {
+            $r = ConvertTo-ProfileAppReference $a
+            if ($null -ne $r) { $refs += $r }
+        }
+    }
+    elseif ($Profile.PSObject.Properties['AppIds'] -and $null -ne $Profile.AppIds) {
+        foreach ($id in @($Profile.AppIds)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$id)) {
+                $refs += [PSCustomObject]@{
+                    AppId  = [string]$id
+                    Source = "Standard"
+                    Name   = ""
+                }
+            }
+        }
+    }
+    elseif ($Profile.PSObject.Properties['ApplicationIds'] -and $null -ne $Profile.ApplicationIds) {
+        foreach ($id in @($Profile.ApplicationIds)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$id)) {
+                $refs += [PSCustomObject]@{
+                    AppId  = [string]$id
+                    Source = "Standard"
+                    Name   = ""
+                }
+            }
+        }
+    }
+
+    return @($refs)
+}
+
 function global:ConvertTo-ProfileObject {
     param($raw)
     if ($null -eq $raw) { return $null }
+
     $id = ""
     $name = ""
-    $appIds = @()
     if ($raw.PSObject.Properties['Id'] -and $null -ne $raw.Id) { $id = [string]$raw.Id }
     if ($raw.PSObject.Properties['Name'] -and $null -ne $raw.Name) { $name = [string]$raw.Name }
-    if ($raw.PSObject.Properties['AppIds'] -and $null -ne $raw.AppIds) {
-        $appIds = @($raw.AppIds | ForEach-Object { [string]$_ })
-    }
-    elseif ($raw.PSObject.Properties['ApplicationIds'] -and $null -ne $raw.ApplicationIds) {
-        $appIds = @($raw.ApplicationIds | ForEach-Object { [string]$_ })
-    }
+
+    $apps = Get-ProfileAppReferences -Profile $raw
+    $appIds = @($apps | ForEach-Object { [string]$_.AppId })
+
     return [PSCustomObject]@{
-        Id     = $id
-        Name   = $name
-        AppIds = @($appIds)
+        Id           = $id
+        Name         = $name
+        Applications = @($apps)
+        AppIds       = @($appIds)
     }
 }
 
@@ -93,10 +179,24 @@ function global:Write-ProfileStore {
 
     $profilesOut = @()
     foreach ($p in @($Store.Profiles)) {
+        $refs = Get-ProfileAppReferences -Profile $p
+
+        $appsOut = @()
+        foreach ($r in $refs) {
+            $appsOut += [ordered]@{
+                AppId  = [string]$r.AppId
+                Source = [string]$r.Source
+                Name   = [string]$r.Name
+            }
+        }
+
+        $appIdsOut = @($appsOut | ForEach-Object { [string]$_.AppId })
+
         $profilesOut += [ordered]@{
-            Id     = [string]$p.Id
-            Name   = [string]$p.Name
-            AppIds = @($p.AppIds | ForEach-Object { [string]$_ })
+            Id           = [string]$p.Id
+            Name         = [string]$p.Name
+            Applications = @($appsOut)
+            AppIds       = @($appIdsOut)
         }
     }
     $payload = [ordered]@{ Profiles = $profilesOut }
@@ -115,4 +215,3 @@ function global:Write-ProfileStore {
         throw
     }
 }
-
