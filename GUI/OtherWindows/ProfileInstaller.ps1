@@ -65,6 +65,29 @@ catch {
 
 $script:AllApps = @($Global:Apps | Where-Object { $_ -and $_.Name })
 
+# ==========================================
+# LOAD OBZ BACKEND (optional, independent)
+# ==========================================
+
+$script:ObzAvailable = $false
+$script:ObzApps = @()
+
+$obzRoot = Join-Path (Split-Path (Split-Path $script:ProfileInstallerRoot -Parent) -Parent) "Core\OBZ"
+$obzProviderPath = Join-Path $obzRoot "OBZApplicationProvider.ps1"
+$obzInstallerPath = Join-Path $obzRoot "OBZInstaller.ps1"
+
+if ((Test-Path -LiteralPath $obzProviderPath -PathType Leaf) -and (Test-Path -LiteralPath $obzInstallerPath -PathType Leaf)) {
+    try {
+        . $obzProviderPath
+        . $obzInstallerPath
+        $script:ObzAvailable = $true
+        $script:ObzApps = @(Get-OBZApplication)
+    }
+    catch {
+        Write-Warning "OBZ backend failed to load: $($_.Exception.Message)"
+    }
+}
+
 $script:CurrentView = "Overview" # Overview | Create | Edit
 $script:EditingProfileId = $null
 
@@ -287,15 +310,29 @@ function global:Get-AppDisplayText {
 }
 
 function global:Build-AppCheckboxList {
-    param([string[]]$selectedIds)
+    param([array]$selectedApps)
 
     $appListPanel.SuspendLayout()
     $appListPanel.Controls.Clear()
     $script:AppCheckBoxes = @()
 
     $selectedSet = @{}
-    foreach ($id in @($selectedIds)) { $selectedSet[[string]$id] = $true }
+    foreach ($ref in @($selectedApps)) {
+        $src = "Standard"
+        $aid = ""
+        if ($ref -is [string]) {
+            $aid = $ref
+        }
+        else {
+            if ($ref.PSObject.Properties['Source'] -and $ref.Source) { $src = [string]$ref.Source }
+            if ($ref.PSObject.Properties['AppId']) { $aid = [string]$ref.AppId }
+        }
+        if (-not [string]::IsNullOrWhiteSpace($aid)) {
+            $selectedSet[("{0}|{1}" -f $src, $aid)] = $true
+        }
+    }
 
+    # --- Standard applications ---
     $grouped = $script:AllApps | Group-Object -Property {
         if ($_.Category) { [string]$_.Category } else { "Other" }
     } | Sort-Object Name
@@ -320,8 +357,36 @@ function global:Build-AppCheckboxList {
             $cb.Size = New-Object System.Drawing.Size(830, 22)
             $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
             $cb.AutoEllipsis = $true
-            $appId = [string]$app.Number
-            $cb.Checked = $selectedSet.ContainsKey($appId)
+            $cb.Checked = $selectedSet.ContainsKey("Standard|" + [string]$app.Number)
+            $cb.Add_CheckedChanged({ Update-SelectedCounter })
+            $appListPanel.Controls.Add($cb)
+            $script:AppCheckBoxes += $cb
+            $y += 24
+        }
+        $y += 6
+    }
+
+    # --- OBZ applications ---
+    if ($script:ObzAvailable -and @($script:ObzApps).Count -gt 0) {
+        $header = New-Object System.Windows.Forms.Label
+        $header.Text = "OBZ APPLICATIONS"
+        $header.Font = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
+        $header.Location = New-Object System.Drawing.Point(10, $y)
+        $header.Size = New-Object System.Drawing.Size(840, 22)
+        $header.ForeColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
+        $appListPanel.Controls.Add($header)
+        $y += 24
+
+        foreach ($obzApp in ($script:ObzApps | Sort-Object Name)) {
+            $cb = New-Object System.Windows.Forms.CheckBox
+            $cb.Text = "$($obzApp.Name)  ($($obzApp.FileName))"
+            $cb.Tag = $obzApp
+            $cb.AutoSize = $false
+            $cb.Location = New-Object System.Drawing.Point(26, $y)
+            $cb.Size = New-Object System.Drawing.Size(830, 22)
+            $cb.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+            $cb.AutoEllipsis = $true
+            $cb.Checked = $selectedSet.ContainsKey("OBZ|" + [string]$obzApp.Id)
             $cb.Add_CheckedChanged({ Update-SelectedCounter })
             $appListPanel.Controls.Add($cb)
             $script:AppCheckBoxes += $cb
@@ -358,14 +423,41 @@ function global:Apply-AppSearchFilter {
     $appListPanel.ResumeLayout()
 }
 
-function global:Get-SelectedEditorAppIds {
-    $ids = @()
+function global:Get-SelectedEditorApplications {
+    $refs = @()
     foreach ($cb in $script:AppCheckBoxes) {
-        if ($cb.Checked -and $cb.Tag -and $cb.Tag.Number) {
-            $ids += [string]$cb.Tag.Number
+        if (-not $cb.Checked) { continue }
+        $tag = $cb.Tag
+        if ($null -eq $tag) { continue }
+
+        if ($tag.PSObject.Properties['Source'] -and ([string]$tag.Source -eq "OBZ")) {
+            if ($tag.PSObject.Properties['Id'] -and -not [string]::IsNullOrWhiteSpace([string]$tag.Id)) {
+                $refs += [PSCustomObject]@{
+                    AppId  = [string]$tag.Id
+                    Source = "OBZ"
+                    Name   = [string]$tag.Name
+                }
+            }
+        }
+        elseif ($tag.PSObject.Properties['Number']) {
+            $refs += [PSCustomObject]@{
+                AppId  = [string]$tag.Number
+                Source = "Standard"
+                Name   = [string]$tag.Name
+            }
         }
     }
-    return @($ids | Select-Object -Unique)
+
+    # De-duplicate by Source + AppId (stable identity).
+    $seen = @{}
+    $unique = @()
+    foreach ($r in $refs) {
+        $key = ("{0}|{1}" -f $r.Source, $r.AppId).ToLowerInvariant()
+        if ($seen.ContainsKey($key)) { continue }
+        $seen[$key] = $true
+        $unique += $r
+    }
+    return @($unique)
 }
 
 # ==========================================
@@ -392,14 +484,14 @@ function global:Show-Editor {
         $edTitle.Text = "CREATE PROFILE"
         $btnSave.Text = "Create Profile"
         $txtProfileName.Text = ""
-        Build-AppCheckboxList -selectedIds @()
+        Build-AppCheckboxList -selectedApps @()
     }
     else {
         $edTitle.Text = "EDIT PROFILE"
         $btnSave.Text = "Save Changes"
         $txtProfileName.Text = [string]$profile.Name
         $script:EditingProfileId = [string]$profile.Id
-        Build-AppCheckboxList -selectedIds @($profile.AppIds)
+        Build-AppCheckboxList -selectedApps @($profile.Applications)
     }
 
     $txtSearch.Text = ""
@@ -596,7 +688,15 @@ function global:Invoke-InstallCustomProfile {
                 if (Get-Command Write-Host -ErrorAction SilentlyContinue) {
                     Write-Host "`nProgress: $currentApp of $totalApps applications" -ForegroundColor Cyan
                 }
-                Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+                if ($app.PSObject.Properties['Source'] -and ([string]$app.Source -eq "OBZ")) {
+                    $obzResult = Install-OBZApplication -Id ([string]$app.Id)
+                    if ($obzResult.Status -notin @("Success", "Skipped")) {
+                        $installErrors += "$($app.Name): $($obzResult.Message)"
+                    }
+                }
+                else {
+                    Install-OneApp -App $app -Index $currentApp -Total $totalApps -ErrorAction Stop
+                }
             }
             catch {
                 $installErrors += "$($app.Name): $($_.Exception.Message)"
@@ -654,11 +754,11 @@ $btnCancel.Add_Click({ Show-Overview })
 $btnSave.Add_Click({
     $name = $txtProfileName.Text
     if ($null -ne $name) { $name = $name.Trim() } else { $name = "" }
-    $selectedIds = @(Get-SelectedEditorAppIds)
+    $selectedApps = @(Get-SelectedEditorApplications)
 
     if ($script:CurrentView -eq "Edit" -and $script:EditingProfileId) {
         try {
-            $updated = Update-CustomProfile -Id $script:EditingProfileId -Name $name -AppIds $selectedIds
+            $updated = Update-CustomProfile -Id $script:EditingProfileId -Name $name -Applications $selectedApps
             [System.Windows.Forms.MessageBox]::Show(
                 "Profile '$($updated.Name)' saved successfully.",
                 "Installation Manager",
@@ -678,7 +778,7 @@ $btnSave.Add_Click({
     }
     else {
         try {
-            $created = New-CustomProfile -Name $name -AppIds $selectedIds
+            $created = New-CustomProfile -Name $name -Applications $selectedApps
             [System.Windows.Forms.MessageBox]::Show(
                 "Profile '$($created.Name)' created successfully.",
                 "Installation Manager",
