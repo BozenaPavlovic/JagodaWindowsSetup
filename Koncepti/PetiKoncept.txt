@@ -1,0 +1,11 @@
+unaprijeditit GUI WPF ili WinForms ( kada user hvers s mišem odozgo polja koje ima scrool bar ono autmatki reagiti i može se scrollati mišem jer inače to neradi nego user mora kliknuti miše m na polje prvo),
+( takođertamo gdje se nešto upisuje treba utomatki biti ozančeno kad user otvori windo on odmah može tipkati a ne da mora kliknuti),
+(također sam izgled bi trebalo modernizirati i naprivti ljepšim i boljim)
+
+poprvitit LOGs da prikazuje sve potrebno i izbristai stari
+
+ododati qualitly of life funkcionalnosti
+
+dodati još APPS u DATABASE
+
+dodati male ikone pored app koje user selekta

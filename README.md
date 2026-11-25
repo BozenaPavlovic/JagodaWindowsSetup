@@ -133,7 +133,7 @@ JagodaWindowsSetup/
 - **`Core\Uninstallers\Uninstaller.ps1`** – agregira module 01–07 (dijeljeni uninstaller engine):
   - `01_Configuration.ps1`: Uninstaller config (timeout settings, AppX/MSI/EXE/Winget enable flags)
   - `02_RegistryDetection.ps1`: `Get-InstalledProgramsFromRegistry`, `Get-AllInstalledProgramsFromRegistry` (registar Uninstall HKLM/HKCU 64/32-bit)
-  - `03_AppXDetection.ps1`: `Get-AllInstalledProgramsFromAppx`, `Get-AppxPackages` (AppX package detection)
+  - `03_AppXDetection.ps1`: `Get-AllInstalledProgramsFromAppx`, `Get-InstalledProgramsFromAppx`, `Find-InstalledAppByAppx` (AppX package detection)
   - `04_UninstallCommandResolver.ps1`: `Resolve-UninstallCommand`, `Find-InstalledProgramFromDbApp` (MSI/AppX/EXE/Winget command resolution)
   - `05_UninstallExecution.ps1`: `Execute-UninstallCommand` (silent execution, timeout handling)
   - `06_UninstallVerification.ps1`: `Verify-MsiUninstall`, `Verify-AppxUninstall`, `Verify-Uninstall` (post-uninstall verification)
@@ -141,7 +141,7 @@ JagodaWindowsSetup/
 - **Detekcija:** `Get-InstalledPrograms` čita registar `Uninstall` (HKLM/HKCU, 64/32-bit) i AppX pakete.
 - **Komanda:** `Find-UninstallCommand` bira `msiexec /x {GUID} /qn` za MSI, `Remove-AppxPackage` za AppX, ili `UninstallString`/`QuietUninstallString` za ostale.
 - **Izvršavanje:** `Uninstall-OneApp` (u `Uninstaller.ps1`) pokreće deinstalaciju (opciono silent), čeka (10-minutni timeout), verifikuje uklanjanje, piše u `Logs\Uninstall.log` i uklanja unos iz managed stora. `Uninstall-MultipleApps` radi istu stvar po aplikaciji sa progresom.
-- **Managed store:** `Logs\ManagedPrograms.json` (preko `Get-UninstallStorePath` iz `02_RegistryDetection.ps1`).
+- **Managed store:** `Logs\ManagedPrograms.json` (preko `Get-UninstallStorePath` iz `07_UninstallLogging.ps1`).
 - **Pristup:** kroz GUI **Apps Installer** u **Uninstall** modu (dugme "Switch to Uninstall Mode") ili direktno pozivom funkcija iz `Core\Uninstallers\Uninstaller.ps1`.
 
 ## Core moduli i funkcije
