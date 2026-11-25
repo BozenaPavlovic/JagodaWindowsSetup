@@ -3,6 +3,58 @@
                      {
                          "Id":  "8be983c3-e1b5-47e3-ac25-92dd7413a765",
                          "Name":  "test",
+                         "Applications":  [
+                                              {
+                                                  "AppId":  "14",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "13",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "4",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "15",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "23",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "26",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "30",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "31",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "29",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              },
+                                              {
+                                                  "AppId":  "2",
+                                                  "Source":  "Standard",
+                                                  "Name":  ""
+                                              }
+                                          ],
                          "AppIds":  [
                                         "14",
                                         "13",
@@ -19,43 +71,53 @@
                      {
                          "Id":  "e158736f-6e60-4c89-8edd-aaf93c829c4a",
                          "Name":  "ADMIN",
+                         "Applications":  [
+                                              {
+                                                  "AppId":  "cc7ebe29d0cff79f05b6edfb7f08f33c",
+                                                  "Source":  "OBZ",
+                                                  "Name":  "OBZ32OcsPackage"
+                                              },
+                                              {
+                                                  "AppId":  "ae33f241c71018c67dfe310e03277ce6",
+                                                  "Source":  "OBZ",
+                                                  "Name":  "OBZ64OcsPackage"
+                                              },
+                                              {
+                                                  "AppId":  "517405d2bd67b846457d2ff1a38fd5a3",
+                                                  "Source":  "OBZ",
+                                                  "Name":  "TSPrintMSI"
+                                              }
+                                          ],
                          "AppIds":  [
-                                        "14",
-                                        "13",
-                                        "6",
-                                        "7",
-                                        "4",
-                                        "18",
-                                        "19",
-                                        "20",
-                                        "15",
-                                        "16",
-                                        "17",
-                                        "5",
-                                        "35",
-                                        "36",
-                                        "34",
-                                        "32",
-                                        "33",
-                                        "39",
-                                        "37",
-                                        "38",
-                                        "31",
-                                        "24",
-                                        "23",
-                                        "21",
-                                        "22",
-                                        "29",
-                                        "30",
-                                        "28",
-                                        "26",
-                                        "27",
-                                        "10",
-                                        "11",
-                                        "12",
-                                        "2",
-                                        "8",
-                                        "9"
+                                        "cc7ebe29d0cff79f05b6edfb7f08f33c",
+                                        "ae33f241c71018c67dfe310e03277ce6",
+                                        "517405d2bd67b846457d2ff1a38fd5a3"
+                                    ]
+                     },
+                     {
+                         "Id":  "3e8fb841-e8c9-420a-87e9-77ed847d4dce",
+                         "Name":  "xcyxcyxcyxc",
+                         "Applications":  [
+                                              {
+                                                  "AppId":  "cc7ebe29d0cff79f05b6edfb7f08f33c",
+                                                  "Source":  "OBZ",
+                                                  "Name":  "OBZ32OcsPackage"
+                                              },
+                                              {
+                                                  "AppId":  "ae33f241c71018c67dfe310e03277ce6",
+                                                  "Source":  "OBZ",
+                                                  "Name":  "OBZ64OcsPackage"
+                                              },
+                                              {
+                                                  "AppId":  "517405d2bd67b846457d2ff1a38fd5a3",
+                                                  "Source":  "OBZ",
+                                                  "Name":  "TSPrintMSI"
+                                              }
+                                          ],
+                         "AppIds":  [
+                                        "cc7ebe29d0cff79f05b6edfb7f08f33c",
+                                        "ae33f241c71018c67dfe310e03277ce6",
+                                        "517405d2bd67b846457d2ff1a38fd5a3"
                                     ]
                      }
                  ]

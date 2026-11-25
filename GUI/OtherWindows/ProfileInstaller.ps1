@@ -81,6 +81,7 @@ if ((Test-Path -LiteralPath $obzProviderPath -PathType Leaf) -and (Test-Path -Li
         . $obzProviderPath
         . $obzInstallerPath
         $script:ObzAvailable = $true
+        $script:ObzRefreshResult = Update-OBZApplicationDatabase
         $script:ObzApps = @(Get-OBZApplication)
     }
     catch {

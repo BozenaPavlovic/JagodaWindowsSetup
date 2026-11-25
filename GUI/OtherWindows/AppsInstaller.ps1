@@ -108,12 +108,35 @@ if ((Test-Path -LiteralPath $ObzProviderPath -PathType Leaf) -and (Test-Path -Li
 }
 
 # ==========================================
-# PROFILE DEFINITIONS
+# LOAD PROFILE BACKEND (for custom profiles)
 # ==========================================
-$profiles = @{
-    "Profil A" = @("2", "4", "6", "7")
-    "Profil B" = @("2", "4")
-    "Profil C" = @("6", "7")
+
+$guiRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+
+$profileModelPath = Join-Path $guiRoot "GUI\Models\ProfileModel.ps1"
+$profileControllerPath = Join-Path $guiRoot "GUI\Controllers\ProfileController.ps1"
+
+try {
+    . $profileModelPath
+    . $profileControllerPath
+}
+catch {
+    [System.Windows.Forms.MessageBox]::Show(
+        "Failed to load profile backend:`n$($_.Exception.Message)",
+        "Apps Installer",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Error
+    ) | Out-Null
+    return
+}
+
+# ==========================================
+# LOAD CUSTOM PROFILES
+# ==========================================
+
+$script:CustomProfiles = @()
+if (Get-Command Get-AllCustomProfiles -ErrorAction SilentlyContinue) {
+    $script:CustomProfiles = @(Get-AllCustomProfiles)
 }
 
 # ==========================================
@@ -291,18 +314,14 @@ function Refresh-AppList {
 
         if ($ProfileName) {
 
-            if (-not $profiles.ContainsKey($ProfileName)) {
-
+            $profile = $script:CustomProfiles | Where-Object { $_.Name -eq $ProfileName } | Select-Object -First 1
+            if (-not $profile) {
                 return
             }
 
-            $selectedIds = $profiles[$ProfileName]
+            $resolution = Resolve-ProfileApplications -Profile $profile
 
-            $appsToDisplay = @(
-                $Apps | Where-Object {
-                    [string]$_.Number -in $selectedIds
-                }
-            )
+            $appsToDisplay = @($resolution.Resolved)
 
         }
         else {
