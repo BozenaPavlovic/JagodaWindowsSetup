@@ -53,7 +53,7 @@ if (-not $Global:OBZSettings.Messages.ContainsKey("InstallationError")) {
 # ==========================================
 
 if (-not $Global:OBZSettings.ContainsKey("DownloadFolder")) {
-    $Global:OBZSettings.DownloadFolder = Join-Path $OBZProjectRoot "Downloads\OBZ"
+    $Global:OBZSettings.DownloadFolder = Join-Path $OBZProjectRoot "DATABASE\OBZ\Downloads"
 }
 
 if (-not $Global:OBZSettings.ContainsKey("DownloadTimeoutSeconds")) {

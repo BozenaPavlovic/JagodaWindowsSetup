@@ -4,3 +4,13 @@
 [2026-11-25 10:35:36] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download timed out after 2 seconds.
 [2026-11-25 10:37:45] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obztest [43147a92bc0f4ae0aefb0afe33ba11ac]
 [2026-11-25 10:38:15] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download timed out after 30 seconds.
+[2026-11-25 10:57:07] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obztest [43147a92bc0f4ae0aefb0afe33ba11ac]
+[2026-11-25 10:57:37] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download timed out after 30 seconds.
+[2026-11-25 10:58:25] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obztest [43147a92bc0f4ae0aefb0afe33ba11ac]
+[2026-11-25 10:58:55] [ERROR] [DESKTOP-AGID67J] [Bozena] OBZ install error: Download timed out after 30 seconds.
+[2026-11-25 10:59:15] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obztest [43147a92bc0f4ae0aefb0afe33ba11ac]
+[2026-11-25 10:59:16] [INFO] [DESKTOP-AGID67J] [Bozena] Executing: C:\Users\Bozena\Documents\JagodaWindowsSetup\DATABASE\OBZ\Downloads\obztest.exe
+[2026-11-25 10:59:17] [SUCCESS] [DESKTOP-AGID67J] [Bozena] OBZ install succeeded: obztest (exit 0)
+[2026-11-25 10:59:41] [INFO] [DESKTOP-AGID67J] [Bozena] Starting OBZ install: obzcmd [ecb2f0e87213d8843709e4e893d08242]
+[2026-11-25 10:59:42] [INFO] [DESKTOP-AGID67J] [Bozena] Executing: C:\Users\Bozena\Documents\JagodaWindowsSetup\DATABASE\OBZ\Downloads\obzcmd.exe
+[2026-11-25 10:59:43] [SUCCESS] [DESKTOP-AGID67J] [Bozena] OBZ install succeeded: obzcmd (exit 0)

@@ -169,7 +169,7 @@ function Get-OBZInstallerFile {
 
     $downloadFolder = $Global:OBZSettings.DownloadFolder
     if ([string]::IsNullOrWhiteSpace($downloadFolder)) {
-        $downloadFolder = Join-Path $OBZInstallerRoot "Downloads\OBZ"
+        $downloadFolder = Join-Path $OBZInstallerRoot "DATABASE\OBZ\Downloads"
     }
 
     $downloadFolder = [IO.Path]::GetFullPath($downloadFolder)
@@ -289,7 +289,13 @@ function Install-OBZApplication {
 
         Write-OBZLog -Level INFO -Message "Executing: $installerPath"
 
-        $process = Start-Process -FilePath $installerPath -ArgumentList $Arguments -Wait -PassThru
+        if ($Arguments -and $Arguments.Count -gt 0) {
+            $process = Start-Process -FilePath $installerPath -ArgumentList $Arguments -Wait -PassThru
+        }
+        else {
+            $process = Start-Process -FilePath $installerPath -Wait -PassThru
+        }
+
         $exitCode = $process.ExitCode
 
         # Success codes: 0, 1641 (reboot initiated), 3010 (reboot required).
