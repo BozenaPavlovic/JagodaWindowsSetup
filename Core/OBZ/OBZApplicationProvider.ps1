@@ -5,6 +5,8 @@
 # Does not download or execute installers.
 # ==========================================
 
+if ($Global:OBZBackendLoaded) { return }
+
 $ErrorActionPreference = "Stop"
 
 $OBZProviderConfigPath = Join-Path $PSScriptRoot "OBZConfiguration.ps1"
@@ -194,4 +196,5 @@ function Update-OBZApplicationDatabase {
     }
 }
 
+$Global:OBZBackendLoaded = $true
 Write-Host "[OK] STRAWBERRY WINDOWS OBZ application provider loaded." -ForegroundColor Green

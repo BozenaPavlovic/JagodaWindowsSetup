@@ -5,6 +5,8 @@
 # Never uses Winget. Does not touch the standard engine.
 # ==========================================
 
+if ($Global:OBZInstallerBackendLoaded) { return }
+
 $ErrorActionPreference = "Stop"
 
 $OBZInstallerConfigPath = Join-Path $PSScriptRoot "OBZConfiguration.ps1"
@@ -466,4 +468,5 @@ function Install-OBZApplication {
     }
 }
 
+$Global:OBZInstallerBackendLoaded = $true
 Write-Host "[OK] STRAWBERRY WINDOWS OBZ installer backend loaded." -ForegroundColor Green

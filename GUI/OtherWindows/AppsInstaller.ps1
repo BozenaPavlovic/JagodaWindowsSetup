@@ -96,7 +96,82 @@ if ((Test-Path -LiteralPath $ObzProviderPath -PathType Leaf) -and (Test-Path -Li
         . $ObzInstallerPath
 
         $script:ObzAvailable = $true
-        $script:ObzRefreshResult = Update-OBZApplicationDatabase
+        $script:ObzRefreshing = $false
+        $script:ObzWebClient = $null
+        $script:ObzTimeoutTimer = $null
+        $script:ObzElapsedTimer = $null
+        $script:ObzStartTime = $null
+
+        function global:Invoke-OBZFetchAsync {
+            if ($script:ObzRefreshing) { return }
+            $script:ObzRefreshing = $true
+            if ($script:ObzRefreshButton) { $script:ObzRefreshButton.Enabled = $false; $script:ObzRefreshButton.Text = "Refreshing..." }
+
+            $script:ObzStartTime = Get-Date
+            # elapsed timer
+            $script:ObzElapsedTimer = New-Object System.Windows.Forms.Timer
+            $script:ObzElapsedTimer.Interval = 1000
+            $script:ObzElapsedTimer.Add_Tick({
+                if ($script:ObzRefreshButton) {
+                    $elapsed = [int]((Get-Date) - $script:ObzStartTime).TotalSeconds
+                    $script:ObzRefreshButton.Text = "Refreshing... $elapsed s"
+                }
+            })
+            $script:ObzElapsedTimer.Start()
+
+            $wc = New-Object System.Net.WebClient
+            $script:ObzWebClient = $wc
+            $wc.Headers.Add("User-Agent", "Mozilla/5.0")
+            $timeoutSec = [int]$Global:OBZSettings.ServerTimeoutSeconds
+
+            $completedHandler = {
+                param($sender, $e)
+                $script:ObzElapsedTimer.Stop()
+                if ($script:ObzTimeoutTimer) { $script:ObzTimeoutTimer.Stop() }
+                try {
+                    if ($e.Cancelled) {
+                        if ($Global:OBZSettings) { [System.Windows.Forms.MessageBox]::Show($Global:OBZSettings.Messages.ServerUnavailable, "OBZ") | Out-Null }
+                    }
+                    elseif ($e.Error) {
+                        Write-Warning ("OBZ refresh error: " + $e.Error.ToString())
+                        if ($Global:OBZSettings) { [System.Windows.Forms.MessageBox]::Show($Global:OBZSettings.Messages.ServerUnavailable, "OBZ") | Out-Null }
+                    }
+                    else {
+                        $html = $e.Result
+                        $apps = @()
+                        try { $apps = Get-OBZInstallerLinks -Html $html -BaseUrl $Global:OBZSettings.ApplicationDirectoryUrl } catch { $apps = @() }
+                        if ($apps.Count -gt 0) {
+                            Set-OBZApplicationDatabase -Applications $apps | Out-Null
+                            $script:ObzRefreshResult = [pscustomobject]@{ Status="Success"; Count=$apps.Count; Applications=$apps; Message=$Global:OBZSettings.Messages.LoadingApplications }
+                        }
+                        else {
+                            if ($Global:OBZSettings) { [System.Windows.Forms.MessageBox]::Show($Global:OBZSettings.Messages.NoApplicationsAvailable, "OBZ") | Out-Null }
+                        }
+                    }
+                }
+                catch {
+                    Write-Warning ("OBZ refresh completion error: " + $_.Exception.ToString())
+                }
+                finally {
+                    $script:ObzRefreshing = $false
+                    if ($script:ObzRefreshButton) { $script:ObzRefreshButton.Enabled = $true; $script:ObzRefreshButton.Text = "Refresh OBZ" }
+                    Refresh-OBZList
+                    $wc.Dispose()
+                }
+            }
+            Register-ObjectEvent -InputObject $wc -EventName DownloadStringCompleted -Action $completedHandler | Out-Null
+
+            # timeout
+            $script:ObzTimeoutTimer = New-Object System.Windows.Forms.Timer
+            $script:ObzTimeoutTimer.Interval = $timeoutSec * 1000
+            $script:ObzTimeoutTimer.Add_Tick({
+                $script:ObzTimeoutTimer.Stop()
+                if ($script:ObzWebClient) { $script:ObzWebClient.CancelAsync() }
+            })
+            $script:ObzTimeoutTimer.Start()
+
+            $wc.DownloadStringAsync((New-Object System.Uri($Global:OBZSettings.ApplicationDirectoryUrl)))
+        }
 
     }
     catch {
@@ -425,8 +500,7 @@ function Refresh-OBZList {
     $refreshBtn.Size = New-Object System.Drawing.Size(115, 24)
     $refreshBtn.Add_Click({
         if ($script:ObzAvailable) {
-            $script:ObzRefreshResult = Update-OBZApplicationDatabase
-            Refresh-OBZList
+            Invoke-OBZFetchAsync
         }
     })
     $obzPanel.Controls.Add($refreshBtn)
@@ -809,6 +883,7 @@ $form.Controls.Add($back)
 # SHOW FORM
 # ==========================================
 
+$form.Add_Shown({ if ($script:ObzAvailable) { Invoke-OBZFetchAsync } })
 [void]$form.ShowDialog()
 
 $result = if ($form.Tag) {

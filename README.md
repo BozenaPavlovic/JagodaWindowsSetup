@@ -51,6 +51,10 @@ JagodaWindowsSetup/
 │   │   ├── 06_UninstallVerification.ps1  # Verify-MsiUninstall, Verify-AppxUninstall, Verify-Uninstall
 │   │   ├── 07_UninstallLogging.ps1    # Write-UninstallLog
 │   │   └── Uninstaller.ps1        # agregira 01–07 (dijeljeni uninstaller engine)
+│   ├── OBZ/
+│   │   ├── OBZConfiguration.ps1
+│   │   ├── OBZApplicationProvider.ps1
+│   │   └── OBZInstaller.ps1
 │   ├── Controller.ps1             # Get-SelectedApps, Show-MainMenu, Show-OSSpecs, Run-Installation
 │   ├── Installer.ps1              # kompatibilni shim -> Core\Installers\Programs.ps1
 │   ├── InstallerHelpers.ps1       # Get-InstallCooldownSeconds, Invoke-InstallCooldown
@@ -107,6 +111,8 @@ JagodaWindowsSetup/
 │
 ├── DATA/
 │   ├── Photos/                    # wallpaper slike (.jpg)
+│   ├── OBZ/
+│   │   └── Downloads/             # OBZ installer downloads
 │   └── Profiles/
 │       └── CustomProfiles.json    # custom user profiles (JSON, automatski se kreira)
 │
@@ -224,6 +230,17 @@ Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omoguća
 - `DATA\Profiles\CustomProfiles.json`: custom user profiles (JSON) – kreira se automatski.
 - `Logs\`: runtime logovi (`main.log`, `Activity.log`, `Errors.log`, `Installation.log`, `InstallationHistory.log`, `Uninstall.log`) i managed store (`ManagedPrograms.json`, po potrebi). Pojedinačni instalacijski logovi (npr. `Google_Chrome.log`) nastaju po aplikaciji.
 - `START\Logs\`: log folder za START tok.
+
+## OBZ dodatak (special addon)
+
+- **`Core\OBZ\`** – samostalni (independent) modul koji dinamički otkriva i instalira OBZ aplikacije sa mrežnog direktorijuma `http://192.168.254.22/instalacije/`. Ne mijenja standardni installer config.
+- **`Core\OBZ\OBZConfiguration.ps1`** – podešava `$Global:OBZSettings`: URL direktorijuma, nazivi prikaza (DisplayNameOverrides: OBZ32OcsPackage/OBZ64OcsPackage → "OCS Inventory NG Agent"), poruke, download folder (`DATABASE\OBZ\Downloads`), timeout/retry (DownloadTimeoutSeconds=60, DownloadRetries=2, RetryDelaySeconds=3, ServerTimeoutSeconds=30, RequestTimeoutSeconds=60), TLS1.2.
+- **`Core\OBZ\OBZApplicationProvider.ps1`** – `Get-OBZInstallerLinks` (parsira HTML listing, izvlači .exe linkove), `Update-OBZApplicationDatabase` (dohvata listu sa servera, kešira u `Set-OBZApplicationDatabase`), `Get-OBZApplication`, `Get-OBZApplicationById`. Prikazuje poruke: server nedostupan / nema aplikacija / učitavanje.
+- **`Core\OBZ\OBZInstaller.ps1`** – `Install-OBZApplication -Id` (download + pokretanje instalera), nezavisno od standardnog engine-a.
+- **Integracija GUI:** `GUI\OtherWindows\AppsInstaller.ps1` i `ProfileInstaller.ps1` učitavaju OBZ backend opcionalno (try/catch, ne pada ako server nedostupan). OBZ aplikacije se prikazuju u zasebnoj sekciji "OBZ APPLICATIONS" sa dugmetom "Refresh OBZ"; ako nema aplikacija prikazuje `NoApplicationsAvailable`.
+- **Profili:** aplikacije se referenciraju kao `{ AppId, Source="OBZ", Name }` (pored Standard). `ProfileController.Resolve-ProfileApplications` razrješava OBZ reference preko `Get-OBZApplicationById` u trenutku učitavanja/instalacije; nedostupne OBZ aplikacije se jasno prijavljuju (`UnavailableOBZ`).
+- **Instalacija profila:** OBZ aplikacije se instaliraju preko `Install-OBZApplication -Id`, standardne preko `Install-OneApp`.
+- **Detekcija instaliranog OBZ programa:** preko DisplayNameOverrides (npr. "OCS Inventory NG Agent") umjesto naziva fajla.
 
 ## Napomene
 
