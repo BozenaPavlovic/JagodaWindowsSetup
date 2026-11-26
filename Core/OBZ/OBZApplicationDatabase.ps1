@@ -26,7 +26,7 @@ if (-not (Get-Variable -Name Global:OBZApplicationDatabaseLoaded -Scope Global -
 # HELPERS
 # ==========================================
 
-function Get-OBZStableId {
+function global:Get-OBZStableId {
     <#
         Generates a stable ID from an exact installer filename.
         The ID depends only on the filename bytes, never on list
@@ -55,7 +55,7 @@ function Get-OBZStableId {
     return $builder.ToString()
 }
 
-function New-OBZApplicationObject {
+function global:New-OBZApplicationObject {
     <#
         Builds a normalized OBZ application object.
         Source is always "OBZ". Id is derived from FileName.
@@ -90,7 +90,7 @@ function New-OBZApplicationObject {
 # PUBLIC FUNCTIONS
 # ==========================================
 
-function Initialize-OBZApplicationDatabase {
+function global:Initialize-OBZApplicationDatabase {
     <#
         Initializes an empty, loaded OBZ database.
         After this call the database is "loaded but empty",
@@ -100,7 +100,7 @@ function Initialize-OBZApplicationDatabase {
     $Global:OBZApplicationDatabaseLoaded = $true
 }
 
-function Set-OBZApplicationDatabase {
+function global:Set-OBZApplicationDatabase {
     <#
         Replaces the entire contents of the OBZ database with a
         newly discovered application list. Marks the database as loaded.
@@ -165,7 +165,7 @@ function Set-OBZApplicationDatabase {
     $Global:OBZApplicationDatabaseLoaded = $true
 }
 
-function Get-OBZApplication {
+function global:Get-OBZApplication {
     <#
         Returns all OBZ applications.
         If the database has not been loaded, returns nothing.
@@ -177,7 +177,7 @@ function Get-OBZApplication {
     return @($Global:OBZApplicationDatabase.Values)
 }
 
-function Get-OBZApplicationById {
+function global:Get-OBZApplicationById {
     <#
         Finds a single OBZ application by its stable Id.
         Returns $null when not found or not loaded.
@@ -198,7 +198,7 @@ function Get-OBZApplicationById {
     return $null
 }
 
-function Test-OBZApplication {
+function global:Test-OBZApplication {
     <#
         Checks whether an OBZ application with the given Id exists.
         Returns $false when the database has not been loaded.

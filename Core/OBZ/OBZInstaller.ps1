@@ -36,7 +36,7 @@ if (-not (Test-Path -LiteralPath $OBZInstallerLogDirectory -PathType Container))
 
 $Global:OBZInstallationLog = Join-Path $OBZInstallerLogDirectory "OBZInstallation.log"
 
-function Write-OBZLog {
+function global:Write-OBZLog {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Message,
@@ -74,7 +74,7 @@ function Write-OBZLog {
 # VALIDATION HELPERS
 # ==========================================
 
-function Resolve-OBZApplicationReference {
+function global:Resolve-OBZApplicationReference {
     <#
         Resolves a caller-supplied reference to the canonical object
         stored in the current OBZ database. Only the database copy
@@ -101,7 +101,7 @@ function Resolve-OBZApplicationReference {
     return Get-OBZApplicationById -Id $Id
 }
 
-function Test-OBZDownloadUrl {
+function global:Test-OBZDownloadUrl {
     <#
         Ensures the download URL is absolute HTTP(S) and belongs to
         the configured OBZ server. Prevents arbitrary external URLs.
@@ -128,7 +128,7 @@ function Test-OBZDownloadUrl {
     return $DownloadUrl.StartsWith($base, [System.StringComparison]::OrdinalIgnoreCase)
 }
 
-function Test-OBZInstallerFile {
+function global:Test-OBZInstallerFile {
     <#
         Validates a downloaded installer by content (extension-independent,
         because downloads are staged as *.partial): exists, non-empty, and
@@ -180,7 +180,7 @@ function Test-OBZInstallerFile {
 # PRE-INSTALL CHECK
 # ==========================================
 
-function Test-OBZAppInstalled {
+function global:Test-OBZAppInstalled {
     <#
         Checks if an OBZ application is already installed on the system.
         Uses the standard registry + AppX detection (same as uninstaller).
@@ -192,7 +192,8 @@ function Test-OBZAppInstalled {
     )
 
     # Load uninstaller detection functions if not already loaded
-    $UninstallerRoot = Join-Path $OBZInstallerRoot "Core\Uninstallers"
+    $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+    $UninstallerRoot = Join-Path $root "Core\Uninstallers"
     $RegistryDetection = Join-Path $UninstallerRoot "02_RegistryDetection.ps1"
     $AppXDetection = Join-Path $UninstallerRoot "03_AppXDetection.ps1"
 
@@ -258,7 +259,7 @@ function Test-OBZAppInstalled {
 # DOWNLOAD
 # ==========================================
 
-function Get-OBZInstallerFile {
+function global:Get-OBZInstallerFile {
     <#
         Downloads the installer to the dedicated OBZ download folder.
         Uses the configured timeout and retry settings.
@@ -343,7 +344,7 @@ function Get-OBZInstallerFile {
 # INSTALL
 # ==========================================
 
-function Install-OBZApplication {
+function global:Install-OBZApplication {
     <#
         Installs a single OBZ application.
 

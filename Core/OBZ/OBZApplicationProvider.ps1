@@ -28,7 +28,7 @@ if (-not (Test-Path -LiteralPath $OBZProviderDatabasePath -PathType Leaf)) {
 # PARSING HELPERS
 # ==========================================
 
-function Get-OBZInstallerLinks {
+function global:Get-OBZInstallerLinks {
     <#
         Parses an HTML directory listing and returns valid EXE
         installer links as objects { FileName, DownloadUrl }.
@@ -112,7 +112,7 @@ function Get-OBZInstallerLinks {
 # DISCOVERY
 # ==========================================
 
-function Update-OBZApplicationDatabase {
+function global:Update-OBZApplicationDatabase {
     <#
         Retrieves the OBZ directory listing, parses valid EXE
         installers and refreshes the in-memory database.

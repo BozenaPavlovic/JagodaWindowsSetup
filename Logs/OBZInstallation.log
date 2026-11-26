@@ -48,3 +48,51 @@
 [2026-11-25 12:26:02] [INFO] [DESKTOP-GOT2GL4] [Božena] Installer saved to: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
 [2026-11-25 12:26:02] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
 [2026-11-25 12:26:03] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)
+[2026-11-26 10:39:09] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ32OcsPackage (search names: OBZ32OcsPackage, OBZ32OcsPackage, OCS Inventory NG Agent)
+[2026-11-26 10:39:10] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ32OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-26 10:39:10] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ32OcsPackage [cc7ebe29d0cff79f05b6edfb7f08f33c]
+[2026-11-26 10:39:10] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ64OcsPackage (search names: OBZ64OcsPackage, OBZ64OcsPackage, OCS Inventory NG Agent)
+[2026-11-26 10:39:10] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ64OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-26 10:39:10] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ64OcsPackage [ae33f241c71018c67dfe310e03277ce6]
+[2026-11-26 10:39:10] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: TSPrintMSI (search names: TSPrintMSI, TSPrintMSI)
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: TSPrintMSI
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: TSPrintMSI [517405d2bd67b846457d2ff1a38fd5a3]
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Downloading: TSPrintMSI.msi from http://192.168.254.22/instalacije/TSPrintMSI.msi (timeout: 60s, retries: 2)
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Download attempt 1 of 2 for TSPrintMSI.msi
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Download completed for TSPrintMSI.msi on attempt 1
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Installer saved to: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-26 10:39:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-26 10:39:13] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)
+[2026-11-26 10:54:07] [ERROR] [DESKTOP-GOT2GL4] [Božena] OBZ install error: Cannot bind argument to parameter 'Path' because it is null.
+[2026-11-26 10:54:08] [ERROR] [DESKTOP-GOT2GL4] [Božena] OBZ install error: Cannot bind argument to parameter 'Path' because it is null.
+[2026-11-26 10:54:08] [ERROR] [DESKTOP-GOT2GL4] [Božena] OBZ install error: Cannot bind argument to parameter 'Path' because it is null.
+[2026-11-26 11:01:55] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ32OcsPackage (search names: OBZ32OcsPackage, OBZ32OcsPackage, OCS Inventory NG Agent)
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ32OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ32OcsPackage [cc7ebe29d0cff79f05b6edfb7f08f33c]
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ64OcsPackage (search names: OBZ64OcsPackage, OBZ64OcsPackage, OCS Inventory NG Agent)
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ64OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ64OcsPackage [ae33f241c71018c67dfe310e03277ce6]
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: TSPrintMSI (search names: TSPrintMSI, TSPrintMSI)
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: TSPrintMSI
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: TSPrintMSI [517405d2bd67b846457d2ff1a38fd5a3]
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] Downloading: TSPrintMSI.msi from http://192.168.254.22/instalacije/TSPrintMSI.msi (timeout: 60s, retries: 2)
+[2026-11-26 11:01:56] [INFO] [DESKTOP-GOT2GL4] [Božena] Download attempt 1 of 2 for TSPrintMSI.msi
+[2026-11-26 11:01:57] [INFO] [DESKTOP-GOT2GL4] [Božena] Download completed for TSPrintMSI.msi on attempt 1
+[2026-11-26 11:01:57] [INFO] [DESKTOP-GOT2GL4] [Božena] Installer saved to: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-26 11:01:57] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-26 11:01:58] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)
+[2026-11-26 11:03:57] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ32OcsPackage (search names: OBZ32OcsPackage, OBZ32OcsPackage, OCS Inventory NG Agent)
+[2026-11-26 11:03:57] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ32OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-26 11:03:57] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ32OcsPackage [cc7ebe29d0cff79f05b6edfb7f08f33c]
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ64OcsPackage (search names: OBZ64OcsPackage, OBZ64OcsPackage, OCS Inventory NG Agent)
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ64OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ64OcsPackage [ae33f241c71018c67dfe310e03277ce6]
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: TSPrintMSI (search names: TSPrintMSI, TSPrintMSI)
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: TSPrintMSI
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: TSPrintMSI [517405d2bd67b846457d2ff1a38fd5a3]
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Downloading: TSPrintMSI.msi from http://192.168.254.22/instalacije/TSPrintMSI.msi (timeout: 60s, retries: 2)
+[2026-11-26 11:03:58] [INFO] [DESKTOP-GOT2GL4] [Božena] Download attempt 1 of 2 for TSPrintMSI.msi
+[2026-11-26 11:03:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Download completed for TSPrintMSI.msi on attempt 1
+[2026-11-26 11:03:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Installer saved to: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-26 11:03:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-26 11:04:00] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)
