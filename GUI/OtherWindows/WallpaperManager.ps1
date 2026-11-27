@@ -84,6 +84,26 @@ foreach ($f in $files) {
 $form.Controls.Add($lb)
 
 # ==========================================
+# HOVER MOUSE WHEEL SCROLL (no click required)
+# ==========================================
+
+$lb.Add_MouseWheel({
+
+    param($sender, $eventArgs)
+
+    if ($eventArgs.Delta -gt 0) {
+        $sender.TopIndex = [math]::Max(0, $sender.TopIndex - 3)
+    }
+    else {
+        $sender.TopIndex = [math]::Min(
+            [math]::Max(0, $sender.Items.Count - 1),
+            $sender.TopIndex + 3
+        )
+    }
+
+})
+
+# ==========================================
 # PREVIEW LABEL
 # ==========================================
 

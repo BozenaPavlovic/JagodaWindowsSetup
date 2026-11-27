@@ -9,6 +9,18 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public static class LogViewerNative {
+    public const int WM_VSCROLL = 0x115;
+    public const int SB_LINEUP = 0;
+    public const int SB_LINEDOWN = 1;
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern int SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+}
+"@
+
 # ==========================================
 # GET LOG FILES
 # ==========================================
@@ -104,6 +116,30 @@ $box.BackColor = [System.Drawing.Color]::White
 $box.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
 $form.Controls.Add($box)
+
+# ==========================================
+# HOVER MOUSE WHEEL SCROLL (no click required)
+# ==========================================
+
+$box.Add_MouseWheel({
+
+    param($sender, $eventArgs)
+
+    $cmd = if ($eventArgs.Delta -gt 0) {
+        [LogViewerNative]::SB_LINEDOWN
+    }
+    else {
+        [LogViewerNative]::SB_LINEUP
+    }
+
+    [void][LogViewerNative]::SendMessage(
+        $sender.Handle,
+        [LogViewerNative]::WM_VSCROLL,
+        [IntPtr]$cmd,
+        [IntPtr]::Zero
+    )
+
+})
 
 # ==========================================
 # LOAD LOG FUNCTION

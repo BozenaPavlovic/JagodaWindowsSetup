@@ -71,6 +71,23 @@ $script:SystemInformationPanel.Controls.Add($script:LabelTitle)
 $script:SystemInformationPanel.Controls.Add($script:LabelInfo)
 
 # ==========================================
+# HOVER MOUSE WHEEL SCROLL (no click required)
+# ==========================================
+
+$script:SystemInformationPanel.Add_MouseWheel({
+
+    param($sender, $eventArgs)
+
+    $pos = $sender.AutoScrollPosition
+
+    $sender.AutoScrollPosition = New-Object System.Drawing.Point(
+        $pos.X,
+        $pos.Y - $eventArgs.Delta
+    )
+
+})
+
+# ==========================================
 # RESPONSIVE WIDTH
 # ==========================================
 
