@@ -131,6 +131,25 @@ function Install-OneApp {
 
         $installer = Get-ProgramInstaller $App
 
+        # Remove Zone.Identifier to prevent SmartScreen prompt
+        Unblock-File -LiteralPath $installer -ErrorAction SilentlyContinue
+
+        # Auto-trust the installer's code-signing publisher
+        try {
+            $sig = Get-AuthenticodeSignature -LiteralPath $installer
+            if ($sig.Status -eq "Valid" -and $sig.SignerCertificate) {
+                $cert = $sig.SignerCertificate
+                $trusted = Get-ChildItem "Cert:\LocalMachine\TrustedPublisher" -ErrorAction SilentlyContinue | Where-Object { $_.Thumbprint -eq $cert.Thumbprint }
+                if (-not $trusted) {
+                    $store = New-Object System.Security.Cryptography.X509Certificates.X509Store("TrustedPublisher", "LocalMachine")
+                    $store.Open("ReadWrite")
+                    $store.Add($cert)
+                    $store.Close()
+                }
+            }
+        }
+        catch { }
+
         $safeName = $App.Name -replace "[^a-zA-Z0-9]", "_"
         $logFile = Join-Path $logFolder "$safeName.log"
 
@@ -205,6 +224,16 @@ function Install-OneApp {
         Write-Host "`nINSTALLATION SUCCESSFUL!" -ForegroundColor Green
         Write-Host "Application: $($verified.DisplayName)"
         Write-Host "Version: $($verified.DisplayVersion)"
+
+        # Auto-allow firewall for the installed app
+        try {
+            $exeName = [System.IO.Path]::GetFileName($installer)
+            $ruleName = "OBZ - $exeName"
+            if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) {
+                New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $installer -Action Allow -Profile Any -ErrorAction SilentlyContinue | Out-Null
+            }
+        }
+        catch { }
 
         Add-Content -Path $historyFile `
             -Value "$(Get-Date) SUCCESS: $($App.Name)"

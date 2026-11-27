@@ -24,7 +24,7 @@
         URL = "https://net.geo.opera.com/opera/stable/windows"
         Type = "EXE"
         InteractiveArguments = ""
-        SilentArguments = "/silent /install"
+        SilentArguments = "/silent /install /no-startup-window /disable-auto-update"
         MinBytes = 2000000
         Publisher = "Opera Software"
         WingetID = "Opera.Opera"

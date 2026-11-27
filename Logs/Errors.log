@@ -20,3 +20,25 @@
 [2026-11-23 10:27:05] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: FAILED | Uninstaller exit code: 1603
 [2026-11-23 10:33:54] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall VLC Media Player: FAILED | Uninstaller exit code: 1603
 [2026-11-23 12:46:17] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall WinRAR 7.23 (64-bit): FAILED | Command not found: C:\Program
+[2026-11-27 12:16:35] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall WinRAR 7.23 (64-bit): FAILED | Command not found: C:\Program
+[2026-11-27 12:16:42] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Documentation (64-bit): FAILED | Uninstaller exit code: 1601
+[2026-11-27 12:16:42] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Development Libraries (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:16:42] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Tcl/Tk Support (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:16:43] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Test Suite (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:16:43] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Add to Path (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:16:43] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Standard Library (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:16:45] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:05] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall WinRAR 7.23 (64-bit): FAILED | Command not found: C:\Program
+[2026-11-27 12:20:06] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Documentation (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:06] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Development Libraries (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:07] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Tcl/Tk Support (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:07] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Test Suite (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:07] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Add to Path (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:08] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 Standard Library (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:20:09] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Python 3.14.10 (64-bit): FAILED | Uninstaller exit code: 1603
+[2026-11-27 12:21:48] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Glary Utilities 6.50: FAILED | Command not found: C:\Program
+[2026-11-27 12:23:38] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall TeraCopy: FAILED | Program not found: TeraCopy
+[2026-11-27 12:24:01] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Brave: FAILED | Uninstaller exit code: 19
+[2026-11-27 12:24:10] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Microsoft Edge: FAILED | Uninstaller exit code: 532
+[2026-11-27 12:24:10] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Microsoft Edge WebView2 Runtime: FAILED | Uninstaller exit code: 93
+[2026-11-27 12:24:26] [ERROR] [DESKTOP-GOT2GL4] [Božena] Uninstall Vivaldi: FAILED | Uninstaller exit code: 19

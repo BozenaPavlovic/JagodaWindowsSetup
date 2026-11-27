@@ -62,7 +62,7 @@
         URL = "https://download.teamviewer.com/download/TeamViewer_Setup_x64.exe"
         Type = "EXE"
         InteractiveArguments = ""
-        SilentArguments = "/S"
+        SilentArguments = "/S /norestart"
         MinBytes = 30000000
         Publisher = "TeamViewer Germany GmbH"
         WingetID = "TeamViewer.TeamViewer"
@@ -184,7 +184,7 @@
         SilentArguments = "/VERYSILENT /NORESTART"
         MinBytes = 3000000
         Publisher = "Launchy"
-        WingetID = "OpenJS.Launchy"
+        WingetID = "CodeJelly.Launchy"
     },
 
     @{
@@ -232,7 +232,7 @@
         URL = "https://download.advanced-ip-scanner.com/download/files/Advanced_IP_Scanner_2.5.4594.1.exe"
         Type = "EXE"
         InteractiveArguments = ""
-        SilentArguments = "/VERYSILENT /NORESTART"
+        SilentArguments = "/VERYSILENT /NORESTART /SP- /NOCANCEL"
         MinBytes = 10000000
         Publisher = "Famatech"
         WingetID = "Famatech.AdvancedIPScanner"
