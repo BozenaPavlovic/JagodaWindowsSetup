@@ -11,6 +11,7 @@ $ErrorActionPreference = "Stop"
 
 $OBZInstallerConfigPath = Join-Path $PSScriptRoot "OBZConfiguration.ps1"
 $OBZInstallerDatabasePath = Join-Path $PSScriptRoot "OBZApplicationDatabase.ps1"
+$OBZSilentInstallerPath = Join-Path $PSScriptRoot "OBZSilentInstaller.ps1"
 
 if (-not (Test-Path -LiteralPath $OBZInstallerConfigPath -PathType Leaf)) {
     throw "OBZ configuration not found: $OBZInstallerConfigPath"
@@ -20,8 +21,13 @@ if (-not (Test-Path -LiteralPath $OBZInstallerDatabasePath -PathType Leaf)) {
     throw "OBZ application database not found: $OBZInstallerDatabasePath"
 }
 
+if (-not (Test-Path -LiteralPath $OBZSilentInstallerPath -PathType Leaf)) {
+    throw "OBZ silent installer not found: $OBZSilentInstallerPath"
+}
+
 . $OBZInstallerConfigPath
 . $OBZInstallerDatabasePath
+. $OBZSilentInstallerPath
 
 # ==========================================
 # SEPARATE OBZ LOGGING
@@ -421,11 +427,22 @@ function global:Install-OBZApplication {
             }
             $process = Start-Process -FilePath "msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru
         }
-        elseif ($argumentsList.Count -gt 0) {
-            $process = Start-Process -FilePath $installerPath -ArgumentList $argumentsList -Wait -PassThru
-        }
         else {
-            $process = Start-Process -FilePath $installerPath -Wait -PassThru
+            if ($argumentsList.Count -eq 0) {
+                $detected = Get-OBZSilentArguments -InstallerPath $installerPath
+                if ($detected -and $detected.Count -gt 0) {
+                    $argumentsList = @($detected)
+                    Write-OBZLog -Level INFO -Message "Detected silent arguments: $($argumentsList -join ' ')"
+                }
+            }
+
+            if ($argumentsList.Count -gt 0) {
+                $process = Start-Process -FilePath $installerPath -ArgumentList $argumentsList -Wait -PassThru
+            }
+            else {
+                Write-OBZLog -Level WARNING -Message "Installer type not identified; launching normally."
+                $process = Start-Process -FilePath $installerPath -Wait -PassThru
+            }
         }
 
         $exitCode = $process.ExitCode
