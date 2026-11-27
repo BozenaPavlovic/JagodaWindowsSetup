@@ -146,6 +146,23 @@ $profilesList.BackColor = [System.Drawing.Color]::White
 $profilesList.BorderStyle = "FixedSingle"
 $profilesGroup.Controls.Add($profilesList)
 
+# ==========================================
+# HOVER MOUSE WHEEL SCROLL (no click required)
+# ==========================================
+
+$profilesList.Add_MouseWheel({
+
+    param($sender, $eventArgs)
+
+    $pos = $sender.AutoScrollPosition
+
+    $sender.AutoScrollPosition = New-Object System.Drawing.Point(
+        $pos.X,
+        $pos.Y - $eventArgs.Delta
+    )
+
+})
+
 $btnCreate = New-Object System.Windows.Forms.Button
 $btnCreate.Text = "Create New Profile"
 $btnCreate.Size = New-Object System.Drawing.Size(170, 36)
@@ -242,6 +259,23 @@ $appListPanel.AutoScroll = $true
 $appListPanel.BorderStyle = "FixedSingle"
 $appListPanel.BackColor = [System.Drawing.Color]::White
 $appsGroup.Controls.Add($appListPanel)
+
+# ==========================================
+# HOVER MOUSE WHEEL SCROLL (no click required)
+# ==========================================
+
+$appListPanel.Add_MouseWheel({
+
+    param($sender, $eventArgs)
+
+    $pos = $sender.AutoScrollPosition
+
+    $sender.AutoScrollPosition = New-Object System.Drawing.Point(
+        $pos.X,
+        $pos.Y - $eventArgs.Delta
+    )
+
+})
 
 # Dedicated bottom action area - always visible, outside scrollable application list
 $editorActionsPanel = New-Object System.Windows.Forms.Panel
@@ -500,6 +534,9 @@ function global:Show-Editor {
     $overviewPanel.Visible = $false
     $editorPanel.Visible = $true
     $editorPanel.BringToFront()
+
+    $txtProfileName.Focus()
+    $txtProfileName.SelectAll()
 }
 
 # ==========================================
