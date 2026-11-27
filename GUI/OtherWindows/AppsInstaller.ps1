@@ -224,19 +224,6 @@ $form.Controls.Add($appPanel)
 # HOVER MOUSE WHEEL SCROLL (no click required)
 # ==========================================
 
-$appPanel.Add_MouseWheel({
-
-    param($sender, $eventArgs)
-
-    $pos = $sender.AutoScrollPosition
-
-    $sender.AutoScrollPosition = New-Object System.Drawing.Point(
-        $pos.X,
-        $pos.Y - $eventArgs.Delta
-    )
-
-})
-
 # ==========================================
 # OBZ APPLICATION PANEL (TOP)
 # ==========================================
@@ -259,21 +246,6 @@ $obzPanel.Visible = ($script:InstallerMode -eq "Install")
 $form.Controls.Add($obzPanel)
 
 # ==========================================
-# HOVER MOUSE WHEEL SCROLL (no click required)
-# ==========================================
-
-$obzPanel.Add_MouseWheel({
-
-    param($sender, $eventArgs)
-
-    $pos = $sender.AutoScrollPosition
-
-    $sender.AutoScrollPosition = New-Object System.Drawing.Point(
-        $pos.X,
-        $pos.Y - $eventArgs.Delta
-    )
-
-})
 
 # ==========================================
 # APPLICATION LIST REFRESH
