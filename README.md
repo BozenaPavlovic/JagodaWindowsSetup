@@ -249,3 +249,8 @@ Novi **Installation Manager** (`GUI\OtherWindows\ProfileInstaller.ps1`) omoguća
 - Deinstalacija je dostupna kroz GUI **Apps Installer** (Uninstall mod) i funkcije `Core\Uninstallers\Uninstaller.ps1`.
 - `Linux\install.ps1` i `MacOS\install.ps1` su prazni placeholderi.
 - `START\PinkSetup.ps1` opcija 5 ("Complete Installation") poziva `GUI\ProgramInstaller.ps1`, koji nije prisutan u projektu.
+
+## OBZ WinGet integration
+
+- Core\OBZ\OBZWinget.ps1 provides optional WinGet support: availability check, public app install (e.g. Google Chrome), local manifest generation for private OBZ apps with SHA256, and private app install via manifest. WinGet is not a mandatory prerequisite; OBZ flow continues when unavailable.
+
