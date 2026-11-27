@@ -33,6 +33,19 @@ if (-not $Global:OBZSettings.ContainsKey("DisplayNameOverrides")) {
 }
 
 # ==========================================
+# OBZ WINGET ID OVERRIDES
+# Maps filename (without .exe) to winget package ID
+# Apps not listed here fall back to direct download
+# ==========================================
+
+if (-not $Global:OBZSettings.ContainsKey("WingetIdOverrides")) {
+    $Global:OBZSettings.WingetIdOverrides = @{
+        # "OBZ32OcsPackage" = "OCS-Inventory.OCSAgent"
+        # "Certilia_Middleware_v3.9.14" = "AKD.CertiliaMiddleware"
+    }
+}
+
+# ==========================================
 # OBZ MESSAGES
 # ==========================================
 

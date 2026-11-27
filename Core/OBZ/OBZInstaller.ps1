@@ -460,6 +460,49 @@ function global:Install-OBZApplication {
         Write-Host " OBZ PROGRESS: $($app.Name)" -ForegroundColor Cyan
         Write-Host "========================================" -ForegroundColor Magenta
 
+        # --- Try winget first (if available and app has a WingetID) ---
+        $wingetResult = $null
+        try {
+            if (Get-Command winget.exe -ErrorAction SilentlyContinue) {
+                $wingetId = $null
+                if ($app.PSObject.Properties['WingetID'] -and $app.WingetID) {
+                    $wingetId = [string]$app.WingetID
+                }
+
+                if ($wingetId) {
+                    Write-Host "Trying winget: $wingetId" -ForegroundColor Cyan
+                    Write-OBZLog -Level INFO -Message "Trying winget for $($app.Name): $wingetId"
+
+                    $wingetArgs = @(
+                        "install", "--id", $wingetId, "--exact",
+                        "--silent", "--accept-package-agreements",
+                        "--accept-source-agreements", "--disable-interactivity"
+                    )
+
+                    $proc = Start-Process -FilePath "winget.exe" -ArgumentList $wingetArgs -Wait -PassThru -NoNewWindow
+                    $exitCode = $proc.ExitCode
+
+                    if ($exitCode -eq 0 -or $exitCode -eq 1641 -or $exitCode -eq 3010) {
+                        Write-OBZLog -Level SUCCESS -Message "Winget install succeeded: $($app.Name) (exit $exitCode)"
+                        Write-Host "`nWINGET INSTALL SUCCESSFUL!" -ForegroundColor Green
+                        return [pscustomobject]@{
+                            Status        = "Success"
+                            ExitCode      = $exitCode
+                            InstallerPath = $null
+                            Message       = "Installed $($app.Name) via winget."
+                        }
+                    }
+                    else {
+                        Write-OBZLog -Level WARNING -Message "Winget failed (exit $exitCode); falling back to direct download."
+                        Write-Host "Winget failed; falling back to direct download..." -ForegroundColor Yellow
+                    }
+                }
+            }
+        }
+        catch {
+            Write-OBZLog -Level WARNING -Message "Winget error: $($_.Exception.Message); falling back."
+        }
+
         $installerPath = Get-OBZInstallerFile -Application $app
 
         if (-not (Test-OBZInstallerFile -Path $installerPath)) {

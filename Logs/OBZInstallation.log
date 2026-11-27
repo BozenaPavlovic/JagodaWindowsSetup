@@ -96,3 +96,46 @@
 [2026-11-26 11:03:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Installer saved to: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
 [2026-11-26 11:03:59] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
 [2026-11-26 11:04:00] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)
+[2026-11-27 11:21:16] [ERROR] [DESKTOP-GOT2GL4] [Božena] OBZ install failed: Certilia_Middleware_v3.9.14 (exit 1602)
+[2026-11-27 11:21:16] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ32OcsPackage (search names: OBZ32OcsPackage, OBZ32OcsPackage, OCS Inventory NG Agent)
+[2026-11-27 11:21:16] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ32OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-27 11:21:16] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ32OcsPackage [cc7ebe29d0cff79f05b6edfb7f08f33c]
+[2026-11-27 11:21:16] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ64OcsPackage (search names: OBZ64OcsPackage, OBZ64OcsPackage, OCS Inventory NG Agent)
+[2026-11-27 11:21:34] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: Certilia_Middleware_v3.9.14 (search names: Certilia_Middleware_v3.9.14, Certilia_Middleware_v3.9.14)
+[2026-11-27 11:21:35] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: Certilia_Middleware_v3.9.14
+[2026-11-27 11:21:35] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: Certilia_Middleware_v3.9.14 [0f1725d3c0442e6d546374d066748a3c]
+[2026-11-27 11:21:35] [INFO] [DESKTOP-GOT2GL4] [Božena] Using cached installer: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\Certilia_Middleware_v3.9.14.exe
+[2026-11-27 11:21:35] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\Certilia_Middleware_v3.9.14.exe
+[2026-11-27 11:21:37] [INFO] [DESKTOP-GOT2GL4] [Božena] Detected silent arguments: /quiet /norestart
+[2026-11-27 11:21:41] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: Certilia_Middleware_v3.9.14 (exit 0)
+[2026-11-27 11:21:41] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ32OcsPackage (search names: OBZ32OcsPackage, OBZ32OcsPackage, OCS Inventory NG Agent)
+[2026-11-27 11:21:41] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ32OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-27 11:21:41] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ32OcsPackage [cc7ebe29d0cff79f05b6edfb7f08f33c]
+[2026-11-27 11:21:41] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ64OcsPackage (search names: OBZ64OcsPackage, OBZ64OcsPackage, OCS Inventory NG Agent)
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ64OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ64OcsPackage [ae33f241c71018c67dfe310e03277ce6]
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: TSPrintMSI (search names: TSPrintMSI, TSPrintMSI)
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: TSPrintMSI
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: TSPrintMSI [517405d2bd67b846457d2ff1a38fd5a3]
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Using cached installer: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-27 11:21:42] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-27 11:21:45] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)
+[2026-11-27 11:27:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: Certilia_Middleware_v3.9.14 (search names: Certilia_Middleware_v3.9.14, Certilia_Middleware_v3.9.14)
+[2026-11-27 11:27:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: Certilia_Middleware_v3.9.14
+[2026-11-27 11:27:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: Certilia_Middleware_v3.9.14 [0f1725d3c0442e6d546374d066748a3c]
+[2026-11-27 11:27:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Using cached installer: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\Certilia_Middleware_v3.9.14.exe
+[2026-11-27 11:27:11] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\Certilia_Middleware_v3.9.14.exe
+[2026-11-27 11:27:13] [INFO] [DESKTOP-GOT2GL4] [Božena] Detected silent arguments: /quiet /norestart
+[2026-11-27 11:27:18] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: Certilia_Middleware_v3.9.14 (exit 0)
+[2026-11-27 11:27:18] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ32OcsPackage (search names: OBZ32OcsPackage, OBZ32OcsPackage, OCS Inventory NG Agent)
+[2026-11-27 11:27:18] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ32OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-27 11:27:18] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ32OcsPackage [cc7ebe29d0cff79f05b6edfb7f08f33c]
+[2026-11-27 11:27:18] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: OBZ64OcsPackage (search names: OBZ64OcsPackage, OBZ64OcsPackage, OCS Inventory NG Agent)
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app 'OBZ64OcsPackage' already installed (registry match: OCS Inventory NG Agent) - found: OCS Inventory NG Agent 2.10.1.0, OCS Inventory NG Agent 2.10.1.0
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] OBZ app already installed, skipping: OBZ64OcsPackage [ae33f241c71018c67dfe310e03277ce6]
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] Checking if already installed: TSPrintMSI (search names: TSPrintMSI, TSPrintMSI)
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] Not installed: TSPrintMSI
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] Starting OBZ install: TSPrintMSI [517405d2bd67b846457d2ff1a38fd5a3]
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] Using cached installer: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-27 11:27:19] [INFO] [DESKTOP-GOT2GL4] [Božena] Executing: C:\Users\Božena\Desktop\JagodaWindowsSetup\DATABASE\OBZ\Downloads\TSPrintMSI.msi
+[2026-11-27 11:27:23] [SUCCESS] [DESKTOP-GOT2GL4] [Božena] OBZ install succeeded: TSPrintMSI (exit 0)

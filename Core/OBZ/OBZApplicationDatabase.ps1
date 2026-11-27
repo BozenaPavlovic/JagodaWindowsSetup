@@ -76,6 +76,13 @@ function global:New-OBZApplicationObject {
         $Name = [System.IO.Path]::GetFileNameWithoutExtension($FileName)
     }
 
+    # Look up winget ID override
+    $wingetId = $null
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($FileName)
+    if ($Global:OBZSettings.WingetIdOverrides -and $Global:OBZSettings.WingetIdOverrides.ContainsKey($baseName)) {
+        $wingetId = $Global:OBZSettings.WingetIdOverrides[$baseName]
+    }
+
     return [pscustomobject]@{
         Id            = Get-OBZStableId -FileName $FileName
         Name          = $Name
@@ -83,6 +90,7 @@ function global:New-OBZApplicationObject {
         FileName      = $FileName
         DownloadUrl   = $DownloadUrl
         InstallerType = $InstallerType
+        WingetID      = $wingetId
     }
 }
 
