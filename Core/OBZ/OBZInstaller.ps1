@@ -289,6 +289,13 @@ function global:Get-OBZInstallerFile {
     $installer = Join-Path $downloadFolder $Application.FileName
     $temporary = "$installer.partial"
 
+    # Cache: if installer already exists and is valid, skip download
+    if ((Test-Path -LiteralPath $installer -PathType Leaf) -and (Test-OBZInstallerFile -Path $installer)) {
+        Unblock-File -LiteralPath $installer -ErrorAction SilentlyContinue
+        Write-OBZLog -Level INFO -Message "Using cached installer: $installer"
+        return $installer
+    }
+
     $timeoutSec = [int]$Global:OBZSettings.DownloadTimeoutSeconds
     $retries = [int]$Global:OBZSettings.DownloadRetries
     if ($retries -lt 1) { $retries = 1 }
@@ -339,6 +346,9 @@ function global:Get-OBZInstallerFile {
         throw "Downloaded file failed validation."
     }
 
+    # Remove Zone.Identifier to prevent SmartScreen prompt
+    Unblock-File -LiteralPath $temporary -ErrorAction SilentlyContinue
+
     Move-Item -LiteralPath $temporary -Destination $installer -Force
 
     Write-OBZLog -Level INFO -Message "Installer saved to: $installer"
@@ -349,6 +359,50 @@ function global:Get-OBZInstallerFile {
 # ==========================================
 # INSTALL
 # ==========================================
+
+function global:Get-OBZSilentArguments {
+    <#
+        Detects the installer type by scanning the EXE for known
+        signatures and returns appropriate silent-install arguments.
+        Falls back to common silent flags when type is unknown.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$InstallerPath
+    )
+
+    $bytes = [System.IO.File]::ReadAllBytes($InstallerPath)
+    $text = [System.Text.Encoding]::ASCII.GetString($bytes)
+
+    # Inno Setup
+    if ($text -match "Inno Setup") {
+        return @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-")
+    }
+
+    # NSIS (Nullsoft) - must match specific signature, not just "NSIS"
+    if ($text -match "Nullsoft.NSIS" -or $text -match "Nullsoft Install System") {
+        return @("/S")
+    }
+
+    # InstallShield
+    if ($text -match "InstallShield") {
+        return @("/s", "/v`"/qn`"")
+    }
+
+    # Wise InstallMaster
+    if ($text -match "Wise InstallMaster" -or $text -match "WiseInstallation") {
+        return @("/s")
+    }
+
+    # MSI-based EXE (Windows Installer)
+    if ($text -match "Windows Installer" -or $text -match "msiexec") {
+        return @("/quiet", "/norestart")
+    }
+
+    # Unknown installer - do NOT guess, return empty so caller launches normally
+    Write-OBZLog -Level INFO -Message "Installer type not identified for $(Split-Path $InstallerPath -Leaf); launching without silent args."
+    return @()
+}
 
 function global:Install-OBZApplication {
     <#
@@ -415,6 +469,38 @@ function global:Install-OBZApplication {
         Write-OBZLog -Level INFO -Message "Executing: $installerPath"
         Write-Host "Starting installation..." -ForegroundColor Cyan
 
+        # Auto-trust the installer's code-signing publisher to bypass driver prompts
+        try {
+            $sig = Get-AuthenticodeSignature -LiteralPath $installerPath
+            if ($sig.Status -eq "Valid" -and $sig.SignerCertificate) {
+                $cert = $sig.SignerCertificate
+                $trusted = Get-ChildItem "Cert:\LocalMachine\TrustedPublisher" | Where-Object { $_.Thumbprint -eq $cert.Thumbprint }
+                if (-not $trusted) {
+                    $store = New-Object System.Security.Cryptography.X509Certificates.X509Store("TrustedPublisher", "LocalMachine")
+                    $store.Open("ReadWrite")
+                    $store.Add($cert)
+                    $store.Close()
+                    Write-OBZLog -Level INFO -Message "Added publisher to TrustedPublisher: $($cert.Subject)"
+                }
+            }
+        }
+        catch {
+            Write-OBZLog -Level WARNING -Message "Could not auto-trust publisher: $($_.Exception.Message)"
+        }
+
+        # Auto-allow firewall for the installer (prevents "Windows Defender Firewall blocked" prompt)
+        try {
+            $exeName = [System.IO.Path]::GetFileName($installerPath)
+            $existingRule = Get-NetFirewallRule -DisplayName "OBZ - $exeName" -ErrorAction SilentlyContinue
+            if (-not $existingRule) {
+                New-NetFirewallRule -DisplayName "OBZ - $exeName" -Direction Outbound -Program $installerPath -Action Allow -Profile Any -ErrorAction SilentlyContinue | Out-Null
+                Write-OBZLog -Level INFO -Message "Added firewall rule for: $exeName"
+            }
+        }
+        catch {
+            Write-OBZLog -Level WARNING -Message "Could not add firewall rule: $($_.Exception.Message)"
+        }
+
         $argumentsList = @()
         if ($Arguments -and $Arguments.Count -gt 0) {
             $argumentsList = @($Arguments)
@@ -438,6 +524,14 @@ function global:Install-OBZApplication {
 
             if ($argumentsList.Count -gt 0) {
                 $process = Start-Process -FilePath $installerPath -ArgumentList $argumentsList -Wait -PassThru
+                $exitCode = $process.ExitCode
+
+                # If silent failed with error, retry without args (interactive)
+                if ($exitCode -ne 0 -and $exitCode -ne 1641 -and $exitCode -ne 3010) {
+                    Write-OBZLog -Level WARNING -Message "Silent install failed (exit $exitCode); retrying without arguments."
+                    Write-Host "Silent install failed; retrying without arguments..." -ForegroundColor Yellow
+                    $process = Start-Process -FilePath $installerPath -Wait -PassThru
+                }
             }
             else {
                 Write-OBZLog -Level WARNING -Message "Installer type not identified; launching normally."
@@ -449,6 +543,21 @@ function global:Install-OBZApplication {
 
         # Success codes: 0, 1641 (reboot initiated), 3010 (reboot required).
         if ($exitCode -eq 0 -or $exitCode -eq 1641 -or $exitCode -eq 3010) {
+            # Post-install: auto-allow firewall for installed publisher apps (e.g. Certilia Signer)
+            try {
+                $certDir = "C:\Program Files\AKD"
+                if (Test-Path $certDir) {
+                    $exes = Get-ChildItem $certDir -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue
+                    foreach ($exe in $exes) {
+                        $ruleName = "OBZ - $($exe.Name)"
+                        if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) {
+                            New-NetFirewallRule -DisplayName $ruleName -Direction Outbound -Program $exe.FullName -Action Allow -Profile Any -ErrorAction SilentlyContinue | Out-Null
+                        }
+                    }
+                }
+            }
+            catch { }
+
             Write-OBZLog -Level SUCCESS -Message "OBZ install succeeded: $($app.Name) (exit $exitCode)"
             Write-Host "`nINSTALLATION SUCCESSFUL!" -ForegroundColor Green
             Write-Host "Application: $($app.Name)" -ForegroundColor Green
